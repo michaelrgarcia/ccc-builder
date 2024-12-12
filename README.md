@@ -1,8 +1,8 @@
-# React + Vite
+# ccc-builder
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+I give my thanks to [Prajwal](https://github.com/kidkoder432) for single-handedly creating a [substantial part](https://github.com/kidkoder432/ccc-builder-backend) of the backend.
 
-Currently, two official plugins are available:
+CCCBuilder is a tool designed to help students in California Community Colleges (CCCs) create schedules that allow them to transfer to any institution in the UC, CSU, or AICCU system.
+Schedules consist of the minimum amount of courses needed in order to satisfy all specified transfer requirements.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**This tool does not intend to take on the role of an academic counselor.**
