@@ -1,6 +1,6 @@
 # ccc-builder
 
-I give my thanks to [Prajwal](https://github.com/kidkoder432) for single-handedly creating the [backend](https://github.com/kidkoder432/ccc-builder-backend).
+I give my thanks to [Prajwal](https://github.com/kidkoder432) for single-handedly creating a [substantial part](https://github.com/kidkoder432/ccc-builder-backend) of the backend.
 
 CCCBuilder is a tool designed to help students in California Community Colleges (CCCs) create schedules for transferring to any institution in the UC, CSU, or AICCU system.
 
