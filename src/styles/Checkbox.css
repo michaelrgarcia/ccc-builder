@@ -1,7 +1,9 @@
 .checkbox-container {
+  display: flex;
   position: relative;
-  padding: 20px;
   cursor: pointer;
+
+  padding-left: 50px;
 
   user-select: none;
 }
