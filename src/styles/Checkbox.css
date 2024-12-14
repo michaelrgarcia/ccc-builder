@@ -18,6 +18,10 @@
   background-color: #ccc;
 }
 
+.checkbox-container:active > input ~ .checkmark {
+  background-color: #bbb;
+}
+
 .checkbox-container > input:checked ~ .checkmark {
   background-color: #06b6d4;
   background-image: url(../assets/check.svg);
