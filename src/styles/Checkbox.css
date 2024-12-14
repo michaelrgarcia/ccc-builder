@@ -3,7 +3,7 @@
   position: relative;
   cursor: pointer;
 
-  padding-left: 50px;
+  margin-bottom: 20px;
 
   user-select: none;
 }
@@ -16,8 +16,25 @@
   width: 0;
 }
 
-.checkbox-container:hover > input ~ .checkmark {
-  background-color: #ccc;
+.checkbox-container > input ~ .checkmark::after {
+  content: " ";
+  border-radius: 100%;
+}
+
+.checkbox-container:hover > input ~ .checkmark::after {
+  background-color: #a1c5c26b;
+
+  position: absolute;
+
+  margin-left: -20px;
+  margin-top: -10px;
+
+  opacity: 1;
+
+  width: 30px;
+  height: 30px;
+
+  padding: 5px;
 }
 
 .checkbox-container:active > input ~ .checkmark {
@@ -31,9 +48,12 @@
 
 .checkmark {
   position: absolute;
-  top: 0;
-  left: 0;
-  height: 25px;
-  width: 25px;
-  background-color: #eee;
+
+  height: 20px;
+  width: 20px;
+
+  background-color: #ddd;
+
+  border-radius: 5px;
+  border: 1px solid #488078;
 }

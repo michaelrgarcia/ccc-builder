@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 
 import "../styles/Autocomplete.css";
+import CheckboxOption from "./CheckboxOption";
 
 function Autocomplete({ options }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,7 +19,17 @@ function Autocomplete({ options }) {
 
   return (
     <div className="autocomplete-container">
-      <input type="text" onChange={updateSearch} onClick={toggleOptions} />
+      <input
+        type="text"
+        placeholder="Select an institution..."
+        onChange={updateSearch}
+        onClick={toggleOptions}
+      />
+      <div className="autocomplete-options">
+        {options.map(({ name }, index) => (
+          <CheckboxOption optText={name} checked={false} key={index} />
+        ))}
+      </div>
     </div>
   );
 }
