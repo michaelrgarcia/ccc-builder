@@ -1,0 +1,33 @@
+.checkbox-container {
+  position: relative;
+  padding: 20px;
+  cursor: pointer;
+
+  user-select: none;
+}
+
+.checkbox-container > input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkbox-container:hover > input ~ .checkmark {
+  background-color: #ccc;
+}
+
+.checkbox-container > input:checked ~ .checkmark {
+  background-color: #06b6d4;
+  background-image: url(../assets/check.svg);
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+}
