@@ -3,27 +3,27 @@ import Autocomplete from "./Autocomplete";
 
 const schools = [
   {
-    name: "test",
+    name: "University of California, Berkeley",
     id: 3,
   },
   {
-    name: "test",
+    name: "University of California, Los Angeles",
     id: 3,
   },
   {
-    name: "test",
+    name: "University of California, Irvine",
     id: 3,
   },
   {
-    name: "test",
+    name: "San Jose State University",
     id: 3,
   },
   {
-    name: "test",
+    name: "San Francisco State University",
     id: 3,
   },
   {
-    name: "test",
+    name: "California State University, Stanislaus",
     id: 3,
   },
 ];
