@@ -14,15 +14,19 @@
   cursor: pointer;
   height: 0;
   width: 0;
+
+  z-index: 2;
 }
 
 .checkbox-container > input ~ .checkmark::after {
   content: " ";
   border-radius: 100%;
+
+  pointer-events: none;
 }
 
 .checkbox-container:hover > input ~ .checkmark::after {
-  background-color: #a1c5c26b;
+  background-color: #55807c9f;
 
   position: absolute;
 
