@@ -27,7 +27,7 @@ function Autocomplete({ options }) {
       />
       <div className="autocomplete-options">
         {options.map(({ name }, index) => (
-          <CheckboxOption optText={name} checked={false} key={index} />
+          <CheckboxOption optText={name} key={index} />
         ))}
       </div>
     </div>
