@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 
 import "../styles/Autocomplete.css";
+import MagnifyingGlass from "../assets/magnify.svg";
+
 import CheckboxOption from "./CheckboxOption";
 
 function Autocomplete({ options }) {
@@ -19,12 +21,15 @@ function Autocomplete({ options }) {
 
   return (
     <div className="autocomplete-container">
-      <input
-        type="text"
-        placeholder="Select an institution..."
-        onChange={updateSearch}
-        onClick={toggleOptions}
-      />
+      <div className="search-input">
+        <img src={MagnifyingGlass} />
+        <input
+          type="text"
+          placeholder="Select an institution..."
+          onChange={updateSearch}
+          onClick={toggleOptions}
+        />
+      </div>
       <div className="autocomplete-options">
         {options.map(({ name }, index) => (
           <CheckboxOption optText={name} key={index} />
