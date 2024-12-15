@@ -7,6 +7,7 @@ import MagnifyingGlass from "../assets/magnify.svg";
 
 import CheckboxOption from "./CheckboxOption";
 import Input from "./Input";
+import { matchName } from "../utils/search";
 
 function Autocomplete({ options }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,9 +16,9 @@ function Autocomplete({ options }) {
   const optionsRef = useRef();
   const inputRef = useRef();
 
-  const renderedOptions = options.map(({ name }, index) => (
-    <CheckboxOption optText={name} key={index} />
-  ));
+  const filteredOptions = searchQuery
+    ? options.filter(({ name }) => matchName(name, searchQuery))
+    : options;
 
   function updateSearch(e) {
     setSearchQuery(e.target.value);
@@ -49,6 +50,7 @@ function Autocomplete({ options }) {
         <Input
           id="universities"
           type="text"
+          val={searchQuery}
           placeholder="Select an institution..."
           ref={inputRef}
           changeHandler={updateSearch}
@@ -57,7 +59,9 @@ function Autocomplete({ options }) {
       </div>
       {showOptions ? (
         <div className="autocomplete-options" ref={optionsRef}>
-          {renderedOptions}
+          {filteredOptions.map(({ name }, index) => (
+            <CheckboxOption optText={name} key={index} />
+          ))}
         </div>
       ) : (
         ""
