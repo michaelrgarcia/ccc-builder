@@ -18,6 +18,8 @@
 .search-input > img {
   width: 25px;
 
+  user-select: none;
+
   filter: invert(92%) sepia(0%) saturate(132%) hue-rotate(156deg)
     brightness(79%) contrast(72%);
 
