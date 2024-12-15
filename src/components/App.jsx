@@ -1,6 +1,32 @@
-import Checkbox from "./Checkbox";
-
 import "../styles/App.css";
+import Autocomplete from "./Autocomplete";
+
+const schools = [
+  {
+    name: "test",
+    id: 3,
+  },
+  {
+    name: "test",
+    id: 3,
+  },
+  {
+    name: "test",
+    id: 3,
+  },
+  {
+    name: "test",
+    id: 3,
+  },
+  {
+    name: "test",
+    id: 3,
+  },
+  {
+    name: "test",
+    id: 3,
+  },
+];
 
 function App() {
   return (
@@ -8,10 +34,10 @@ function App() {
       <header>
         <h1>CCCBuilder</h1>
         <p className="user-guide">
-          Select the institutions you would like to transfer.
+          Welcome! First, create a list of universities to transfer to.
         </p>
       </header>
-      <Checkbox checked={true} />
+      <Autocomplete options={schools} />
     </>
   );
 }
