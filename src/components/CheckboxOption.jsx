@@ -26,7 +26,7 @@ function CheckboxOption({ optText, checked = false }) {
 
 CheckboxOption.propTypes = {
   optText: PropTypes.string.isRequired,
-  checked: PropTypes.bool.isRequired,
+  checked: PropTypes.bool,
 };
 
 export default CheckboxOption;
