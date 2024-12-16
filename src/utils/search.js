@@ -50,14 +50,6 @@ export function matchName(name, query) {
     }
   }
 
-  /*
-
-  if (nameAbbreviation.includes(queryAbbreviation)) {
-    return true;
-  }
-
-  */
-
   if (normalizedName.includes(normalizedQuery)) {
     return true;
   }
