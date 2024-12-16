@@ -85,7 +85,7 @@
 }
 
 .opt-wrapper:hover {
-  background-color: #ddd;
+  background-color: #ddddddad;
   border-radius: 10px;
 
   cursor: pointer;
