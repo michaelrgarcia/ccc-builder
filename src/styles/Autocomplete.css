@@ -85,18 +85,25 @@
 }
 
 .opt-wrapper:hover {
+  /* (prod) background-color: #dddddd30; */
+  /* (dev) background-color: #ddd; */
   background-color: #dddddd30;
+
   border-radius: 10px;
 
   cursor: pointer;
 }
 
 .opt-wrapper:active {
-  background-color: #ccc;
+  /* (prod) background-color: #cccccc30; */
+  /* (dev) background-color: #ccc; */
+  background-color: #cccccc30;
 }
 
 .checkbox-option.selected {
-  background-color: #bbbbbbcc;
+  /* (prod) background-color: #bbbbbb2a; */
+  /* (dev) background-color: #bbbbbbcc; */
+  background-color: #bbbbbb2a;
 }
 
 .opt-wrapper > p {
