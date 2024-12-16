@@ -85,9 +85,9 @@
 }
 
 .opt-wrapper:hover {
-  /* (prod) background-color: #dddddd30; */
+  /* (prod) background-color: #bbbbbb2a; */
   /* (dev) background-color: #ddd; */
-  background-color: #dddddd30;
+  background-color: #bbbbbb2a;
 
   border-radius: 10px;
 
@@ -101,9 +101,9 @@
 }
 
 .checkbox-option.selected {
-  /* (prod) background-color: #bbbbbb2a; */
+  /* (prod) background-color: #dddddd30; */
   /* (dev) background-color: #bbbbbbcc; */
-  background-color: #bbbbbb2a;
+  background-color: #dddddd30;
 }
 
 .opt-wrapper > p {
