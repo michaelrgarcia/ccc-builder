@@ -48,10 +48,6 @@
 }
 
 .autocomplete-options {
-  position: absolute;
-
-  top: 100%;
-  margin-left: -1px;
   width: 100%;
   max-height: 200px;
   overflow-y: auto;
@@ -64,7 +60,6 @@
   margin-top: 5px;
 
   background-color: inherit;
-  z-index: 10;
 }
 
 .checkbox-option {
@@ -128,10 +123,6 @@
 
   min-width: 300px;
   max-width: 400px;
-
-  max-height: 100px;
-
-  overflow: auto;
 
   margin-bottom: 10px;
 }
