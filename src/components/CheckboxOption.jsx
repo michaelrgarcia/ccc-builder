@@ -1,23 +1,15 @@
 import PropTypes from "prop-types";
 
-import { useState } from "react";
-
 import "../styles/Autocomplete.css";
 import "../styles/Checkbox.css";
 
 import Checkbox from "./Checkbox";
 
-function CheckboxOption({ optText, checked = false }) {
-  const [isSelected, setIsSelected] = useState(checked);
-
-  function toggleCheck() {
-    setIsSelected(!isSelected);
-  }
-
+function CheckboxOption({ optText, clickHandler, checked }) {
   return (
-    <div className={`checkbox-option ${isSelected ? "selected" : ""}`}>
-      <div className="opt-wrapper" onClick={toggleCheck}>
-        <Checkbox checked={isSelected} onChange={toggleCheck} />
+    <div className={`checkbox-option ${checked ? "selected" : ""}`}>
+      <div className="opt-wrapper" onClick={clickHandler}>
+        <Checkbox checked={checked} onChange={clickHandler} />
         <p>{optText}</p>
       </div>
     </div>
@@ -26,7 +18,8 @@ function CheckboxOption({ optText, checked = false }) {
 
 CheckboxOption.propTypes = {
   optText: PropTypes.string.isRequired,
-  checked: PropTypes.bool,
+  clickHandler: PropTypes.func,
+  checked: PropTypes.bool.isRequired,
 };
 
 export default CheckboxOption;
