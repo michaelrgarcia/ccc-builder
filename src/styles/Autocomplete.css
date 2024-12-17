@@ -1,8 +1,6 @@
 .autocomplete-container {
   min-width: 300px;
   max-width: 400px;
-  border: 1px solid #aaa;
-  border-radius: 3px;
 
   display: flex;
   flex-direction: column;
@@ -14,6 +12,9 @@
 .search-input {
   display: flex;
   padding: 5px;
+
+  border: 1px solid #aaa;
+  border-radius: 5px;
 }
 
 .search-input > img {
@@ -49,7 +50,7 @@
 .autocomplete-options {
   position: absolute;
 
-  top: 110%;
+  top: 100%;
   margin-left: -1px;
   width: 100%;
   max-height: 200px;
@@ -58,14 +59,16 @@
   animation: fadeIn 0.15s ease-out;
 
   border: 1px solid #aaa;
+  padding-bottom: 3px;
+  border-radius: 5px;
+  margin-top: 5px;
 
-  border-radius: 3px;
   background-color: inherit;
   z-index: 10;
 }
 
 .checkbox-option {
-  font-size: 0.9em;
+  font-size: 0.85em;
 }
 
 .checkbox-option,
@@ -116,6 +119,49 @@
 
   word-wrap: break-word;
   text-align: left;
+}
+
+.selected-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  min-width: 300px;
+  max-width: 400px;
+
+  max-height: 100px;
+
+  overflow: auto;
+
+  margin-bottom: 10px;
+}
+
+.selected-opt {
+  /* (prod) background-color: #dddddd30; */
+  /* (dev) background-color: #bbbbbbcc; */
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  max-height: 40px;
+
+  animation: fadeIn 0.15s ease-out;
+
+  border-radius: 20px;
+
+  background-color: #dddddd30;
+
+  font-size: 0.7em;
+
+  cursor: pointer;
+}
+
+.selected-opt > img {
+  width: 20px;
+
+  filter: invert(92%) sepia(0%) saturate(132%) hue-rotate(156deg)
+    brightness(79%) contrast(72%);
 }
 
 @keyframes fadeIn {
