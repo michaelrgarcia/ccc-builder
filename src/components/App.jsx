@@ -1,9 +1,13 @@
-import "../styles/App.css";
-import Autocomplete from "./Autocomplete";
+import { useState } from "react";
 
 import { schools } from "../utils/staticAssistData";
 
+import "../styles/App.css";
+import Autocomplete from "./Autocomplete";
+
 function App() {
+  const [selectedSchools, setSelectedSchools] = useState([]);
+
   return (
     <>
       <header>
@@ -13,7 +17,7 @@ function App() {
         </p>
       </header>
       <main>
-        <Autocomplete options={schools} />
+        <Autocomplete options={schools} updateParent={setSelectedSchools} />
       </main>
     </>
   );
