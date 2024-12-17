@@ -1,4 +1,35 @@
 header {
-  margin-top: -200px;
   margin-bottom: 20px;
+}
+
+.next {
+  background: linear-gradient(to bottom, #a2c2da 0%, #6ba8e5 50%, #2c6598 100%);
+  color: white;
+
+  border: 1px solid #2c6598;
+  border-radius: 20px;
+  padding: 8px 50px;
+  margin-top: 20px;
+
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 0px 1px 0px rgba(0, 0, 0, 0.2);
+
+  cursor: pointer;
+  outline: none;
+}
+
+.next:active {
+  background: linear-gradient(to bottom, #7dbaf5 0%, #357ab8 50%, #2c6598 100%);
+  box-shadow: inset 0 2px 4px 0 #000;
+}
+
+.next:focus {
+  outline: 1px solid rgb(0, 0, 0);
+}
+
+.next:hover {
+  background: linear-gradient(to bottom, #c4e2f9 0%, #7dbaf5 50%, #357ab8 100%);
+  border: 1px solid #2c6598;
+  border-radius: 20px;
 }
