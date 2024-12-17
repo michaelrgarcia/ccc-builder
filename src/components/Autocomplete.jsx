@@ -25,10 +25,10 @@ SelectedOption.propTypes = {
   clickHandler: PropTypes.func.isRequired,
 };
 
-function Autocomplete({ options }) {
+function Autocomplete({ options, updateParent }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showOptions, setShowOptions] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState([]); // need to move this state up to App
+  const [selectedOptions, setSelectedOptions] = useState([]);
 
   const optionsRef = useRef();
   const inputRef = useRef();
@@ -86,6 +86,10 @@ function Autocomplete({ options }) {
       document.removeEventListener("click", toggleOptions, true);
     };
   }, []);
+
+  useEffect(() => {
+    updateParent(selectedOptions);
+  }, [updateParent, selectedOptions]);
 
   return (
     <>
@@ -145,6 +149,7 @@ Autocomplete.propTypes = {
       id: PropTypes.number.isRequired,
     })
   ).isRequired,
+  updateParent: PropTypes.func,
 };
 
 export default Autocomplete;
