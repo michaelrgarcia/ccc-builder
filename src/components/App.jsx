@@ -18,9 +18,13 @@ function App() {
       </header>
       <main>
         <Autocomplete options={schools} updateParent={setSelectedSchools} />
-        <button type="button" className="next">
-          Next
-        </button>
+        {selectedSchools.length > 0 ? (
+          <button type="button" className="next">
+            Next
+          </button>
+        ) : (
+          ""
+        )}
       </main>
     </>
   );

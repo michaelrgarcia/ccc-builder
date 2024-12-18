@@ -23,6 +23,10 @@ header {
 
   user-select: none;
   cursor: pointer;
+
+  animation-name: btnFadeIn;
+  animation-duration: 0.8s;
+  animation-timing-function: ease-in-out;
 }
 
 .next:active {
@@ -41,7 +45,7 @@ header {
 }
 
 .next:focus {
-  outline: 2px solid rgb(0, 0, 0);
+  outline: 2px solid #000;
 }
 
 .next:hover {
@@ -52,4 +56,13 @@ header {
     #6494cb 55%,
     #3d77bc 100%
   );
+}
+
+@keyframes btnFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
