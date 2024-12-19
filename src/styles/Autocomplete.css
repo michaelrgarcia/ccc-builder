@@ -59,9 +59,6 @@
   display: block;
   background-color: inherit;
 
-  font-size: 0.8em;
-  font-family: inherit;
-
   padding: 0;
   border: none;
 
@@ -74,12 +71,14 @@
 
 .checkbox-option,
 .opt-wrapper {
-  max-height: 40px;
+  min-height: 40px;
 }
 
 .opt-wrapper {
   display: flex;
   align-items: center;
+
+  height: auto;
 
   padding-left: 30px;
 }
@@ -108,11 +107,15 @@
   /* (prod) background-color: #dddddd30; */
   /* (dev) background-color: #bbbbbbcc; */
   background-color: #dddddd30;
+  border: none;
 }
 
 .opt-wrapper > p {
   margin-left: 40px;
   margin-bottom: 13px;
+
+  font-size: 0.8em;
+  font-family: inherit;
 
   user-select: none;
 
