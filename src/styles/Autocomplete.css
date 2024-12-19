@@ -107,7 +107,7 @@
   /* (prod) background-color: #dddddd30; */
   /* (dev) background-color: #bbbbbbcc; */
   background-color: #dddddd30;
-  border: none;
+  border-radius: 0;
 }
 
 .opt-wrapper > p {
