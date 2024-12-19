@@ -18,10 +18,22 @@ main {
   align-items: center;
 }
 
+.major-selects {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 20px;
+
+  width: 100%;
+}
+
 .major-select {
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  flex-shrink: 0;
 
   width: 100%;
   max-width: 400px;
@@ -31,6 +43,8 @@ main {
   margin-bottom: 10px;
 
   font-style: italic;
+
+  align-self: flex-start;
 
   font-size: 0.85em;
   text-align: left;
@@ -102,7 +116,4 @@ main {
 }
 
 @media only screen and (min-width: 950px) {
-  .major-select {
-    align-items: flex-start;
-  }
 }
