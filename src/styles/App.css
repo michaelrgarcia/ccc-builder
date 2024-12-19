@@ -51,7 +51,7 @@ main {
 }
 
 .next {
-  padding: 8px 50px;
+  padding: 4px 50px;
   margin-top: 25px;
   border: 1px solid #2463a6;
   border-radius: 5px;
@@ -60,6 +60,7 @@ main {
 
   color: white;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
+  font-size: 1.3em;
 
   background: linear-gradient(
     to bottom,

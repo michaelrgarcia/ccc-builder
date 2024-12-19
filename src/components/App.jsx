@@ -20,7 +20,7 @@ function App() {
 
   const [selectedSchools, setSelectedSchools] = useState([]);
 
-  const [majors, setMajors] = useState([]);
+  const [majors, setMajors] = useState({});
   const [selectedMajors, setSelectedMajors] = useState([]);
 
   useEffect(() => {
