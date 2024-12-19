@@ -125,7 +125,7 @@ function App() {
                   <Autocomplete
                     options={majors[id] || []}
                     placeholderTxt="Select a major..."
-                    updateParent={setSelectedMajors}
+                    updateParent={setSelectedMajors} // fix; only majors from one school can be selected
                   />
                 </div>
               );
