@@ -25,7 +25,7 @@ SelectedOption.propTypes = {
   clickHandler: PropTypes.func.isRequired,
 };
 
-function Autocomplete({ options, updateParent }) {
+function Autocomplete({ options, placeholderTxt, updateParent }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -64,13 +64,13 @@ function Autocomplete({ options, updateParent }) {
 
   function toggleSelectOption(optionId) {
     const selectedLocation = selectedOptions.findIndex(
-      (option) => option.id === optionId
+      (option) => Object.values(option)[1] === optionId
     );
 
     // -1 -> not found in selectedOptions
     if (selectedLocation === -1) {
       const matchingOption = filteredOptions.find(
-        (option) => option.id === optionId
+        (option) => Object.values(option)[1] === optionId
       );
 
       setSelectedOptions([...selectedOptions, matchingOption]);
@@ -88,20 +88,26 @@ function Autocomplete({ options, updateParent }) {
   }, []);
 
   useEffect(() => {
-    updateParent(selectedOptions);
+    updateParent([...selectedOptions]);
   }, [updateParent, selectedOptions]);
 
   return (
     <>
       <div className="autocomplete-container">
         <div className="selected-options" ref={selectedOptRef}>
-          {selectedOptions.map(({ name }, index) => (
-            <SelectedOption
-              key={index}
-              text={name}
-              clickHandler={() => deselectOption(index)}
-            />
-          ))}
+          {selectedOptions.map((opt, index) => {
+            const optValues = Object.values(opt);
+
+            const optName = optValues[0];
+
+            return (
+              <SelectedOption
+                key={index}
+                text={optName}
+                clickHandler={() => deselectOption(index)}
+              />
+            );
+          })}
         </div>
         <div className="search-input">
           <img src={MagnifyingGlass} />
@@ -109,7 +115,7 @@ function Autocomplete({ options, updateParent }) {
             id="universities"
             type="text"
             val={searchQuery}
-            placeholder="Select an institution..."
+            placeholder={placeholderTxt}
             ref={inputRef}
             changeHandler={updateSearch}
             clickHandler={() => setShowOptions(true)}
@@ -119,17 +125,22 @@ function Autocomplete({ options, updateParent }) {
           <div className="autocomplete-options" ref={optionsRef}>
             {filteredOptions.length === 0
               ? "No results"
-              : filteredOptions.map(({ name, id }) => {
+              : filteredOptions.map((opt) => {
+                  const optValues = Object.values(opt);
+
+                  const optName = optValues[0];
+                  const optId = optValues[1];
+
                   const isSelected = selectedOptions.some(
-                    (option) => option.id === id
+                    (option) => Object.values(option)[1] === optId
                   );
 
                   return (
                     <CheckboxOption
-                      optText={name}
+                      optText={optName}
                       checked={isSelected}
-                      clickHandler={() => toggleSelectOption(id)}
-                      key={id}
+                      clickHandler={() => toggleSelectOption(optId)}
+                      key={optId}
                     />
                   );
                 })}
@@ -143,12 +154,28 @@ function Autocomplete({ options, updateParent }) {
 }
 
 Autocomplete.propTypes = {
+  // array of objects with a name and id
   options: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      id: PropTypes.number.isRequired,
+    PropTypes.objectOf((propValue, key, componentName, propFullName) => {
+      if (typeof key !== "string") {
+        return new Error(
+          `${propFullName} key in ${componentName} must be a string.`
+        );
+      }
+
+      if (
+        typeof propValue[key] !== "string" &&
+        typeof propValue[key] !== "number"
+      ) {
+        return new Error(
+          `${propFullName} in ${componentName} must have values that are strings or numbers.`
+        );
+      }
+
+      return null;
     })
   ).isRequired,
+  placeholderTxt: PropTypes.string,
   updateParent: PropTypes.func,
 };
 
