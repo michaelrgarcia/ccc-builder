@@ -56,7 +56,20 @@
 }
 
 .checkbox-option {
+  display: block;
+  background-color: inherit;
+
   font-size: 0.8em;
+  font-family: inherit;
+
+  padding: 0;
+  border: none;
+
+  width: 100%;
+}
+
+.checkbox-option:hover {
+  border: none;
 }
 
 .checkbox-option,

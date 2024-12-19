@@ -7,12 +7,15 @@ import Checkbox from "./Checkbox";
 
 function CheckboxOption({ optText, clickHandler, checked }) {
   return (
-    <div className={`checkbox-option ${checked ? "selected" : ""}`}>
+    <button
+      type="button"
+      className={`checkbox-option ${checked ? "selected" : ""}`}
+    >
       <div className="opt-wrapper" onClick={clickHandler}>
         <Checkbox checked={checked} onChange={clickHandler} />
         <p>{optText}</p>
       </div>
-    </div>
+    </button>
   );
 }
 
