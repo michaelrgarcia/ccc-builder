@@ -1,16 +1,7 @@
-function createFourYrAbbreviation(text) {
+function createAbbreviation(text, wordsToFilter) {
   return text
     .split(/\s+/)
-    .filter((word) => word.toLowerCase() !== "of")
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
-}
-
-function createCcAbbreviation(text) {
-  return text
-    .split(/\s+/)
-    .filter((word) => word.toLowerCase() !== "the")
+    .filter((word) => wordsToFilter.indexOf(word.toLowerCase()) === -1)
     .map((word) => word[0])
     .join("")
     .toUpperCase();
@@ -23,15 +14,15 @@ function normalizeString(text) {
     .trim();
 }
 
-export function matchName(name, query) {
+export function uniSearch(name, query) {
   if (!name || !query) {
     return false;
   }
 
   const normalizedName = normalizeString(name);
   const normalizedQuery = normalizeString(query);
-  const nameAbbreviation = createFourYrAbbreviation(name).toLowerCase();
-  const queryAbbreviation = createFourYrAbbreviation(query).toLowerCase();
+  const nameAbbreviation = createAbbreviation(name, ["of"]).toLowerCase();
+  const queryAbbreviation = createAbbreviation(query, ["of"]).toLowerCase();
 
   const queryWords = normalizedQuery.split(/\s+/);
   const nameWords = normalizedName.split(/\s+/);
@@ -78,13 +69,13 @@ export function matchName(name, query) {
   return false;
 }
 
-export function ccSearch(name, query) {
+export function collegeAndMajorSearch(name, query) {
   if (!name || !query) {
     return false;
   }
 
   const normalizedName = normalizeString(name);
-  const nameAbbreviation = createCcAbbreviation(name).toLowerCase();
+  const nameAbbreviation = createAbbreviation(name, ["the"]).toLowerCase();
   const normalizedQuery = normalizeString(query).toLowerCase();
 
   if (nameAbbreviation === normalizedQuery) {
