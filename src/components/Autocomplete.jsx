@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 
 import { useEffect, useRef, useState } from "react";
-import { matchName } from "../utils/search";
 
 import "../styles/Autocomplete.css";
 
@@ -25,7 +24,12 @@ SelectedOption.propTypes = {
   clickHandler: PropTypes.func.isRequired,
 };
 
-function Autocomplete({ options, placeholderTxt, updateParent }) {
+function Autocomplete({
+  options,
+  placeholderTxt,
+  updateParent,
+  searchAlgorithm,
+}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -35,7 +39,7 @@ function Autocomplete({ options, placeholderTxt, updateParent }) {
   const selectedOptRef = useRef();
 
   const filteredOptions = searchQuery
-    ? options.filter(({ name }) => matchName(name, searchQuery))
+    ? options.filter(({ name }) => searchAlgorithm(name, searchQuery))
     : options;
 
   function updateSearch(e) {
@@ -178,6 +182,7 @@ Autocomplete.propTypes = {
   ).isRequired,
   placeholderTxt: PropTypes.string,
   updateParent: PropTypes.func,
+  searchAlgorithm: PropTypes.func.isRequired,
 };
 
 export default Autocomplete;

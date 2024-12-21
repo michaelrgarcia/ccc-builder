@@ -1,35 +1,35 @@
 import PropTypes from "prop-types";
 
-import { useEffect, useRef, useState } from "react";
-import { matchName } from "../utils/search";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import "../styles/Autocomplete.css";
 
 import MagnifyingGlass from "../assets/magnify.svg";
 import XCircle from "../assets/close-circle.svg";
 
-import CheckboxOption from "./CheckboxOption";
 import Input from "./Input";
 
-function SingleAutocomplete({ options, placeholderTxt, updateParent }) {
+function SingleAutocomplete({
+  options,
+  placeholderTxt,
+  updateParent,
+  searchAlgorithm,
+}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOption, setSelectedOption] = useState({});
 
+  const [tempInputVal, setTempInputVal] = useState("");
+
   const containerRef = useRef();
 
   const filteredOptions = searchQuery
-    ? options.filter(({ name }) => matchName(name, searchQuery))
+    ? options.filter(({ name }) => searchAlgorithm(name, searchQuery))
     : options;
 
   function updateSearch(e) {
     setSearchQuery(e.target.value);
-  }
-
-  function toggleOptions(e) {
-    if (containerRef.current && !containerRef.current.contains(e.target)) {
-      setShowOptions(false);
-    }
+    setTempInputVal(e.target.value);
   }
 
   function toggleSelectOption(optionId) {
@@ -41,13 +41,24 @@ function SingleAutocomplete({ options, placeholderTxt, updateParent }) {
     updateParent(matchingOption);
   }
 
+  const toggleOptions = useCallback(
+    (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setShowOptions(false);
+        setSearchQuery("");
+        setTempInputVal(selectedOption.name);
+      }
+    },
+    [selectedOption.name]
+  );
+
   useEffect(() => {
     document.addEventListener("click", toggleOptions, true);
 
     return () => {
       document.removeEventListener("click", toggleOptions, true);
     };
-  }, []);
+  }, [toggleOptions]);
 
   return (
     <div className="autocomplete-container" ref={containerRef}>
@@ -57,7 +68,7 @@ function SingleAutocomplete({ options, placeholderTxt, updateParent }) {
             <Input
               id="community-colleges"
               type="text"
-              val={selectedOption.name}
+              val={tempInputVal}
               placeholder={placeholderTxt}
               changeHandler={updateSearch}
               clickHandler={() => setShowOptions(true)}
@@ -66,6 +77,9 @@ function SingleAutocomplete({ options, placeholderTxt, updateParent }) {
               src={XCircle}
               className="deselect-option"
               onClick={() => {
+                setSearchQuery("");
+                setTempInputVal("");
+
                 setSelectedOption({});
                 updateParent({});
               }}
@@ -105,7 +119,10 @@ function SingleAutocomplete({ options, placeholderTxt, updateParent }) {
                   >
                     <div
                       className="opt-wrapper"
-                      onClick={() => toggleSelectOption(optId)}
+                      onClick={() => {
+                        toggleSelectOption(optId);
+                        setTempInputVal(optName);
+                      }}
                     >
                       <p>{optName}</p>
                     </div>
@@ -144,6 +161,7 @@ SingleAutocomplete.propTypes = {
   ).isRequired,
   placeholderTxt: PropTypes.string,
   updateParent: PropTypes.func,
+  searchAlgorithm: PropTypes.func.isRequired,
 };
 
 export default SingleAutocomplete;
