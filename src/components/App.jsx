@@ -21,7 +21,7 @@ function App() {
   const [selectedSchools, setSelectedSchools] = useState([]);
 
   const [majors, setMajors] = useState({});
-  const [selectedMajors, setSelectedMajors] = useState([]);
+  const [selectedMajors, setSelectedMajors] = useState({});
 
   useEffect(() => {
     async function getMajors() {
@@ -102,11 +102,29 @@ function App() {
       </>
     );
   } else if (currentStage === "major-select") {
+    const handleMajorSelect = (schoolId) => (newSelections) => {
+      setSelectedMajors((prev) => {
+        const updatedMajors = { ...prev };
+
+        if (newSelections.length === 0) {
+          delete updatedMajors[schoolId];
+        } else {
+          updatedMajors[schoolId] = newSelections;
+        }
+
+        return updatedMajors;
+      });
+    };
+
+    const majorsForEachSchool = Object.values(selectedMajors);
+
     return (
       <>
         <header>
           <h1>CCCBuilder</h1>
-          <p className="user-guide">Select your majors.</p>
+          <p className="user-guide">
+            Select at least one major for each school.
+          </p>
           <div className="progress-container">
             <label htmlFor="plan-progress">10% done</label>
             <progress
@@ -125,13 +143,13 @@ function App() {
                   <Autocomplete
                     options={majors[id] || []}
                     placeholderTxt="Select a major..."
-                    updateParent={setSelectedMajors}
+                    updateParent={handleMajorSelect(id)}
                   />
                 </div>
               );
             })}
           </div>
-          {selectedMajors.length > 0 ? (
+          {majorsForEachSchool.length === selectedSchools.length ? (
             <button
               type="button"
               className="next"
