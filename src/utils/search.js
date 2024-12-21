@@ -1,4 +1,4 @@
-export function createAbbreviation(text) {
+function createFourYrAbbreviation(text) {
   return text
     .split(/\s+/)
     .filter((word) => word.toLowerCase() !== "of")
@@ -7,7 +7,16 @@ export function createAbbreviation(text) {
     .toUpperCase();
 }
 
-export function normalizeString(text) {
+function createCcAbbreviation(text) {
+  return text
+    .split(/\s+/)
+    .filter((word) => word.toLowerCase() !== "the")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+}
+
+function normalizeString(text) {
   return text
     .toLowerCase()
     .replace(/[^\w\s]/g, "")
@@ -21,8 +30,8 @@ export function matchName(name, query) {
 
   const normalizedName = normalizeString(name);
   const normalizedQuery = normalizeString(query);
-  const nameAbbreviation = createAbbreviation(name).toLowerCase();
-  const queryAbbreviation = createAbbreviation(query).toLowerCase();
+  const nameAbbreviation = createFourYrAbbreviation(name).toLowerCase();
+  const queryAbbreviation = createFourYrAbbreviation(query).toLowerCase();
 
   const queryWords = normalizedQuery.split(/\s+/);
   const nameWords = normalizedName.split(/\s+/);
@@ -63,6 +72,30 @@ export function matchName(name, query) {
       )
     )
   ) {
+    return true;
+  }
+
+  return false;
+}
+
+export function ccSearch(name, query) {
+  if (!name || !query) {
+    return false;
+  }
+
+  const normalizedName = normalizeString(name);
+  const nameAbbreviation = createCcAbbreviation(name).toLowerCase();
+  const normalizedQuery = normalizeString(query).toLowerCase();
+
+  if (nameAbbreviation === normalizedQuery) {
+    return true;
+  }
+
+  if (nameAbbreviation.startsWith(normalizedQuery)) {
+    return true;
+  }
+
+  if (normalizedName.includes(normalizedQuery)) {
     return true;
   }
 
