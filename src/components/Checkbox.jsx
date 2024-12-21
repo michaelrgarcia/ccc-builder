@@ -19,7 +19,7 @@ function Checkbox({ checked, onChange, fieldName }) {
 Checkbox.propTypes = {
   checked: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
-  fieldName: PropTypes.func.isRequired,
+  fieldName: PropTypes.string.isRequired,
 };
 
 export default Checkbox;
