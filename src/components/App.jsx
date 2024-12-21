@@ -204,7 +204,7 @@ function App() {
             searchAlgorithm={collegeAndMajorSearch}
             inputId="community-colleges"
           />
-          {selectedCCC ? (
+          {selectedCCC.name ? (
             <button
               type="button"
               className="next"
