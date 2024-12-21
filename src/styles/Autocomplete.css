@@ -162,6 +162,10 @@
   filter: invert(92%) sepia(0%) saturate(132%) hue-rotate(156deg)
     brightness(79%) contrast(72%);
 }
+.deselect-option {
+  margin-right: 3px;
+  cursor: pointer;
+}
 
 @keyframes fadeIn {
   0% {
