@@ -10,6 +10,8 @@ import XCircle from "../assets/close-circle.svg";
 import Input from "./Input";
 
 function SingleAutocomplete({
+  optionNameLabel,
+  optionIdLabel,
   options,
   placeholderTxt,
   updateParent,
@@ -26,8 +28,8 @@ function SingleAutocomplete({
   const containerRef = useRef();
 
   const filteredOptions = inputValues.searchQuery
-    ? options.filter(({ name }) =>
-        searchAlgorithm(name, inputValues.searchQuery)
+    ? options.filter((option) =>
+        searchAlgorithm(option[optionNameLabel], inputValues.searchQuery)
       )
     : options;
 
@@ -40,7 +42,7 @@ function SingleAutocomplete({
 
   function toggleSelectOption(optionId) {
     const matchingOption = filteredOptions.find(
-      (option) => Object.values(option)[1] === optionId
+      (option) => option[optionIdLabel] === optionId
     );
 
     setSelectedOption(matchingOption);
@@ -113,31 +115,26 @@ function SingleAutocomplete({
         <div className="autocomplete-options">
           {filteredOptions.length === 0
             ? "No results"
-            : filteredOptions.map((opt) => {
-                const optValues = Object.values(opt);
-
-                const optName = optValues[0];
-                const optId = optValues[1];
-
-                const isSelected = selectedOption.id === optId;
+            : filteredOptions.map((option) => {
+                const isSelected = selectedOption.id === option[optionIdLabel];
 
                 return (
                   <button
                     type="button"
                     className={`single-option ${isSelected ? "selected" : ""}`}
-                    key={optId}
+                    key={option[optionIdLabel]}
                   >
                     <div
                       className="opt-wrapper"
                       onClick={() => {
-                        toggleSelectOption(optId);
+                        toggleSelectOption(option[optionIdLabel]);
                         setInputValues({
                           ...inputValues,
-                          tempVal: optName,
+                          tempVal: option[optionNameLabel],
                         });
                       }}
                     >
-                      <p>{optName}</p>
+                      <p>{option[optionNameLabel]}</p>
                     </div>
                   </button>
                 );
@@ -151,27 +148,39 @@ function SingleAutocomplete({
 }
 
 SingleAutocomplete.propTypes = {
-  // array of objects with a name and id
-  options: PropTypes.arrayOf(
-    PropTypes.objectOf((propValue, key, componentName, propFullName) => {
-      if (typeof key !== "string") {
+  optionNameLabel: PropTypes.string.isRequired,
+  optionIdLabel: PropTypes.string.isRequired,
+  options: (props, propName, componentName) => {
+    const { options, optionNameLabel, optionIdLabel } = props;
+
+    if (!Array.isArray(options)) {
+      return new Error(`${propName} in ${componentName} must be an array.`);
+    }
+
+    for (let i = 0; i < options.length; i++) {
+      const option = options[i];
+
+      if (
+        typeof option[optionNameLabel] !== "string" &&
+        typeof option[optionNameLabel] !== "number"
+      ) {
         return new Error(
-          `${propFullName} key in ${componentName} must be a string.`
+          `Invalid ${propName} at index ${i}: Each object must have a valid "${optionNameLabel}" (string or number).`
         );
       }
 
       if (
-        typeof propValue[key] !== "string" &&
-        typeof propValue[key] !== "number"
+        typeof option[optionIdLabel] !== "string" &&
+        typeof option[optionIdLabel] !== "number"
       ) {
         return new Error(
-          `${propFullName} in ${componentName} must have values that are strings or numbers.`
+          `Invalid ${propName} at index ${i}: Each object must have a valid "${optionIdLabel}" (string or number).`
         );
       }
+    }
 
-      return null;
-    })
-  ).isRequired,
+    return null;
+  },
   placeholderTxt: PropTypes.string,
   updateParent: PropTypes.func,
   searchAlgorithm: PropTypes.func.isRequired,
