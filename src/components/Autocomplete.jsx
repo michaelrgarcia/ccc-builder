@@ -29,6 +29,7 @@ function Autocomplete({
   placeholderTxt,
   updateParent,
   searchAlgorithm,
+  inputId,
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showOptions, setShowOptions] = useState(false);
@@ -117,7 +118,7 @@ function Autocomplete({
         <div className="search-input">
           <img src={MagnifyingGlass} />
           <Input
-            id="universities"
+            id={inputId}
             type="text"
             val={searchQuery}
             placeholder={placeholderTxt}
@@ -183,6 +184,7 @@ Autocomplete.propTypes = {
   placeholderTxt: PropTypes.string,
   updateParent: PropTypes.func,
   searchAlgorithm: PropTypes.func.isRequired,
+  inputId: PropTypes.string.isRequired,
 };
 
 export default Autocomplete;

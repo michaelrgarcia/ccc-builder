@@ -14,6 +14,7 @@ function SingleAutocomplete({
   placeholderTxt,
   updateParent,
   searchAlgorithm,
+  inputId,
 }) {
   const [inputValues, setInputValues] = useState({
     searchQuery: "",
@@ -73,7 +74,7 @@ function SingleAutocomplete({
         {selectedOption.name ? (
           <>
             <Input
-              id="community-colleges"
+              id={inputId}
               type="text"
               val={inputValues.tempVal}
               placeholder={placeholderTxt}
@@ -98,7 +99,7 @@ function SingleAutocomplete({
           <>
             <img src={MagnifyingGlass} />
             <Input
-              id="community-colleges"
+              id={inputId}
               type="text"
               val={inputValues.searchQuery}
               placeholder={placeholderTxt}
