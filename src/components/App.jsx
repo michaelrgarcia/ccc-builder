@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 
-import { schools } from "../utils/staticAssistData";
+import { caliCCs, universities } from "../utils/staticAssistData";
 
 import "../styles/App.css";
 import Autocomplete from "./Autocomplete";
+import SingleAutocomplete from "./SingleAutocomplete";
 
 // not for reuse. move this outside of the components dir?
 
@@ -18,10 +19,11 @@ function App() {
 
   const [error, setError] = useState(null);
 
-  const [selectedSchools, setSelectedSchools] = useState([]);
-
   const [majors, setMajors] = useState({});
+
+  const [selectedSchools, setSelectedSchools] = useState([]);
   const [selectedMajors, setSelectedMajors] = useState({});
+  const [selectedCCC, setSelectedCCC] = useState({});
 
   useEffect(() => {
     async function getMajors() {
@@ -40,6 +42,7 @@ function App() {
             }
 
             const data = await response.json();
+
             majorData[id] = data;
           })
         );
@@ -80,7 +83,7 @@ function App() {
         </header>
         <main>
           <Autocomplete
-            options={schools}
+            options={universities}
             placeholderTxt="Select an institution..."
             updateParent={setSelectedSchools}
           />
@@ -156,6 +159,44 @@ function App() {
               onClick={() => {
                 setPlanProgress(20);
                 setCurrentStage("primary-cc-select");
+              }}
+            >
+              Next
+            </button>
+          ) : (
+            ""
+          )}
+        </main>
+      </>
+    );
+  } else if (currentStage === "primary-cc-select") {
+    return (
+      <>
+        <header>
+          <h1>CCCBuilder</h1>
+          <p className="user-guide">Select your primary community college.</p>
+          <div className="progress-container">
+            <label htmlFor="plan-progress">20% done</label>
+            <progress
+              id="plan-progress"
+              value={planProgress}
+              max={100}
+            ></progress>
+          </div>
+        </header>
+        <main>
+          <SingleAutocomplete
+            options={caliCCs}
+            placeholderTxt="Select a community college..."
+            updateParent={setSelectedCCC}
+          />
+          {selectedCCC ? (
+            <button
+              type="button"
+              className="next"
+              onClick={() => {
+                setPlanProgress(50);
+                setCurrentStage("primary-cc-search");
               }}
             >
               Next
