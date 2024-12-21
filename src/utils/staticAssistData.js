@@ -1,9 +1,5 @@
 export const schools = [
   {
-    name: "California Polytechnic University, Humboldt",
-    id: 115,
-  },
-  {
     name: "California Polytechnic University, Pomona",
     id: 75,
   },
@@ -23,10 +19,13 @@ export const schools = [
     name: "California State University, Chico",
     id: 141,
   },
+  /*
+  // does not work with 24-25, but works with 23-24
   {
     name: "California State University, Dominguez Hills",
     id: 50,
   },
+  */
   {
     name: "California State University, East Bay",
     id: 21,
@@ -48,10 +47,6 @@ export const schools = [
     id: 76,
   },
   {
-    name: "California State University, Maritime Academy",
-    id: 1,
-  },
-  {
     name: "California State University, Monterey Bay",
     id: 12,
   },
@@ -64,20 +59,8 @@ export const schools = [
     id: 60,
   },
   {
-    name: "California State University, San Bernardino",
-    id: 85,
-  },
-  {
-    name: "California State University, San Marcos",
-    id: 23,
-  },
-  {
     name: "California State University, Stanislaus",
     id: 24,
-  },
-  {
-    name: "San Diego State University",
-    id: 26,
   },
   {
     name: "San Francisco State University",
@@ -87,10 +70,13 @@ export const schools = [
     name: "San Jose State University",
     id: 39,
   },
+  /*
+  // does not work with 24-25. works with 23-24
   {
     name: "Sonoma State University",
     id: 88,
   },
+  */
   {
     name: "University of California, Berkeley",
     id: 79,
