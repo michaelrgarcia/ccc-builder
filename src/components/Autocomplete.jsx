@@ -55,17 +55,12 @@ function Autocomplete({ options, placeholderTxt, updateParent }) {
     }
   }
 
-  function deselectOption(selectedLocation) {
-    const copySelected = [...selectedOptions];
-    copySelected.splice(selectedLocation, 1);
-
-    setSelectedOptions(copySelected);
-  }
-
   function toggleSelectOption(optionId) {
     const selectedLocation = selectedOptions.findIndex(
       (option) => Object.values(option)[1] === optionId
     );
+
+    let newSelectedOptions;
 
     // -1 -> not found in selectedOptions
     if (selectedLocation === -1) {
@@ -73,10 +68,14 @@ function Autocomplete({ options, placeholderTxt, updateParent }) {
         (option) => Object.values(option)[1] === optionId
       );
 
-      setSelectedOptions([...selectedOptions, matchingOption]);
+      newSelectedOptions = [...selectedOptions, matchingOption];
     } else {
-      deselectOption(selectedLocation);
+      newSelectedOptions = [...selectedOptions];
+      newSelectedOptions.splice(selectedLocation, 1);
     }
+
+    setSelectedOptions(newSelectedOptions);
+    updateParent(newSelectedOptions);
   }
 
   useEffect(() => {
@@ -86,10 +85,6 @@ function Autocomplete({ options, placeholderTxt, updateParent }) {
       document.removeEventListener("click", toggleOptions, true);
     };
   }, []);
-
-  useEffect(() => {
-    updateParent([...selectedOptions]);
-  }, [updateParent, selectedOptions]);
 
   return (
     <>
@@ -104,7 +99,13 @@ function Autocomplete({ options, placeholderTxt, updateParent }) {
               <SelectedOption
                 key={index}
                 text={optName}
-                clickHandler={() => deselectOption(index)}
+                clickHandler={() => {
+                  const copySelected = [...selectedOptions];
+                  copySelected.splice(index, 1);
+
+                  setSelectedOptions(copySelected);
+                  updateParent(copySelected);
+                }}
               />
             );
           })}
