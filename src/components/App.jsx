@@ -22,6 +22,7 @@ function App() {
 
   const [majors, setMajors] = useState({});
 
+  // combine into "user selections" state object
   const [selectedSchools, setSelectedSchools] = useState([]);
   const [selectedMajors, setSelectedMajors] = useState({});
   const [selectedCCC, setSelectedCCC] = useState({});
@@ -88,6 +89,7 @@ function App() {
             placeholderTxt="Select a university..."
             updateParent={setSelectedSchools}
             searchAlgorithm={uniSearch}
+            inputId="universities"
           />
           {selectedSchools.length > 0 ? (
             <button
@@ -150,6 +152,7 @@ function App() {
                     placeholderTxt="Select a major..."
                     updateParent={handleMajorSelect(id)}
                     searchAlgorithm={collegeAndMajorSearch}
+                    inputId={`major-select-${id}`}
                   />
                 </div>
               );
@@ -193,6 +196,7 @@ function App() {
             placeholderTxt="Select a community college..."
             updateParent={setSelectedCCC}
             searchAlgorithm={collegeAndMajorSearch}
+            inputId="community-colleges"
           />
           {selectedCCC ? (
             <button
