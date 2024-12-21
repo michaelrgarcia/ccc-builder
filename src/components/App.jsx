@@ -5,7 +5,7 @@ import { caliCCs, universities } from "../utils/staticAssistData";
 import "../styles/App.css";
 import Autocomplete from "./Autocomplete";
 import SingleAutocomplete from "./SingleAutocomplete";
-import { collegeAndMajorSearch, uniSearch } from "../utils/search";
+import { ccAndMajorSearch, uniSearch } from "../utils/search";
 
 // not for reuse. move this outside of the components dir?
 
@@ -155,7 +155,7 @@ function App() {
                     options={majors[id] || []}
                     placeholderTxt="Select a major..."
                     updateParent={handleMajorSelect(id)}
-                    searchAlgorithm={collegeAndMajorSearch}
+                    searchAlgorithm={ccAndMajorSearch}
                     inputId={`major-select-${id}`}
                   />
                 </div>
@@ -201,7 +201,7 @@ function App() {
             options={caliCCs}
             placeholderTxt="Select a community college..."
             updateParent={setSelectedCCC}
-            searchAlgorithm={collegeAndMajorSearch}
+            searchAlgorithm={ccAndMajorSearch}
             inputId="community-colleges"
           />
           {selectedCCC.name ? (

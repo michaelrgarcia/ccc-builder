@@ -69,7 +69,7 @@ export function uniSearch(name, query) {
   return false;
 }
 
-export function collegeAndMajorSearch(name, query) {
+export function ccAndMajorSearch(name, query) {
   if (!name || !query) {
     return false;
   }
