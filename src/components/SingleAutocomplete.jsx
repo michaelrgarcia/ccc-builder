@@ -16,9 +16,7 @@ function SingleAutocomplete({ options, placeholderTxt, updateParent }) {
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOption, setSelectedOption] = useState({});
 
-  const optionsRef = useRef();
-  const inputRef = useRef();
-  const selectedOptRef = useRef();
+  const containerRef = useRef();
 
   const filteredOptions = searchQuery
     ? options.filter(({ name }) => matchName(name, searchQuery))
@@ -29,14 +27,7 @@ function SingleAutocomplete({ options, placeholderTxt, updateParent }) {
   }
 
   function toggleOptions(e) {
-    if (
-      optionsRef.current &&
-      !optionsRef.current.contains(e.target) &&
-      inputRef.current &&
-      !inputRef.current.contains(e.target) &&
-      selectedOptRef.current &&
-      !selectedOptRef.current.contains(e.target)
-    ) {
+    if (containerRef.current && !containerRef.current.contains(e.target)) {
       setShowOptions(false);
     }
   }
@@ -59,64 +50,67 @@ function SingleAutocomplete({ options, placeholderTxt, updateParent }) {
   }, []);
 
   return (
-    <>
-      <div className="autocomplete-container">
-        <div className="search-input">
-          {selectedOption.name ? (
-            <>
-              <Input
-                id="community-colleges"
-                type="text"
-                val={selectedOption.name || searchQuery}
-                placeholder={placeholderTxt}
-                ref={inputRef}
-                changeHandler={updateSearch}
-                clickHandler={() => setShowOptions(true)}
-              />
-              <img src={XCircle} className="deselect-option" />
-            </>
-          ) : (
-            <>
-              <img src={MagnifyingGlass} />
-              <Input
-                id="community-colleges"
-                type="text"
-                val={searchQuery}
-                placeholder={placeholderTxt}
-                ref={inputRef}
-                changeHandler={updateSearch}
-                clickHandler={() => setShowOptions(true)}
-              />
-            </>
-          )}
-        </div>
-        {showOptions ? (
-          <div className="autocomplete-options" ref={optionsRef}>
-            {filteredOptions.length === 0
-              ? "No results"
-              : filteredOptions.map((opt) => {
-                  const optValues = Object.values(opt);
-
-                  const optName = optValues[0];
-                  const optId = optValues[1];
-
-                  const isSelected = selectedOption.id === optId;
-
-                  return (
-                    <CheckboxOption
-                      optText={optName}
-                      checked={isSelected}
-                      clickHandler={() => toggleSelectOption(optId)}
-                      key={optId}
-                    />
-                  );
-                })}
-          </div>
+    <div className="autocomplete-container" ref={containerRef}>
+      <div className="search-input">
+        {selectedOption.name ? (
+          <>
+            <Input
+              id="community-colleges"
+              type="text"
+              val={selectedOption.name}
+              placeholder={placeholderTxt}
+              changeHandler={updateSearch}
+              clickHandler={() => setShowOptions(true)}
+            />
+            <img
+              src={XCircle}
+              className="deselect-option"
+              onClick={() => {
+                setSelectedOption({});
+                updateParent({});
+              }}
+            />
+          </>
         ) : (
-          ""
+          <>
+            <img src={MagnifyingGlass} />
+            <Input
+              id="community-colleges"
+              type="text"
+              val={searchQuery}
+              placeholder={placeholderTxt}
+              changeHandler={updateSearch}
+              clickHandler={() => setShowOptions(true)}
+            />
+          </>
         )}
       </div>
-    </>
+      {showOptions ? (
+        <div className="autocomplete-options">
+          {filteredOptions.length === 0
+            ? "No results"
+            : filteredOptions.map((opt) => {
+                const optValues = Object.values(opt);
+
+                const optName = optValues[0];
+                const optId = optValues[1];
+
+                const isSelected = selectedOption.id === optId;
+
+                return (
+                  <CheckboxOption
+                    optText={optName}
+                    checked={isSelected}
+                    clickHandler={() => toggleSelectOption(optId)}
+                    key={optId}
+                  />
+                );
+              })}
+        </div>
+      ) : (
+        ""
+      )}
+    </div>
   );
 }
 
