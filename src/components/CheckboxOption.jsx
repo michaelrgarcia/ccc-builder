@@ -12,7 +12,11 @@ function CheckboxOption({ optText, clickHandler, checked }) {
       className={`checkbox-option ${checked ? "selected" : ""}`}
     >
       <div className="opt-wrapper" onClick={clickHandler}>
-        <Checkbox checked={checked} onChange={clickHandler} />
+        <Checkbox
+          checked={checked}
+          onChange={clickHandler}
+          fieldName={optText}
+        />
         <p>{optText}</p>
       </div>
     </button>
