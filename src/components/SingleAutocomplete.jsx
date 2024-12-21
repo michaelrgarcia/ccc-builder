@@ -15,21 +15,26 @@ function SingleAutocomplete({
   updateParent,
   searchAlgorithm,
 }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [inputValues, setInputValues] = useState({
+    searchQuery: "",
+    tempVal: "",
+  });
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOption, setSelectedOption] = useState({});
 
-  const [tempInputVal, setTempInputVal] = useState("");
-
   const containerRef = useRef();
 
-  const filteredOptions = searchQuery
-    ? options.filter(({ name }) => searchAlgorithm(name, searchQuery))
+  const filteredOptions = inputValues.searchQuery
+    ? options.filter(({ name }) =>
+        searchAlgorithm(name, inputValues.searchQuery)
+      )
     : options;
 
   function updateSearch(e) {
-    setSearchQuery(e.target.value);
-    setTempInputVal(e.target.value);
+    setInputValues({
+      searchQuery: e.target.value,
+      tempVal: e.target.value,
+    });
   }
 
   function toggleSelectOption(optionId) {
@@ -45,8 +50,10 @@ function SingleAutocomplete({
     (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setShowOptions(false);
-        setSearchQuery("");
-        setTempInputVal(selectedOption.name);
+        setInputValues({
+          searchQuery: "",
+          tempVal: selectedOption.name,
+        });
       }
     },
     [selectedOption.name]
@@ -68,7 +75,7 @@ function SingleAutocomplete({
             <Input
               id="community-colleges"
               type="text"
-              val={tempInputVal}
+              val={inputValues.tempVal}
               placeholder={placeholderTxt}
               changeHandler={updateSearch}
               clickHandler={() => setShowOptions(true)}
@@ -77,8 +84,10 @@ function SingleAutocomplete({
               src={XCircle}
               className="deselect-option"
               onClick={() => {
-                setSearchQuery("");
-                setTempInputVal("");
+                setInputValues({
+                  searchQuery: "",
+                  tempVal: "",
+                });
 
                 setSelectedOption({});
                 updateParent({});
@@ -91,7 +100,7 @@ function SingleAutocomplete({
             <Input
               id="community-colleges"
               type="text"
-              val={searchQuery}
+              val={inputValues.searchQuery}
               placeholder={placeholderTxt}
               changeHandler={updateSearch}
               clickHandler={() => setShowOptions(true)}
@@ -121,7 +130,10 @@ function SingleAutocomplete({
                       className="opt-wrapper"
                       onClick={() => {
                         toggleSelectOption(optId);
-                        setTempInputVal(optName);
+                        setInputValues({
+                          ...inputValues,
+                          tempVal: optName,
+                        });
                       }}
                     >
                       <p>{optName}</p>
