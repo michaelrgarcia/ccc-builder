@@ -98,12 +98,18 @@ function SingleAutocomplete({ options, placeholderTxt, updateParent }) {
                 const isSelected = selectedOption.id === optId;
 
                 return (
-                  <CheckboxOption
-                    optText={optName}
-                    checked={isSelected}
-                    clickHandler={() => toggleSelectOption(optId)}
+                  <button
+                    type="button"
+                    className={`single-option ${isSelected ? "selected" : ""}`}
                     key={optId}
-                  />
+                  >
+                    <div
+                      className="opt-wrapper"
+                      onClick={() => toggleSelectOption(optId)}
+                    >
+                      <p>{optName}</p>
+                    </div>
+                  </button>
                 );
               })}
         </div>
