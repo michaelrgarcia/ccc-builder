@@ -175,6 +175,7 @@ SingleAutocomplete.propTypes = {
   placeholderTxt: PropTypes.string,
   updateParent: PropTypes.func,
   searchAlgorithm: PropTypes.func.isRequired,
+  inputId: PropTypes.string.isRequired,
 };
 
 export default SingleAutocomplete;
