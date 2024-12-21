@@ -85,6 +85,8 @@ function App() {
         </header>
         <main>
           <Autocomplete
+            optionNameLabel="name"
+            optionIdLabel="id"
             options={universities}
             placeholderTxt="Select a university..."
             updateParent={setSelectedSchools}
@@ -148,6 +150,8 @@ function App() {
                 <div className="major-select" key={id}>
                   <p className="school-name">{name}</p>
                   <Autocomplete
+                    optionNameLabel="major"
+                    optionIdLabel="key"
                     options={majors[id] || []}
                     placeholderTxt="Select a major..."
                     updateParent={handleMajorSelect(id)}
@@ -192,6 +196,8 @@ function App() {
         </header>
         <main>
           <SingleAutocomplete
+            optionNameLabel="name"
+            optionIdLabel="id"
             options={caliCCs}
             placeholderTxt="Select a community college..."
             updateParent={setSelectedCCC}
