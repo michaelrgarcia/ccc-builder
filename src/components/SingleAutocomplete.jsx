@@ -6,6 +6,7 @@ import "../styles/Autocomplete.css";
 
 import MagnifyingGlass from "../assets/magnify.svg";
 import XCircle from "../assets/close-circle.svg";
+import Check from "../assets/check.svg";
 
 import Input from "./Input";
 
@@ -135,6 +136,7 @@ function SingleAutocomplete({
                       }}
                     >
                       <p>{option[optionNameLabel]}</p>
+                      {isSelected ? <img src={Check} alt="Selected" /> : ""}
                     </div>
                   </button>
                 );
