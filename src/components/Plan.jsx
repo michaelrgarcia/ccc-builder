@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { sortCourses } from "../utils/planTools";
 
 function Plan({ baseArticulations }) {
   function createRequirementsList() {
@@ -16,9 +17,16 @@ function Plan({ baseArticulations }) {
             ? `${course.coursePrefix} ${course.courseNumber} - ${course.courseTitle}`
             : course.seriesTitle;
 
-        requirements.push(
-          <p key={`articulated-${courseIdentifier}`}>{courseIdentifier}</p>
-        );
+        requirements.push({
+          element: (
+            <p key={`articulated-${courseIdentifier}`}>{courseIdentifier}</p>
+          ),
+          prefix:
+            course.articulationType === "Course" ? course.coursePrefix : "",
+          number:
+            course.articulationType === "Course" ? course.courseNumber : "",
+          isSeries: course.articulationType === "Series",
+        });
       }
 
       for (let k = 0; k < nonArticulatedCourses.length; k++) {
@@ -29,13 +37,22 @@ function Plan({ baseArticulations }) {
             ? `${course.coursePrefix} ${course.courseNumber} - ${course.courseTitle}`
             : course.seriesTitle;
 
-        requirements.push(
-          <p key={`non-articulated-${courseIdentifier}`}>{courseIdentifier}</p>
-        );
+        requirements.push({
+          element: (
+            <p key={`non-articulated-${courseIdentifier}`}>
+              {courseIdentifier}
+            </p>
+          ),
+          prefix: course.type === "Course" ? course.coursePrefix : "",
+          number: course.type === "Course" ? course.courseNumber : "",
+          isSeries: course.type === "Series",
+        });
       }
     }
 
-    return requirements;
+    const sortedRequirements = sortCourses(requirements);
+
+    return sortedRequirements.map((req) => req.element);
   }
 
   return (
