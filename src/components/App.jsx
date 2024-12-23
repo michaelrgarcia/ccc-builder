@@ -6,6 +6,7 @@ import "../styles/App.css";
 import Autocomplete from "./Autocomplete";
 import SingleAutocomplete from "./SingleAutocomplete";
 import { ccAndMajorSearch, uniSearch } from "../utils/search";
+import Plan from "./Plan";
 
 // not for reuse. move this outside of the components dir?
 
@@ -27,7 +28,7 @@ function App() {
   const [selectedMajors, setSelectedMajors] = useState({});
   const [selectedCCC, setSelectedCCC] = useState({});
 
-  const [baseArticulations, setBaseArticulations] = useState({});
+  const [baseArticulations, setBaseArticulations] = useState([]);
 
   useEffect(() => {
     async function getMajors() {
@@ -67,6 +68,7 @@ function App() {
   useEffect(() => {
     async function getBaseArticulations() {
       try {
+        const baseArticulations = [];
         const endpoint = import.meta.env.VITE_BASE_SEARCHER;
 
         await Promise.all(
@@ -90,11 +92,12 @@ function App() {
               }
 
               const newArticulations = await response.json();
-
-              setBaseArticulations(newArticulations);
+              baseArticulations.push(newArticulations);
             });
           })
         );
+
+        setBaseArticulations(baseArticulations);
       } catch (err) {
         console.error("Failed primary search: ", err);
 
@@ -256,7 +259,7 @@ function App() {
               type="button"
               className="next"
               onClick={() => {
-                setPlanProgress(50);
+                setPlanProgress(70);
                 setCurrentStage("primary-cc-search");
               }}
             >
@@ -274,7 +277,7 @@ function App() {
         <header>
           <h1>CCCBuilder</h1>
           <p className="user-guide">
-            Search for any missing articulations and make the necessary choices.
+            Search for any missing articulations and make any indicated choices.
           </p>
           <div className="progress-container">
             <label htmlFor="plan-progress">70% done</label>
@@ -286,7 +289,7 @@ function App() {
           </div>
         </header>
         <main>
-          <p> pypp</p>
+          <Plan baseArticulations={baseArticulations} />
         </main>
       </>
     );
