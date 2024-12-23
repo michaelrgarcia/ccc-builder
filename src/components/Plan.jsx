@@ -1,6 +1,8 @@
 import PropTypes from "prop-types";
 import { sortCourses } from "../utils/planTools";
 
+import "../styles/Plan.css";
+
 function Plan({ baseArticulations }) {
   function createRequirementsList() {
     const requirements = [];

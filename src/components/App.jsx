@@ -278,7 +278,7 @@ function App() {
                 Next
               </button>
             ) : (
-              "Fetching articulations..."
+              <p className="loading">Fetching articulations...</p>
             )
           ) : (
             ""
