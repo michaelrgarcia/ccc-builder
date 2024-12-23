@@ -4,37 +4,40 @@ function Plan({ baseArticulations }) {
   function createRequirementsList() {
     const requirements = [];
 
-    baseArticulations.map(
-      ({ articulatedCourses, nonArticulatedCourses, articulationInfo }) => {
-        articulatedCourses.map(
-          ({ courseTitle, courseNumber, coursePrefix }) => {
-            const courseIdentifier = `${coursePrefix} ${courseNumber} - ${courseTitle}`;
+    for (let i = 0; i < baseArticulations.length; i++) {
+      const { articulatedCourses = [], nonArticulatedCourses = [] } =
+        baseArticulations[i];
 
-            requirements.push(
-              <p key={`${articulationInfo.majorId}/${courseIdentifier}`}>
-                {courseIdentifier}
-              </p>
-            );
-          }
+      for (let j = 0; j < articulatedCourses.length; j++) {
+        const course = articulatedCourses[j];
+
+        const courseIdentifier =
+          course.articulationType === "Course"
+            ? `${course.coursePrefix} ${course.courseNumber} - ${course.courseTitle}`
+            : course.seriesTitle;
+
+        requirements.push(
+          <p key={`articulated-${courseIdentifier}`}>{courseIdentifier}</p>
         );
-
-        nonArticulatedCourses.map((course) => {
-          const courseIdentifier =
-            course.type === "Course"
-              ? `${course.coursePrefix} ${course.courseNumber} - ${course.courseTitle}`
-              : course.seriesTitle;
-
-          requirements.push(
-            <p key={`${articulationInfo.majorId}/${courseIdentifier}`}>
-              {courseIdentifier}
-            </p>
-          );
-        });
       }
-    );
+
+      for (let k = 0; k < nonArticulatedCourses.length; k++) {
+        const course = nonArticulatedCourses[k];
+
+        const courseIdentifier =
+          course.type === "Course"
+            ? `${course.coursePrefix} ${course.courseNumber} - ${course.courseTitle}`
+            : course.seriesTitle;
+
+        requirements.push(
+          <p key={`non-articulated-${courseIdentifier}`}>{courseIdentifier}</p>
+        );
+      }
+    }
 
     return requirements;
   }
+
   return (
     <>
       <div className="legend"></div>
