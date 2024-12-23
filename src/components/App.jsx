@@ -71,16 +71,22 @@ function App() {
         const baseArticulations = [];
         const endpoint = import.meta.env.VITE_BASE_SEARCHER;
 
-        await Promise.all(
-          selectedSchools.map(async ({ name, id }) => {
-            const fyName = name;
-            const fyId = id;
+        const allPromises = [];
 
-            const associatedMajors = selectedMajors[id];
+        for (let i = 0; i < selectedSchools.length; i++) {
+          const { name, id } = selectedSchools[i];
 
-            associatedMajors.map(async ({ major, key }) => {
-              const majorId = `${academicYear}/${selectedCCC.id}/to/${fyId}/Major/${key}`;
+          const fyName = name;
+          const fyId = id;
 
+          const associatedMajors = selectedMajors[id];
+
+          for (let j = 0; j < associatedMajors.length; j++) {
+            const { major, key } = associatedMajors[j];
+
+            const majorId = `${academicYear}/${selectedCCC.id}/to/${fyId}/Major/${key}`;
+
+            const promise = (async () => {
               const response = await fetch(
                 `${endpoint}/?cccId=${selectedCCC.id}&fyId=${fyId}&yr=${academicYear}&majorId=${majorId}`
               );
@@ -93,9 +99,13 @@ function App() {
 
               const newArticulations = await response.json();
               baseArticulations.push(newArticulations);
-            });
-          })
-        );
+            })();
+
+            allPromises.push(promise);
+          }
+        }
+
+        await Promise.all(allPromises);
 
         setBaseArticulations(baseArticulations);
       } catch (err) {
@@ -108,6 +118,7 @@ function App() {
     }
 
     if (selectedCCC.id) {
+      setBaseArticulations([]);
       getBaseArticulations();
     }
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
@@ -255,16 +266,20 @@ function App() {
             inputId="community-colleges"
           />
           {selectedCCC.name ? (
-            <button
-              type="button"
-              className="next"
-              onClick={() => {
-                setPlanProgress(70);
-                setCurrentStage("primary-cc-search");
-              }}
-            >
-              Next
-            </button>
+            baseArticulations.length > 0 ? (
+              <button
+                type="button"
+                className="next"
+                onClick={() => {
+                  setPlanProgress(70);
+                  setCurrentStage("primary-cc-search");
+                }}
+              >
+                Next
+              </button>
+            ) : (
+              "Fetching articulations..."
+            )
           ) : (
             ""
           )}
@@ -289,11 +304,7 @@ function App() {
           </div>
         </header>
         <main>
-          {baseArticulations.length > 0 ? (
-            <Plan baseArticulations={baseArticulations} />
-          ) : (
-            "Fetching articulations..."
-          )}
+          <Plan baseArticulations={baseArticulations} />
         </main>
       </>
     );
