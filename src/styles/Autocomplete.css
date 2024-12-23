@@ -122,6 +122,9 @@
 .single-option.selected img {
   width: 25px;
   margin-right: 15px;
+
+  filter: invert(92%) sepia(0%) saturate(132%) hue-rotate(156deg)
+    brightness(79%) contrast(72%);
 }
 
 .single-option.selected > .opt-wrapper {
