@@ -289,7 +289,12 @@ function App() {
           </div>
         </header>
         <main>
-          <Plan baseArticulations={baseArticulations} />
+          {baseArticulations ? (
+            <Plan baseArticulations={baseArticulations} />
+          ) : (
+            "Getting articulations..."
+            // useEffect will handle a loading bar
+          )}
         </main>
       </>
     );
