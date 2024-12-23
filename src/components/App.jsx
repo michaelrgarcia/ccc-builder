@@ -22,19 +22,21 @@ function App() {
 
   const [majors, setMajors] = useState({});
 
-  // combine into "user selections" state object
+  // combine these at some point
   const [selectedSchools, setSelectedSchools] = useState([]);
   const [selectedMajors, setSelectedMajors] = useState({});
   const [selectedCCC, setSelectedCCC] = useState({});
 
+  const [baseArticulations, setBaseArticulations] = useState({});
+
   useEffect(() => {
     async function getMajors() {
       try {
+        const endpoint = import.meta.env.VITE_ASSIST_SCHOOLS;
         const majorData = {};
 
         await Promise.all(
           selectedSchools.map(async ({ name, id }) => {
-            const endpoint = import.meta.env.VITE_ASSIST_SCHOOLS;
             const response = await fetch(
               `${endpoint}/major-data/${id}/${academicYear}`
             );
@@ -61,6 +63,51 @@ function App() {
       getMajors();
     }
   }, [selectedSchools]);
+
+  useEffect(() => {
+    async function getBaseArticulations() {
+      try {
+        const endpoint = import.meta.env.VITE_BASE_SEARCHER;
+
+        await Promise.all(
+          selectedSchools.map(async ({ name, id }) => {
+            const fyName = name;
+            const fyId = id;
+
+            const associatedMajors = selectedMajors[id];
+
+            associatedMajors.map(async ({ major, key }) => {
+              const majorId = `${academicYear}/${selectedCCC.id}/to/${fyId}/Major/${key}`;
+
+              const response = await fetch(
+                `${endpoint}/?cccId=${selectedCCC.id}&fyId=${fyId}&yr=${academicYear}&majorId=${majorId}`
+              );
+
+              if (!response.ok) {
+                throw new Error(
+                  `Failed primary search for ${fyName}, ${major}`
+                );
+              }
+
+              const newArticulations = await response.json();
+
+              setBaseArticulations(newArticulations);
+            });
+          })
+        );
+      } catch (err) {
+        console.error("Failed primary search: ", err);
+
+        setError(
+          "Critical error fetching articulations for selected primary community college. Please refresh the page."
+        );
+      }
+    }
+
+    if (selectedCCC.id) {
+      getBaseArticulations();
+    }
+  }, [selectedSchools, selectedMajors, selectedCCC.id]);
 
   if (error) {
     return <div className="error">{error}</div>;
@@ -218,6 +265,28 @@ function App() {
           ) : (
             ""
           )}
+        </main>
+      </>
+    );
+  } else if (currentStage === "primary-cc-search") {
+    return (
+      <>
+        <header>
+          <h1>CCCBuilder</h1>
+          <p className="user-guide">
+            Search for any missing articulations and make the necessary choices.
+          </p>
+          <div className="progress-container">
+            <label htmlFor="plan-progress">70% done</label>
+            <progress
+              id="plan-progress"
+              value={planProgress}
+              max={100}
+            ></progress>
+          </div>
+        </header>
+        <main>
+          <p> pypp</p>
         </main>
       </>
     );
