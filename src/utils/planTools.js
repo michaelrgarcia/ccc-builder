@@ -1,3 +1,5 @@
+import { universities } from "./staticAssistData";
+
 export function sortCourses(courseArray) {
   const copy = [...courseArray];
 
@@ -14,4 +16,14 @@ export function sortCourses(courseArray) {
   });
 
   return copy;
+}
+
+export function getUniName(fyId) {
+  const university = universities.find((uni) => uni.id === Number(fyId));
+
+  if (university) {
+    return university.name;
+  } else {
+    return null;
+  }
 }
