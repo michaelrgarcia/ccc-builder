@@ -3,120 +3,90 @@ import { sortCourses } from "../utils/planTools";
 
 import "../styles/Plan.css";
 
-function Plan({ baseArticulations }) {
-  function createRequirementsList() {
-    const requirements = [];
+function renderCourseGroup(courseGroup) {
+  const { courses, type, amount } = courseGroup;
+  const connector = type === "AllCourses" ? "And" : "Or";
 
-    for (let i = 0; i < baseArticulations.length; i++) {
-      const { articulatedCourses = [], nonArticulatedCourses = [] } =
-        baseArticulations[i];
+  return (
+    <div className="course-group">
+      {amount ? (
+        <div className="group-header">Select {amount} from the following:</div>
+      ) : (
+        ""
+      )}
+      {courses.map((course, index) => {
+        const { courseTitle, coursePrefix, courseNumber } = course;
+        const courseIdentifier = `${coursePrefix} ${courseNumber} - ${courseTitle}`;
 
-      for (let j = 0; j < articulatedCourses.length; j++) {
-        const course = articulatedCourses[j];
+        <div className="course-item">
+          <p className="identifier">{courseIdentifier}</p>
+          {index < courses.length - 1 ? (
+            <p className="connector">{connector}</p>
+          ) : (
+            ""
+          )}
+        </div>;
+      })}
+    </div>
+  );
+}
 
-        const courseIdentifier =
-          course.articulationType === "Course"
-            ? `${course.coursePrefix} ${course.courseNumber} - ${course.courseTitle}`
-            : course.seriesTitle;
+function renderRequirement(requirementObj) {
+  const { requiredCourses, conjunction } = requirementObj;
 
-        requirements.push({
-          element: (
-            <p key={`articulated-${courseIdentifier}`}>{courseIdentifier}</p>
-          ),
-          prefix:
-            course.articulationType === "Course" ? course.coursePrefix : "",
-          number:
-            course.articulationType === "Course" ? course.courseNumber : "",
-          isSeries: course.articulationType === "Series",
-        });
-      }
+  return (
+    <div className="requirement">
+      {requiredCourses.map((courseGroup, index) => {
+        <>
+          {renderCourseGroup(courseGroup)}
+          {index < requiredCourses.length - 1 ? (
+            <p className="group-connector">{conjunction}</p>
+          ) : (
+            ""
+          )}
+        </>;
+      })}
+    </div>
+  );
+}
 
-      for (let k = 0; k < nonArticulatedCourses.length; k++) {
-        const course = nonArticulatedCourses[k];
-
-        const courseIdentifier =
-          course.type === "Course"
-            ? `${course.coursePrefix} ${course.courseNumber} - ${course.courseTitle}`
-            : course.seriesTitle;
-
-        requirements.push({
-          element: (
-            <p key={`non-articulated-${courseIdentifier}`}>
-              {courseIdentifier}
-            </p>
-          ),
-          prefix: course.type === "Course" ? course.coursePrefix : "",
-          number: course.type === "Course" ? course.courseNumber : "",
-          isSeries: course.type === "Series",
-        });
-      }
-    }
-
-    const sortedRequirements = sortCourses(requirements);
-
-    return sortedRequirements.map((req) => req.element);
-  }
-
+function Plan({ requirements }) {
   return (
     <>
       <div className="legend"></div>
 
       <div className="university-requirements">
         <p className="title">University Requirements</p>
-        {createRequirementsList()}
+
+        {requirements.map((requirementObj, index) => {
+          <div key={index} className="requirement">
+            {renderRequirement(requirementObj)}
+          </div>;
+        })}
       </div>
     </>
   );
 }
 
+const Course = PropTypes.shape({
+  type: PropTypes.string.isRequired,
+  courseTitle: PropTypes.string.isRequired,
+  coursePrefix: PropTypes.string.isRequired,
+  courseNumber: PropTypes.string.isRequired,
+});
+
+const CourseGroup = PropTypes.shape({
+  type: PropTypes.string.isRequired,
+  amount: PropTypes.number,
+  courses: PropTypes.arrayOf(Course).isRequired,
+});
+
 Plan.propTypes = {
-  baseArticulations: PropTypes.arrayOf(
+  requirements: PropTypes.arrayOf(
     PropTypes.shape({
-      cccInfo: PropTypes.shape({
-        code: PropTypes.string,
-        id: PropTypes.string,
-        name: PropTypes.string.isRequired,
-      }).isRequired,
-      universityInfo: PropTypes.shape({
-        code: PropTypes.string,
-        id: PropTypes.string,
-        name: PropTypes.string.isRequired,
-      }).isRequired,
-      articulationInfo: PropTypes.shape({
-        major: PropTypes.string.isRequired,
-        majorId: PropTypes.string,
-        term: PropTypes.string,
-        termId: PropTypes.string,
-      }).isRequired,
-      articulatedCourses: PropTypes.arrayOf(
-        PropTypes.shape({
-          articulationType: PropTypes.string.isRequired,
-          courseTitle: PropTypes.string.isRequired,
-          courseNumber: PropTypes.string.isRequired,
-          coursePrefix: PropTypes.string.isRequired,
-          articulationOptions: PropTypes.arrayOf(
-            PropTypes.arrayOf(
-              PropTypes.shape({
-                courseTitle: PropTypes.string.isRequired,
-                courseNumber: PropTypes.string.isRequired,
-                coursePrefix: PropTypes.string.isRequired,
-                note: PropTypes.string,
-              }).isRequired
-            ).isRequired
-          ).isRequired,
-        }).isRequired
-      ),
-      // will have to search agreements for course titles in here
-      nonArticulatedCourses: PropTypes.arrayOf(
-        PropTypes.shape({
-          type: PropTypes.string.isRequired,
-          courseTitle: PropTypes.string,
-          seriesTitle: PropTypes.string,
-          courseNumber: PropTypes.string.isRequired,
-          coursePrefix: PropTypes.string.isRequired,
-        }).isRequired
-      ),
-    }).isRequired
+      requiredCourses: PropTypes.arrayOf(CourseGroup).isRequired,
+      conjunction: PropTypes.string,
+    })
   ).isRequired,
 };
 
