@@ -28,7 +28,7 @@ function App() {
   const [selectedMajors, setSelectedMajors] = useState({});
   const [selectedCCC, setSelectedCCC] = useState({});
 
-  const [baseArticulations, setBaseArticulations] = useState([]);
+  const [requirements, setRequirements] = useState([]);
 
   useEffect(() => {
     async function getMajors() {
@@ -66,9 +66,9 @@ function App() {
   }, [selectedSchools]);
 
   useEffect(() => {
-    async function getBaseArticulations() {
+    async function getRequirements() {
       try {
-        const baseArticulations = [];
+        const requirements = [];
         const endpoint = import.meta.env.VITE_BASE_SEARCHER;
 
         const allPromises = [];
@@ -97,8 +97,8 @@ function App() {
                 );
               }
 
-              const newArticulations = await response.json();
-              baseArticulations.push(newArticulations);
+              const newRequirements = await response.json();
+              requirements.push(newRequirements);
             })();
 
             allPromises.push(promise);
@@ -107,19 +107,19 @@ function App() {
 
         await Promise.all(allPromises);
 
-        setBaseArticulations(baseArticulations);
+        setRequirements(requirements);
       } catch (err) {
-        console.error("Failed primary search: ", err);
+        console.error("Failed requirements search: ", err);
 
         setError(
-          "Critical error fetching articulations for selected primary community college. Please refresh the page."
+          "Critical error fetching requirements for selected primary community college. Please refresh the page."
         );
       }
     }
 
     if (selectedCCC.id) {
-      setBaseArticulations([]);
-      getBaseArticulations();
+      setRequirements([]);
+      getRequirements();
     }
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
 
@@ -266,7 +266,7 @@ function App() {
             inputId="community-colleges"
           />
           {selectedCCC.name ? (
-            baseArticulations.length > 0 ? (
+            requirements.length > 0 ? (
               <button
                 type="button"
                 className="next"
@@ -304,7 +304,7 @@ function App() {
           </div>
         </header>
         <main>
-          <Plan baseArticulations={baseArticulations} />
+          <Plan requirements={requirements} />
         </main>
       </>
     );
