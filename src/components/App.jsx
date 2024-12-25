@@ -28,7 +28,7 @@ function App() {
   const [selectedMajors, setSelectedMajors] = useState({});
   const [selectedCCC, setSelectedCCC] = useState({});
 
-  const [requirements, setRequirements] = useState([]);
+  const [requirements, setRequirements] = useState({});
 
   useEffect(() => {
     async function getMajors() {
@@ -68,7 +68,7 @@ function App() {
   useEffect(() => {
     async function getRequirements() {
       try {
-        const requirements = [];
+        const reqs = {};
         const endpoint = import.meta.env.VITE_BASE_SEARCHER;
 
         const allPromises = [];
@@ -98,7 +98,12 @@ function App() {
               }
 
               const newRequirements = await response.json();
-              requirements.push(newRequirements);
+
+              if (reqs[fyId]) {
+                reqs[fyId] = [...reqs[fyId], newRequirements];
+              } else {
+                reqs[fyId] = [newRequirements];
+              }
             })();
 
             allPromises.push(promise);
@@ -107,7 +112,7 @@ function App() {
 
         await Promise.all(allPromises);
 
-        setRequirements(requirements);
+        setRequirements(reqs);
       } catch (err) {
         console.error("Failed requirements search: ", err);
 
@@ -118,7 +123,7 @@ function App() {
     }
 
     if (selectedCCC.id) {
-      setRequirements([]);
+      setRequirements({});
       getRequirements();
     }
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
@@ -241,6 +246,8 @@ function App() {
       </>
     );
   } else if (currentStage === "primary-cc-select") {
+    const reqsForEachMajor = Object.values(requirements);
+
     return (
       <>
         <header>
@@ -266,7 +273,7 @@ function App() {
             inputId="community-colleges"
           />
           {selectedCCC.name ? (
-            requirements.length > 0 ? (
+            reqsForEachMajor.length === selectedSchools.length ? (
               <button
                 type="button"
                 className="next"
