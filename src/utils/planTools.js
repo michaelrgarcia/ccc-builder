@@ -65,3 +65,25 @@ export function getUserChoices(requirements) {
 
   return userChoices;
 }
+
+export function createInstructions(requiredCourses) {
+  if (requiredCourses.length < 2) {
+    return "";
+  } else if (requiredCourses.length === 2) {
+    return "Complete A and B";
+  } else if (requiredCourses.length > 2) {
+    let instructions = "Complete";
+
+    for (let i = 0; i < requiredCourses.length; i++) {
+      const progressiveLetter = String.fromCharCode(i + 1 + 64);
+
+      if (i !== requiredCourses.length - 1) {
+        instructions += ` ${progressiveLetter}, `;
+      } else {
+        instructions += ` and ${progressiveLetter}`;
+      }
+    }
+
+    return instructions;
+  }
+}
