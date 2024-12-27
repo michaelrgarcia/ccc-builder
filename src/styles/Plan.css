@@ -76,11 +76,16 @@
 .course-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
 
   max-width: 500px;
 
   text-align: left;
+}
+
+.identifier {
+  margin-right: 10px;
 }
 
 .dropdown {
