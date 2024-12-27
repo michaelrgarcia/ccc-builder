@@ -27,3 +27,41 @@ export function getUniName(fyId) {
     return null;
   }
 }
+
+export function getUniReqs(requirements) {
+  const uniReqs = [];
+
+  for (let i = 0; i < requirements.length; i++) {
+    const currentReqGroup = requirements[i];
+    const reqdCourses = currentReqGroup.requiredCourses;
+
+    for (let j = 0; j < reqdCourses.length; j++) {
+      const currentReq = reqdCourses[j];
+
+      if (currentReq.type === "AllCourses") {
+        uniReqs.push(currentReqGroup);
+      }
+    }
+  }
+
+  return uniReqs;
+}
+
+export function getUserChoices(requirements) {
+  const userChoices = [];
+
+  for (let i = 0; i < requirements.length; i++) {
+    const currentReqGroup = requirements[i];
+    const reqdCourses = currentReqGroup.requiredCourses;
+
+    for (let j = 0; j < reqdCourses.length; j++) {
+      const currentReq = reqdCourses[j];
+
+      if (currentReq.type === "NCourses" && currentReq.courses.length > 1) {
+        userChoices.push(currentReqGroup);
+      }
+    }
+  }
+
+  return userChoices;
+}

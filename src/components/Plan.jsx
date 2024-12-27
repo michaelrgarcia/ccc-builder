@@ -1,85 +1,133 @@
 import PropTypes from "prop-types";
 
 import "../styles/Plan.css";
-import { getUniName } from "../utils/planTools";
-import { useState } from "react";
+import { getUniName, getUniReqs, getUserChoices } from "../utils/planTools";
+
+function generateCourseGroupKey(courseGroup, groupIndex) {
+  const coursesKey = courseGroup.courses
+    .map((course) => course.courseId || course.seriesTitle)
+    .join("-");
+
+  return `group-${coursesKey}-${groupIndex}`;
+}
+
+function renderCourseGroup(courseGroup, groupIndex) {
+  const { courses, type, amount } = courseGroup;
+  const connector = type === "AllCourses" ? "And" : "Or";
+
+  return (
+    <div
+      className="course-group"
+      key={generateCourseGroupKey(courseGroup, groupIndex)}
+    >
+      {courses.length > 1 && amount ? (
+        <div className="group-header">Select {amount} from the following:</div>
+      ) : (
+        ""
+      )}
+      {courses.map((course, index) => {
+        const { courseTitle, coursePrefix, courseNumber, courseId } = course;
+        const courseIdentifier =
+          course.type === "Course"
+            ? `${coursePrefix} ${courseNumber} - ${courseTitle}`
+            : course.seriesTitle;
+
+        const courseKey = courseId || courseIdentifier;
+
+        return (
+          <div key={courseKey} className="course-item">
+            <p className="identifier">{courseIdentifier}</p>
+            {index < courses.length - 1 ? (
+              <p className="connector">{connector}</p>
+            ) : (
+              ""
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function generateRequirementKey(requirementObj, index) {
+  const courseIds = requirementObj.requiredCourses
+    .flatMap((group) => group.courses)
+    .map((course) => course.courseId || course.seriesTitle)
+    .join("-");
+
+  return `req-${courseIds}-${index}`;
+}
+
+function renderRequirement(requirementObj, reqIndex) {
+  const { requiredCourses, conjunction } = requirementObj;
+
+  return (
+    <div
+      className="requirement"
+      key={generateRequirementKey(requirementObj, reqIndex)}
+    >
+      {requiredCourses.map((courseGroup, groupIndex) => (
+        <div
+          key={generateCourseGroupKey(courseGroup, groupIndex)}
+          className="course-group-wrapper"
+        >
+          {renderCourseGroup(courseGroup, groupIndex)}
+          {groupIndex < requiredCourses.length - 1 ? (
+            <p className="group-connector">{conjunction}</p>
+          ) : (
+            ""
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function Plan({ requirements }) {
   const schoolIds = Object.keys(requirements);
   const uniGroups = Object.values(requirements);
 
-  const [userChoices, setUserChoices] = useState();
-
-  function renderCourseGroup(courseGroup) {
-    const { courses, type, amount } = courseGroup;
-    const connector = type === "AllCourses" ? "And" : "Or";
-
-    // if amount exists, render the corresponding group in a
-    // separate place
-
-    return (
-      <div className="course-group">
-        {amount ? (
-          <div className="group-header">
-            Select {amount} from the following:
-          </div>
-        ) : (
-          ""
-        )}
-        {courses.map((course, index) => {
-          const { courseTitle, coursePrefix, courseNumber, courseId } = course;
-          const courseIdentifier =
-            course.type === "Course"
-              ? `${coursePrefix} ${courseNumber} - ${courseTitle}`
-              : course.seriesTitle;
-
-          return (
-            <div key={courseId} className="course-item">
-              <p className="identifier">{courseIdentifier}</p>
-              {index < courses.length - 1 ? (
-                <p className="connector">{connector}</p>
-              ) : (
-                ""
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
-  function renderRequirement(requirementObj) {
-    const { requiredCourses, conjunction } = requirementObj;
-
-    return (
-      <div className="requirement">
-        {requiredCourses.map((courseGroup, index) => (
-          <>
-            {renderCourseGroup(courseGroup)}
-            {index < requiredCourses.length - 1 ? (
-              <p className="group-connector">{conjunction}</p>
-            ) : (
-              ""
-            )}
-          </>
-        ))}
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="university-requirements">
         <p className="title">University Requirements</p>
-        {uniGroups.map((reqGroups, index) => (
-          <div key={index} className="uni-group">
-            <p className="uni-title">{getUniName(schoolIds[index])}</p>
-            {reqGroups.map((group, index) => (
-              <div key={index} className="requirement-group">
-                {/* major title */}
-                {group.map((requirement) => renderRequirement(requirement))}
-              </div>
-            ))}
+        {uniGroups.map((reqGroups, schoolIndex) => (
+          <div key={`uni-${schoolIds[schoolIndex]}`} className="uni-group">
+            <p className="uni-title">{getUniName(schoolIds[schoolIndex])}</p>
+            {reqGroups.map((group, groupIndex) => {
+              const uniReqs = getUniReqs(group);
+              const groupKey = `uni-${schoolIds[schoolIndex]}-group-${groupIndex}`;
+
+              return (
+                <div key={groupKey} className="requirement-group">
+                  {/* major title */}
+                  {uniReqs.map((requirement, reqIndex) =>
+                    renderRequirement(requirement, reqIndex)
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      <div className="user-choices">
+        <p className="title">User Choices</p>
+        {uniGroups.map((reqGroups, schoolIndex) => (
+          <div key={`choice-${schoolIds[schoolIndex]}`} className="uni-group">
+            <p className="uni-title">{getUniName(schoolIds[schoolIndex])}</p>
+            {reqGroups.map((group, groupIndex) => {
+              const userChoices = getUserChoices(group);
+              const groupKey = `choice-${schoolIds[schoolIndex]}-group-${groupIndex}`;
+
+              return (
+                <div key={groupKey} className="requirement-group">
+                  {/* major title */}
+                  {userChoices.map((requirement, reqIndex) =>
+                    renderRequirement(requirement, reqIndex)
+                  )}
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>
