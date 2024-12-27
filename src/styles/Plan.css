@@ -6,9 +6,86 @@
 
 .uni-title {
   font-size: 1.1em;
-  font-style: italic;
+  color: #737373;
+}
+
+.uni-group {
+  max-width: 500px;
+}
+
+.requirement-group {
+  display: flex;
+  flex-direction: column;
+
+  gap: 15px;
 }
 
 .requirement {
   border: 1px solid;
+  border-radius: 8px;
+
+  text-align: left;
+
+  padding: 0 20px;
+}
+
+.instructions {
+  font-weight: bold;
+
+  margin-bottom: 0px;
+}
+
+.requirement > .lettered-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  padding: 15px 10px;
+
+  border-bottom: 1px solid;
+}
+
+.requirement > .lettered-group:last-child {
+  border-bottom: none;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+
+  gap: 20px;
+}
+
+.group-letter {
+  padding: 5px 12px;
+  border: 2px solid;
+  border-radius: 50%;
+}
+
+.n-course-indicator {
+  background-color: #bbb;
+
+  border-radius: 40px;
+  padding: 5px 20px;
+
+  font-size: 0.9em;
+}
+
+.course-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  max-width: 500px;
+
+  text-align: left;
+}
+
+.dropdown {
+  background-color: #aaa;
+  mask-image: url(../assets/arrow-down-drop-circle.svg);
+
+  padding: 11px 11px;
+  border: 1px solid;
+  border-radius: 50%;
 }
