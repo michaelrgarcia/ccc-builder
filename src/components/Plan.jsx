@@ -64,7 +64,8 @@ function renderRequirement(requirementObj, reqIndex) {
       {instructions ? <p className="instructions">{instructions}</p> : ""}
       {requiredCourses.map((courseGroup, groupIndex) => (
         <Fragment key={generateCourseGroupKey(courseGroup, groupIndex)}>
-          {requiredCourses.length > 1 ? (
+          {requiredCourses.length > 1 ||
+          (courseGroup.amount && courseGroup.courses.length > 1) ? (
             <div className="lettered-group">
               <div className="group-header">
                 <div className="group-letter">
