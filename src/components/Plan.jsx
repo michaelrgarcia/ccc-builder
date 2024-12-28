@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
 
-import DropdownCircle from "../assets/arrow-down-drop-circle.svg";
-import "../styles/Plan.css";
 import { createInstructions, getUniName } from "../utils/planTools";
 import { Fragment } from "react";
+
+import "../styles/Plan.css";
 
 function generateCourseGroupKey(courseGroup, groupIndex) {
   const coursesKey = courseGroup.courses

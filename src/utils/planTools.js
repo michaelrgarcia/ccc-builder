@@ -30,7 +30,7 @@ export function getUniName(fyId) {
 
 export function createInstructions(requiredCourses) {
   if (requiredCourses.length < 2) {
-    return "";
+    return "Complete the following";
   } else if (requiredCourses.length === 2) {
     return "Complete A and B";
   } else if (requiredCourses.length > 2) {
