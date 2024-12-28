@@ -14,8 +14,7 @@ function generateCourseGroupKey(courseGroup, groupIndex) {
 }
 
 function renderCourseGroup(courseGroup, groupIndex) {
-  const { courses, type } = courseGroup;
-  const connector = type === "AllCourses" ? "And" : "Or";
+  const { courses } = courseGroup;
 
   return (
     <div
@@ -23,7 +22,8 @@ function renderCourseGroup(courseGroup, groupIndex) {
       key={generateCourseGroupKey(courseGroup, groupIndex)}
     >
       {courses.map((course) => {
-        const { courseTitle, coursePrefix, courseNumber, courseId } = course;
+        const { courseTitle, coursePrefix, courseNumber, courseId, credits } =
+          course;
         const courseIdentifier =
           course.type === "Course"
             ? `${coursePrefix} ${courseNumber} - ${courseTitle}`
@@ -33,7 +33,10 @@ function renderCourseGroup(courseGroup, groupIndex) {
 
         return (
           <div key={courseKey} className="course-item">
-            <p className="identifier">{courseIdentifier}</p>
+            <div className="identifiers">
+              <p className="course-identifier">{courseIdentifier}</p>
+              <p className="units">{credits} units</p>
+            </div>
             <button type="button" className="dropdown"></button>
           </div>
         );
@@ -131,6 +134,8 @@ const Course = PropTypes.shape({
   coursePrefix: PropTypes.string,
   courseNumber: PropTypes.string,
   courseId: PropTypes.string,
+  seriesId: PropTypes.string,
+  credits: PropTypes.number,
 });
 
 const CourseGroup = PropTypes.shape({

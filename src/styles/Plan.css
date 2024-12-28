@@ -28,7 +28,7 @@
 
   text-align: left;
 
-  padding: 0 20px;
+  padding: 10px 30px;
 }
 
 .instructions {
@@ -68,7 +68,7 @@
   background-color: #bbb;
 
   border-radius: 40px;
-  padding: 5px 20px;
+  padding: 2px 20px;
 
   font-size: 0.9em;
 }
@@ -84,8 +84,19 @@
   text-align: left;
 }
 
-.identifier {
+.course-identifier {
   margin-right: 10px;
+  max-width: 375px;
+}
+
+.units {
+  border: 1px solid #aaa;
+  border-radius: 50px;
+
+  font-size: 0.9em;
+  text-align: center;
+
+  width: 80px;
 }
 
 .dropdown {
