@@ -37,13 +37,16 @@
   margin-bottom: 0px;
 }
 
-.requirement > .lettered-group {
+.requirement > .lettered-group,
+.requirement > .course-group {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 
   padding: 15px 10px;
+}
 
+.requirement > .lettered-group {
   border-bottom: 1px solid;
 }
 
@@ -79,7 +82,7 @@
   justify-content: space-between;
   gap: 10px;
 
-  max-width: 500px;
+  width: 100%;
 
   text-align: left;
 }
@@ -103,7 +106,7 @@
   background-color: #aaa;
   mask-image: url(../assets/arrow-down-drop-circle.svg);
 
-  padding: 11px 11px;
+  padding: 12px 12px;
   border: 1px solid;
   border-radius: 50%;
 }
