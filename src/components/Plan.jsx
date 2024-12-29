@@ -5,6 +5,8 @@ import { Fragment } from "react";
 
 import "../styles/Plan.css";
 
+// separate code when possible...
+
 function generateCourseGroupKey(courseGroup, groupIndex) {
   const coursesKey = courseGroup.courses
     .map((course) => course.courseId || course.seriesTitle)
@@ -74,10 +76,20 @@ function renderRequirement(requirementObj, reqIndex) {
                 <div className="group-letter">
                   {String.fromCharCode(groupIndex + 1 + 64)}
                 </div>
-                {courseGroup.amount ? (
+                {courseGroup.type === "NCourses" ? (
                   <p className="n-course-indicator">
                     Select {courseGroup.amount} from the following
                   </p>
+                ) : (
+                  ""
+                )}
+                {courseGroup.type === "NCredits" ? (
+                  <div className="n-credits-indicator">
+                    <p className="n-credits">
+                      Select {courseGroup.amount} units from the following
+                    </p>
+                    <p className="credits-selected">(0 units selected)</p>
+                  </div>
                 ) : (
                   ""
                 )}
@@ -139,7 +151,7 @@ const Course = PropTypes.shape({
 });
 
 const CourseGroup = PropTypes.shape({
-  type: PropTypes.oneOf(["AllCourses", "NCourses"]).isRequired,
+  type: PropTypes.oneOf(["AllCourses", "NCourses", "NCredits"]).isRequired,
   amount: PropTypes.number,
   courses: PropTypes.arrayOf(Course).isRequired,
 });
