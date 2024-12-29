@@ -30,6 +30,7 @@ function App() {
   const [selectedCCC, setSelectedCCC] = useState({});
 
   const [requirements, setRequirements] = useState({});
+  const [articulations, setArticulations] = useState({});
 
   useEffect(() => {
     async function getMajors() {
@@ -129,7 +130,68 @@ function App() {
     }
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
 
-  useEffect(() => {}, [selectedSchools, selectedMajors, selectedCCC.id]);
+  useEffect(() => {
+    async function getArticulations() {
+      try {
+        const articulations = {};
+        const endpoint = import.meta.env.VITE_PRAJWAL_ARTICULATIONS;
+
+        const allPromises = [];
+
+        for (let i = 0; i < selectedSchools.length; i++) {
+          const { name, id } = selectedSchools[i];
+
+          const fyName = name;
+          const fyId = id;
+
+          const associatedMajors = selectedMajors[id];
+
+          for (let j = 0; j < associatedMajors.length; j++) {
+            const { major, key } = associatedMajors[j];
+
+            const majorId = `${academicYear}/${selectedCCC.id}/to/${fyId}/Major/${key}`;
+
+            const promise = (async () => {
+              const response = await fetch(
+                `${endpoint}/?cccId=${selectedCCC.id}&fyId=${fyId}&yr=${academicYear}&majorId=${majorId}`
+              );
+
+              if (!response.ok) {
+                throw new Error(
+                  `Failed articulation search for ${fyName}, ${major}`
+                );
+              }
+
+              const newRequirements = await response.json();
+
+              if (articulations[fyId]) {
+                articulations[fyId] = [...articulations[fyId], newRequirements];
+              } else {
+                articulations[fyId] = [newRequirements];
+              }
+            })();
+
+            allPromises.push(promise);
+          }
+        }
+
+        await Promise.all(allPromises);
+
+        setArticulations(articulations);
+      } catch (err) {
+        console.error("Failed articulations search: ", err);
+
+        setError(
+          "Critical error fetching articulations for selected primary community college. Please refresh the page."
+        );
+      }
+    }
+
+    if (selectedCCC.id) {
+      setArticulations({});
+      getArticulations();
+    }
+  }, [selectedSchools, selectedMajors, selectedCCC.id]);
 
   if (error) {
     return <div className="error">{error}</div>;
@@ -314,7 +376,7 @@ function App() {
           </div>
         </header>
         <main>
-          <Plan requirements={requirements} />
+          <Plan requirements={requirements} articulations={articulations} />
         </main>
       </>
     );
