@@ -147,7 +147,7 @@ const Course = PropTypes.shape({
   courseNumber: PropTypes.string,
   courseId: PropTypes.string,
   seriesId: PropTypes.string,
-  credits: PropTypes.number,
+  credits: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 });
 
 const CourseGroup = PropTypes.shape({
