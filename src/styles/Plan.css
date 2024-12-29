@@ -8,10 +8,16 @@
   font-size: 1.1em;
   color: #737373;
 
+  margin-bottom: -10px;
+
   text-align: left;
 }
 
 .uni-group {
+  display: flex;
+  flex-direction: column;
+
+  gap: 30px;
   max-width: 500px;
 }
 
