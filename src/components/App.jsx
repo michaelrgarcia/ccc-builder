@@ -9,6 +9,8 @@ import { ccAndMajorSearch, uniSearch } from "../utils/search";
 import Plan from "./Plan";
 import { removeDupes } from "../utils/planTools";
 
+import WarningIcon from "../assets/alert.svg";
+
 // not for reuse. move this outside of the components dir?
 
 // this component will get huge. treat each if statement body as
@@ -194,7 +196,12 @@ function App() {
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return (
+      <div className="error">
+        <img src={WarningIcon} alt="Alert" />
+        {error}
+      </div>
+    );
   }
 
   if (currentStage === "school-select") {
@@ -312,6 +319,7 @@ function App() {
     );
   } else if (currentStage === "primary-cc-select") {
     const reqsForEachMajor = Object.values(requirements);
+    const articsForEachMajor = Object.values(articulations);
 
     return (
       <>
@@ -338,7 +346,8 @@ function App() {
             inputId="community-colleges"
           />
           {selectedCCC.name ? (
-            reqsForEachMajor.length === selectedSchools.length ? (
+            reqsForEachMajor.length === selectedSchools.length &&
+            articsForEachMajor.length === selectedSchools.length ? (
               <button
                 type="button"
                 className="next"
