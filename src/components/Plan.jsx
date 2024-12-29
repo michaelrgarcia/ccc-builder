@@ -1,28 +1,17 @@
 import PropTypes from "prop-types";
 
-import { createInstructions, getUniName } from "../utils/planTools";
+import {
+  createInstructions,
+  getUniName,
+  generateCourseGroupKey,
+  generateRequirementKey,
+} from "../utils/planTools";
+
 import { Fragment, useState } from "react";
 
 import "../styles/Plan.css";
 
 // separate code when possible...
-
-function generateCourseGroupKey(courseGroup, groupIndex) {
-  const coursesKey = courseGroup.courses
-    .map((course) => course.courseId || course.seriesTitle)
-    .join("-");
-
-  return `group-${coursesKey}-${groupIndex}`;
-}
-
-function generateRequirementKey(requirementObj, index) {
-  const courseIds = requirementObj.requiredCourses
-    .flatMap((group) => group.courses)
-    .map((course) => course.courseId || course.seriesTitle)
-    .join("-");
-
-  return `req-${courseIds}-${index}`;
-}
 
 function Plan({ requirements }) {
   const [flatReqs, setFlatReqs] = useState(

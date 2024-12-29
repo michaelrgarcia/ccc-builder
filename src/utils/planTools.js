@@ -94,3 +94,20 @@ export function removeDupes(requirements) {
 
   return reqsCopy;
 }
+
+export function generateCourseGroupKey(courseGroup, groupIndex) {
+  const coursesKey = courseGroup.courses
+    .map((course) => course.courseId || course.seriesTitle)
+    .join("-");
+
+  return `group-${coursesKey}-${groupIndex}`;
+}
+
+export function generateRequirementKey(requirementObj, index) {
+  const courseIds = requirementObj.requiredCourses
+    .flatMap((group) => group.courses)
+    .map((course) => course.courseId || course.seriesTitle)
+    .join("-");
+
+  return `req-${courseIds}-${index}`;
+}
