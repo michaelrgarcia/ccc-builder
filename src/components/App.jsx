@@ -7,6 +7,7 @@ import Autocomplete from "./Autocomplete";
 import SingleAutocomplete from "./SingleAutocomplete";
 import { ccAndMajorSearch, uniSearch } from "../utils/search";
 import Plan from "./Plan";
+import { removeDupes } from "../utils/planTools";
 
 // not for reuse. move this outside of the components dir?
 
@@ -112,7 +113,7 @@ function App() {
 
         await Promise.all(allPromises);
 
-        setRequirements(reqs);
+        setRequirements(removeDupes(reqs));
       } catch (err) {
         console.error("Failed requirements search: ", err);
 
@@ -127,6 +128,8 @@ function App() {
       getRequirements();
     }
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
+
+  useEffect(() => {}, [selectedSchools, selectedMajors, selectedCCC.id]);
 
   if (error) {
     return <div className="error">{error}</div>;
