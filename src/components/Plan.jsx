@@ -13,16 +13,14 @@ import "../styles/Plan.css";
 
 // separate code when possible...
 
-function Plan({ requirements }) {
-  const [flatReqs, setFlatReqs] = useState(
-    Object.values(requirements).flat().flat()
-  );
+function Plan({ requirements, articulations }) {
+  const [plan, setPlan] = useState([]); // populate with articulatedCourses from articulations
 
   const schoolIds = Object.keys(requirements);
   const uniGroups = Object.values(requirements);
 
   function renderCourseGroup(courseGroup, groupIndex) {
-    const { courses } = courseGroup;
+    const { courses, type } = courseGroup;
 
     return (
       <div
@@ -36,6 +34,24 @@ function Plan({ requirements }) {
             course.type === "Course"
               ? `${coursePrefix} ${courseNumber} - ${courseTitle}`
               : course.seriesTitle;
+
+          // check articulation existence in articulations
+
+          if (type === "AllCourses") {
+            // if it exists, blur it and add it to the plans state
+            // if it doesnt, store it somewhere in the Course component
+            // for search
+          } else if (type === "NCourses") {
+            // if this course exists in articulatedCourses from
+            // articulations, store it somewhere in the Course component
+            // if it doesnt, store it somewhere in the Course component
+            // for search
+          } else if (type === "NCredits") {
+            // if this course exists in articulatedCourses from
+            // articulations, store it somewhere in the Course component
+            // if it doesnt, store it somewhere in the Course component
+            // for search
+          }
 
           const courseKey = courseId || courseIdentifier;
 
@@ -164,9 +180,55 @@ const Requirement = PropTypes.shape({
   conjunction: PropTypes.oneOf(["And", "Or"]),
 });
 
+const Articulation = PropTypes.shape({
+  articulationType: PropTypes.oneOf(["Course", "Series"]).isRequired,
+  courseTitle: PropTypes.string,
+  seriesTitle: PropTypes.string,
+  coursePrefix: PropTypes.string,
+  courseNumber: PropTypes.string,
+  courseId: PropTypes.string,
+  seriesId: PropTypes.string,
+  credits: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  articulationOptions: PropTypes.arrayOf(
+    PropTypes.arrayOf(
+      PropTypes.shape({
+        courseTitle: PropTypes.string.isRequired,
+        courseNumber: PropTypes.string.isRequired,
+        coursePrefix: PropTypes.string.isRequired,
+        courseId: PropTypes.string.isRequired,
+        note: PropTypes.string,
+      })
+    )
+  ).isRequired,
+});
+
 Plan.propTypes = {
   requirements: PropTypes.objectOf(
     PropTypes.arrayOf(PropTypes.arrayOf(Requirement))
+  ).isRequired,
+  articulations: PropTypes.objectOf(
+    PropTypes.arrayOf(
+      PropTypes.shape({
+        cccInfo: PropTypes.shape({
+          id: PropTypes.string.isRequired,
+          name: PropTypes.string,
+          code: PropTypes.string,
+        }),
+        universityInfo: PropTypes.shape({
+          id: PropTypes.string.isRequired,
+          name: PropTypes.string,
+          code: PropTypes.string,
+        }),
+        articulationInfo: PropTypes.shape({
+          term: PropTypes.string,
+          termId: PropTypes.string.isRequired,
+          major: PropTypes.string.isRequired,
+          majorId: PropTypes.string,
+        }),
+        articulatedCourses: PropTypes.arrayOf(Articulation).isRequired,
+        nonArticulatedCourses: PropTypes.arrayOf(Course).isRequired,
+      }).isRequired
+    )
   ).isRequired,
 };
 
