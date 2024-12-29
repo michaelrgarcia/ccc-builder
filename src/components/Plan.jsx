@@ -1,6 +1,10 @@
 import PropTypes from "prop-types";
 
-import { createInstructions, getUniName } from "../utils/planTools";
+import {
+  createInstructions,
+  getUniName,
+  removeDupes,
+} from "../utils/planTools";
 import { Fragment } from "react";
 
 import "../styles/Plan.css";
@@ -106,10 +110,10 @@ function renderRequirement(requirementObj, reqIndex) {
 }
 
 function Plan({ requirements }) {
-  // remove dupes from requirements
-  // dupes will only appear within the same school
-  const schoolIds = Object.keys(requirements);
-  const uniGroups = Object.values(requirements);
+  const noDupes = removeDupes(requirements);
+
+  const schoolIds = Object.keys(noDupes);
+  const uniGroups = Object.values(noDupes);
 
   return (
     <>

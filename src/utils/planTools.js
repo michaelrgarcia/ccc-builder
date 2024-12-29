@@ -50,4 +50,47 @@ export function createInstructions(requiredCourses) {
   }
 }
 
-export function removeDupes(requirements) {}
+export function removeDupes(requirements) {
+  const reqsCopy = structuredClone(requirements);
+
+  for (const uni in reqsCopy) {
+    const knownIds = new Set();
+
+    const majorsForEachUni = reqsCopy[uni];
+
+    for (let i = 0; i < majorsForEachUni.length; i++) {
+      const majorReqs = majorsForEachUni[i];
+
+      for (let j = 0; j < majorReqs.length; j++) {
+        const requirement = majorReqs[j];
+
+        for (let k = 0; k < requirement.requiredCourses.length; k++) {
+          const { courses, type, amount } = requirement.requiredCourses[k];
+
+          const initialLength = courses.length;
+
+          for (let l = 0; l < courses.length; l++) {
+            const currentCourse = courses[l];
+            const id = currentCourse.courseId || currentCourse.seriesId;
+
+            if (!knownIds.has(id)) {
+              knownIds.add(id);
+            } else {
+              courses.splice(l, 1);
+              l--;
+
+              if (
+                type === "NCourses" &&
+                courses.length === initialLength - amount
+              ) {
+                courses.splice(0, courses.length);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return reqsCopy;
+}
