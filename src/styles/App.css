@@ -118,6 +118,29 @@ main {
   margin-top: 25px;
 }
 
+.error {
+  margin-top: 250px;
+
+  color: lightcoral;
+
+  animation-name: btnFadeIn;
+  animation-duration: 0.8s;
+  animation-timing-function: ease-in-out;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 20px;
+}
+
+.error > img {
+  width: 150px;
+
+  filter: invert(90%) sepia(88%) saturate(665%) hue-rotate(327deg)
+    brightness(104%) contrast(98%);
+}
+
 @keyframes btnFadeIn {
   0% {
     opacity: 0;
