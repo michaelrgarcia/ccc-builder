@@ -119,8 +119,6 @@ main {
 }
 
 .error {
-  margin-top: 250px;
-
   color: lightcoral;
 
   animation-name: btnFadeIn;
