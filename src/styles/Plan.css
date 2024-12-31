@@ -4,11 +4,16 @@
   text-decoration: underline;
 }
 
+.university-requirements > .title {
+  margin-bottom: -20px;
+}
+
 .uni-title {
   font-size: 1.1em;
   color: #737373;
 
   margin-bottom: -10px;
+  margin-top: 50px;
 
   text-align: left;
 }
@@ -26,6 +31,13 @@
   flex-direction: column;
 
   gap: 30px;
+}
+
+.major-name {
+  text-align: left;
+  font-style: italic;
+
+  margin-bottom: -15px;
 }
 
 .requirement {
