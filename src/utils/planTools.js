@@ -34,15 +34,21 @@ export function createInstructions(requiredCourses) {
   } else if (requiredCourses.length === 2) {
     return "Complete A and B";
   } else if (requiredCourses.length > 2) {
-    let instructions = "Complete";
+    let instructions = "";
 
     for (let i = 0; i < requiredCourses.length; i++) {
-      const progressiveLetter = String.fromCharCode(i + 1 + 64);
+      const currentReq = requiredCourses[i];
 
-      if (i !== requiredCourses.length - 1) {
-        instructions += ` ${progressiveLetter}, `;
-      } else {
-        instructions += ` and ${progressiveLetter}`;
+      if (currentReq.courses.length > 1) {
+        const progressiveLetter = String.fromCharCode(i + 1 + 64);
+
+        if (i === 0) {
+          instructions = "Complete";
+        } else if (i !== requiredCourses.length - 1) {
+          instructions += ` ${progressiveLetter}, `;
+        } else {
+          instructions += ` and ${progressiveLetter}`;
+        }
       }
     }
 
