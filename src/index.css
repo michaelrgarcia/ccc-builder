@@ -29,6 +29,12 @@ body {
   min-height: 100vh;
 }
 
+body:has(.error) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 #root {
   display: flex;
   flex-direction: column;
