@@ -5,6 +5,7 @@ import {
   getUniName,
   generateCourseGroupKey,
   generateRequirementKey,
+  groupByUni,
 } from "../utils/planTools";
 
 import { Fragment, useState } from "react";
@@ -13,11 +14,11 @@ import "../styles/Plan.css";
 
 // separate code when possible...
 
-function Plan({ requirements, articulations }) {
+function Plan({ reqsList, majorList, articulations }) {
   const [plan, setPlan] = useState([]); // populate with articulatedCourses from articulations
 
-  const schoolIds = Object.keys(requirements);
-  const uniGroups = Object.values(requirements);
+  // const schoolIds = Object.keys(requirements);
+  const uniGroups = groupByUni(reqsList);
 
   function renderCourseGroup(courseGroup, groupIndex) {
     const { courses, type } = courseGroup;
@@ -103,10 +104,7 @@ function Plan({ requirements, articulations }) {
                         <p className="n-course-indicator">
                           Select {courseGroup.amount} from the following
                         </p>
-                      ) : (
-                        ""
-                      )}
-                      {courseGroup.type === "NCredits" ? (
+                      ) : courseGroup.type === "NCredits" ? (
                         <div className="n-credits-indicator">
                           <p className="n-credits">
                             Select {courseGroup.amount} units from the following
@@ -137,22 +135,35 @@ function Plan({ requirements, articulations }) {
       </div>
       <div className="university-requirements">
         <p className="title">Requirements</p>
-        {uniGroups.map((reqGroups, schoolIndex) => (
-          <div key={`uni-${schoolIds[schoolIndex]}`} className="uni-group">
-            <p className="uni-title">{getUniName(schoolIds[schoolIndex])}</p>
-            {reqGroups.map((group, groupIndex) => (
-              <div
-                key={`uni-${schoolIds[schoolIndex]}-group-${groupIndex}`}
-                className="requirement-group"
-              >
-                {/* major title */}
-                {group.map((requirement, reqIndex) =>
-                  renderRequirement(requirement, reqIndex)
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
+        {uniGroups.map((uniGroup) => {
+          const { fyId } = uniGroup[0].inputs;
+
+          return (
+            <div key={`uni-${fyId}`} className="uni-group">
+              <p className="uni-title">{getUniName(fyId)}</p>
+              {uniGroup.map(({ inputs, requirements }) => {
+                const separated = inputs.majorId.split("/");
+                const extractedKey = separated[separated.length - 1];
+
+                const majorName = majorList.find(
+                  (major) => major.key === extractedKey
+                ).major;
+
+                return (
+                  <div
+                    key={`uni-${fyId}-major-${extractedKey}`}
+                    className="requirement-group"
+                  >
+                    <div className="major-name">{majorName}</div>
+                    {requirements.map((requirement, groupIndex) =>
+                      renderRequirement(requirement, groupIndex)
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
     </>
   );
@@ -203,8 +214,22 @@ const Articulation = PropTypes.shape({
 });
 
 Plan.propTypes = {
-  requirements: PropTypes.objectOf(
-    PropTypes.arrayOf(PropTypes.arrayOf(Requirement))
+  reqsList: PropTypes.arrayOf(
+    PropTypes.shape({
+      inputs: PropTypes.shape({
+        cccId: PropTypes.string,
+        fyId: PropTypes.string.isRequired,
+        yr: PropTypes.string,
+        majorId: PropTypes.string.isRequired,
+      }).isRequired,
+      requirements: PropTypes.arrayOf(Requirement).isRequired,
+    }).isRequired
+  ).isRequired,
+  majorList: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      major: PropTypes.string.isRequired,
+    }).isRequired
   ).isRequired,
   articulations: PropTypes.objectOf(
     PropTypes.arrayOf(
@@ -229,7 +254,7 @@ Plan.propTypes = {
         nonArticulatedCourses: PropTypes.arrayOf(Course).isRequired,
       }).isRequired
     )
-  ).isRequired,
+  ) /* .isRequired */,
 };
 
 export default Plan;
