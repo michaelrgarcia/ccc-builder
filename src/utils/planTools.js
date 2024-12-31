@@ -111,3 +111,69 @@ export function generateRequirementKey(requirementObj, index) {
 
   return `req-${courseIds}-${index}`;
 }
+
+export function findArticulation(course, articulations) {
+  const { courseId } = course;
+
+  const articulationId = courseId.split("_")[0];
+
+  /*
+
+  for (const uni in articulations) {
+    const articsForEachUni = articulations[uni];
+
+    for (let i = 0; i < articsForEachUni.length; i++) {
+      const majorReqs = majorsForEachUni[i];
+
+      for (let j = 0; j < majorReqs.length; j++) {
+        const requirement = majorReqs[j];
+
+        for (let k = 0; k < requirement.requiredCourses.length; k++) {
+          const { courses, type, amount } = requirement.requiredCourses[k];
+
+          const initialLength = courses.length;
+
+          for (let l = 0; l < courses.length; l++) {
+            const currentCourse = courses[l];
+            const id = currentCourse.courseId || currentCourse.seriesId;
+
+            if (!knownIds.has(id)) {
+              knownIds.add(id);
+            } else {
+              courses.splice(l, 1);
+              l--;
+
+              if (
+                type === "NCourses" &&
+                courses.length === initialLength - amount
+              ) {
+                courses.splice(0, courses.length);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  */
+}
+
+export function groupByUni(reqsList) {
+  const newReqsList = [];
+  const fyIds = new Set();
+
+  for (let i = 0; i < reqsList.length; i++) {
+    const { inputs } = reqsList[i];
+
+    fyIds.add(inputs.fyId);
+  }
+
+  for (const id of fyIds) {
+    const filtered = reqsList.filter((req) => req.inputs.fyId === id);
+
+    newReqsList.push(filtered);
+  }
+
+  return newReqsList;
+}
