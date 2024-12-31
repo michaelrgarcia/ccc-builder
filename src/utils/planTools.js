@@ -50,34 +50,34 @@ export function createInstructions(requiredCourses) {
   }
 }
 
-export function removeDupes(requirements) {
-  const reqsCopy = structuredClone(requirements);
+export function removeDupes(reqsList) {
+  const uniGroups = groupByUni(reqsList);
 
-  for (const uni in reqsCopy) {
+  for (let i = 0; i < uniGroups.length; i++) {
     const knownIds = new Set();
+    const majorReqs = uniGroups[i];
 
-    const majorsForEachUni = reqsCopy[uni];
+    for (let j = 0; j < majorReqs.length; j++) {
+      const { requirements } = majorReqs[j];
 
-    for (let i = 0; i < majorsForEachUni.length; i++) {
-      const majorReqs = majorsForEachUni[i];
+      for (let k = 0; k < requirements.length; k++) {
+        const req = requirements[k];
 
-      for (let j = 0; j < majorReqs.length; j++) {
-        const requirement = majorReqs[j];
-
-        for (let k = 0; k < requirement.requiredCourses.length; k++) {
-          const { courses, type, amount } = requirement.requiredCourses[k];
+        for (let l = 0; l < req.requiredCourses.length; l++) {
+          const { courses, type, amount } = req.requiredCourses[l];
 
           const initialLength = courses.length;
 
-          for (let l = 0; l < courses.length; l++) {
-            const currentCourse = courses[l];
+          for (let m = 0; m < courses.length; m++) {
+            const currentCourse = courses[m];
+
             const id = currentCourse.courseId || currentCourse.seriesId;
 
             if (!knownIds.has(id)) {
               knownIds.add(id);
             } else {
-              courses.splice(l, 1);
-              l--;
+              courses.splice(m, 1);
+              m--;
 
               if (
                 type === "NCourses" &&
@@ -92,7 +92,7 @@ export function removeDupes(requirements) {
     }
   }
 
-  return reqsCopy;
+  return uniGroups.flat();
 }
 
 export function generateCourseGroupKey(courseGroup, groupIndex) {
