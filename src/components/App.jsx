@@ -31,7 +31,7 @@ function App() {
   const [selectedMajors, setSelectedMajors] = useState({});
   const [selectedCCC, setSelectedCCC] = useState({});
 
-  const [requirements, setRequirements] = useState({});
+  const [reqsList, setReqsList] = useState([]);
   const [articulations, setArticulations] = useState({});
 
   useEffect(() => {
@@ -70,67 +70,52 @@ function App() {
   }, [selectedSchools]);
 
   useEffect(() => {
-    async function getRequirements() {
+    async function getReqsList() {
       try {
-        const reqs = {};
         const endpoint = import.meta.env.VITE_BASE_SEARCHER;
 
-        const allPromises = [];
+        const linksBody = selectedSchools.flatMap((school) => {
+          const fyId = school.id;
+          const associatedMajors = selectedMajors[fyId];
 
-        for (let i = 0; i < selectedSchools.length; i++) {
-          const { name, id } = selectedSchools[i];
+          return associatedMajors.map(({ key }) => ({
+            cccId: selectedCCC.id,
+            fyId,
+            yr: academicYear,
+            majorId: `${academicYear}/${selectedCCC.id}/to/${fyId}/Major/${key}`,
+          }));
+        });
 
-          const fyName = name;
-          const fyId = id;
+        const response = await fetch(endpoint, {
+          body: JSON.stringify(linksBody),
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Connection: "keep-alive",
+          },
+        });
 
-          const associatedMajors = selectedMajors[id];
+        if (response.ok) {
+          const newReqsList = await response.json();
 
-          for (let j = 0; j < associatedMajors.length; j++) {
-            const { major, key } = associatedMajors[j];
-
-            const majorId = `${academicYear}/${selectedCCC.id}/to/${fyId}/Major/${key}`;
-
-            const promise = (async () => {
-              const response = await fetch(
-                `${endpoint}/?cccId=${selectedCCC.id}&fyId=${fyId}&yr=${academicYear}&majorId=${majorId}`
-              );
-
-              if (!response.ok) {
-                throw new Error(
-                  `Failed primary search for ${fyName}, ${major}`
-                );
-              }
-
-              const newRequirements = await response.json();
-
-              if (reqs[fyId]) {
-                reqs[fyId] = [...reqs[fyId], newRequirements];
-              } else {
-                reqs[fyId] = [newRequirements];
-              }
-            })();
-
-            allPromises.push(promise);
-          }
+          setReqsList(removeDupes(newReqsList));
         }
-
-        await Promise.all(allPromises);
-
-        setRequirements(removeDupes(reqs));
       } catch (err) {
-        console.error("Failed requirements search: ", err);
+        console.error("Failed reqsList search: ", err);
 
         setError(
-          "Critical error fetching requirements for selected primary community college. Please refresh the page."
+          "Critical error obtaining the list of requirements from each selected university. Please refresh the page."
         );
       }
     }
 
     if (selectedCCC.id) {
-      setRequirements({});
-      getRequirements();
+      setReqsList({});
+      getReqsList();
     }
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
+
+  /*
 
   useEffect(() => {
     async function getArticulations() {
@@ -194,6 +179,8 @@ function App() {
       getArticulations();
     }
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
+
+  */
 
   if (error) {
     return (
@@ -318,7 +305,7 @@ function App() {
       </>
     );
   } else if (currentStage === "primary-cc-select") {
-    const reqsForEachMajor = Object.values(requirements);
+    const amtOfMajors = Object.values(selectedMajors).flat();
     const articsForEachMajor = Object.values(articulations);
 
     return (
@@ -346,8 +333,8 @@ function App() {
             inputId="community-colleges"
           />
           {selectedCCC.name ? (
-            reqsForEachMajor.length === selectedSchools.length &&
-            articsForEachMajor.length === selectedSchools.length ? (
+            reqsList.length === amtOfMajors.length /* &&
+            articsForEachMajor.length === selectedSchools.length */ ? (
               <button
                 type="button"
                 className="next"
@@ -368,6 +355,8 @@ function App() {
       </>
     );
   } else if (currentStage === "primary-cc-search") {
+    const flatMajors = Object.values(selectedMajors).flat();
+
     return (
       <>
         <header>
@@ -385,7 +374,10 @@ function App() {
           </div>
         </header>
         <main>
-          <Plan requirements={requirements} articulations={articulations} />
+          <Plan
+            reqsList={reqsList}
+            majorList={flatMajors} /* articulations={articulations} */
+          />
         </main>
       </>
     );
