@@ -74,7 +74,7 @@ function App() {
       try {
         const endpoint = import.meta.env.VITE_BASE_SEARCHER;
 
-        const linksBody = selectedSchools.flatMap((school) => {
+        const paramsList = selectedSchools.flatMap((school) => {
           const fyId = school.id;
           const associatedMajors = selectedMajors[fyId];
 
@@ -87,7 +87,7 @@ function App() {
         });
 
         const response = await fetch(endpoint, {
-          body: JSON.stringify(linksBody),
+          body: JSON.stringify(paramsList),
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -115,56 +115,37 @@ function App() {
     }
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
 
-  /*
-
   useEffect(() => {
     async function getArticulations() {
       try {
-        const articulations = {};
         const endpoint = import.meta.env.VITE_PRAJWAL_ARTICULATIONS;
 
-        const allPromises = [];
+        const paramsList = selectedSchools.flatMap((school) => {
+          const fyId = school.id;
+          const associatedMajors = selectedMajors[fyId];
 
-        for (let i = 0; i < selectedSchools.length; i++) {
-          const { name, id } = selectedSchools[i];
+          return associatedMajors.map(({ key }) => ({
+            cccId: selectedCCC.id,
+            fyId,
+            yr: academicYear,
+            majorId: `${academicYear}/${selectedCCC.id}/to/${fyId}/Major/${key}`,
+          }));
+        });
 
-          const fyName = name;
-          const fyId = id;
+        const response = await fetch(endpoint, {
+          body: JSON.stringify(paramsList),
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Connection: "keep-alive",
+          },
+        });
 
-          const associatedMajors = selectedMajors[id];
+        if (response.ok) {
+          const newArticulations = await response.json();
 
-          for (let j = 0; j < associatedMajors.length; j++) {
-            const { major, key } = associatedMajors[j];
-
-            const majorId = `${academicYear}/${selectedCCC.id}/to/${fyId}/Major/${key}`;
-
-            const promise = (async () => {
-              const response = await fetch(
-                `${endpoint}/?cccId=${selectedCCC.id}&fyId=${fyId}&yr=${academicYear}&majorId=${majorId}`
-              );
-
-              if (!response.ok) {
-                throw new Error(
-                  `Failed articulation search for ${fyName}, ${major}`
-                );
-              }
-
-              const newRequirements = await response.json();
-
-              if (articulations[fyId]) {
-                articulations[fyId] = [...articulations[fyId], newRequirements];
-              } else {
-                articulations[fyId] = [newRequirements];
-              }
-            })();
-
-            allPromises.push(promise);
-          }
+          setArticulations(newArticulations);
         }
-
-        await Promise.all(allPromises);
-
-        setArticulations(articulations);
       } catch (err) {
         console.error("Failed articulations search: ", err);
 
@@ -175,12 +156,10 @@ function App() {
     }
 
     if (selectedCCC.id) {
-      setArticulations({});
+      setArticulations([]);
       getArticulations();
     }
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
-
-  */
 
   if (error) {
     return (
@@ -376,7 +355,8 @@ function App() {
         <main>
           <Plan
             reqsList={reqsList}
-            majorList={flatMajors} /* articulations={articulations} */
+            majorList={flatMajors}
+            articulations={articulations}
           />
         </main>
       </>
