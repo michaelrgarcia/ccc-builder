@@ -110,7 +110,7 @@ function App() {
     }
 
     if (selectedCCC.id) {
-      setReqsList({});
+      setReqsList([]);
       getReqsList();
     }
   }, [selectedSchools, selectedMajors, selectedCCC.id]);
@@ -333,7 +333,7 @@ function App() {
             inputId="community-colleges"
           />
           {selectedCCC.name ? (
-            reqsList.length === amtOfMajors.length /* &&
+            reqsList.flat().length === amtOfMajors.length /* &&
             articsForEachMajor.length === selectedSchools.length */ ? (
               <button
                 type="button"
