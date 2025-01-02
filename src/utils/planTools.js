@@ -119,50 +119,22 @@ export function generateRequirementKey(requirementObj, index) {
 }
 
 export function findArticulation(course, articulations) {
-  const { courseId } = course;
+  const idToFind = course.courseId || course.seriesId;
 
-  const articulationId = courseId.split("_")[0];
+  const noYearCourseId = idToFind.split("_")[0];
 
-  /*
+  for (let i = 0; i < articulations.length; i++) {
+    const { articulatedCourses } = articulations[i];
 
-  for (const uni in articulations) {
-    const articsForEachUni = articulations[uni];
+    for (let j = 0; j < articulatedCourses.length; j++) {
+      const articulationId =
+        articulatedCourses[j].courseId || articulatedCourses[j].seriesId;
 
-    for (let i = 0; i < articsForEachUni.length; i++) {
-      const majorReqs = majorsForEachUni[i];
-
-      for (let j = 0; j < majorReqs.length; j++) {
-        const requirement = majorReqs[j];
-
-        for (let k = 0; k < requirement.requiredCourses.length; k++) {
-          const { courses, type, amount } = requirement.requiredCourses[k];
-
-          const initialLength = courses.length;
-
-          for (let l = 0; l < courses.length; l++) {
-            const currentCourse = courses[l];
-            const id = currentCourse.courseId || currentCourse.seriesId;
-
-            if (!knownIds.has(id)) {
-              knownIds.add(id);
-            } else {
-              courses.splice(l, 1);
-              l--;
-
-              if (
-                type === "NCourses" &&
-                courses.length === initialLength - amount
-              ) {
-                courses.splice(0, courses.length);
-              }
-            }
-          }
-        }
+      if (noYearCourseId === articulationId) {
+        return articulatedCourses[j];
       }
     }
   }
-
-  */
 }
 
 export function groupByUni(reqsList) {
