@@ -5,6 +5,7 @@ import {
   getUniName,
   groupByUni,
   findArticulation,
+  prePopulatePlan,
 } from "../utils/planTools";
 
 import { useState } from "react";
@@ -199,11 +200,16 @@ function CourseItemGroup({
           <CourseItem
             key={courseKey}
             course={course}
-            isFulfilled={planCourses.some(
-              (planCourse) =>
-                planCourse.courseId === course.courseId ||
-                planCourse.seriesId === course.seriesId
-            )}
+            isFulfilled={planCourses.some((planCourse) => {
+              const idToFind = course.courseId || course.seriesId;
+
+              const noYearCourseId = idToFind.split("_")[0];
+
+              return (
+                Number(planCourse.courseId) === Number(noYearCourseId) ||
+                planCourse.seriesId === noYearCourseId
+              );
+            })}
             articulation={findArticulation(course, articulations)}
             onArticulationSelect={onArticulationSelect}
           />
@@ -336,7 +342,9 @@ UniversityGroup.propTypes = {
 };
 
 function Plan({ reqsList, majorList, articulations }) {
-  const [planCourses, setPlanCourses] = useState([]); // populate with articulatedCourses from articulations
+  const [planCourses, setPlanCourses] = useState(
+    prePopulatePlan(reqsList, articulations)
+  );
 
   const uniGroups = groupByUni(reqsList);
 
@@ -344,6 +352,22 @@ function Plan({ reqsList, majorList, articulations }) {
     <>
       <div className="plan">
         <p className="title">Plan</p>
+        {planCourses.map((articulation, index) => {
+          const { articulationOptions, cccInfo, universityInfo } = articulation;
+
+          // user will be able to select articulationOptions of any length
+          // just render each array + its courses as a separate course in the DOM
+          const articulationInfo = articulationOptions[0][0];
+          const identifier =
+            articulationInfo.seriesTitle ||
+            `${articulationInfo.coursePrefix} ${articulationInfo.courseNumber} - ${articulationInfo.courseTitle}`;
+
+          return (
+            <div key={index} className="ccc-articulation">
+              {identifier}
+            </div>
+          );
+        })}
       </div>
       <div className="university-requirements">
         <p className="title">Requirements</p>
