@@ -124,14 +124,18 @@ export function findArticulation(course, articulations) {
   const noYearCourseId = idToFind.split("_")[0];
 
   for (let i = 0; i < articulations.length; i++) {
-    const { articulatedCourses } = articulations[i];
+    const { articulatedCourses, universityInfo, cccInfo } = articulations[i];
 
     for (let j = 0; j < articulatedCourses.length; j++) {
       const articulationId =
         articulatedCourses[j].courseId || articulatedCourses[j].seriesId;
 
-      if (noYearCourseId === articulationId) {
-        return articulatedCourses[j];
+      if (Number(noYearCourseId) === Number(articulationId)) {
+        return {
+          ...articulatedCourses[j],
+          universityInfo,
+          cccInfo,
+        };
       }
     }
   }
@@ -154,4 +158,37 @@ export function groupByUni(reqsList) {
   }
 
   return newReqsList;
+}
+
+export function prePopulatePlan(reqsList, articulations) {
+  const planCourses = [];
+
+  for (let i = 0; i < reqsList.length; i++) {
+    const { requirements } = reqsList[i];
+
+    for (let j = 0; j < requirements.length; j++) {
+      const req = requirements[j];
+
+      for (let k = 0; k < req.requiredCourses.length; k++) {
+        const { courses } = req.requiredCourses[k];
+
+        for (let l = 0; l < courses.length; l++) {
+          const currentCourse = courses[l];
+          const associatedArticulation = findArticulation(
+            currentCourse,
+            articulations
+          );
+
+          if (
+            associatedArticulation &&
+            associatedArticulation.articulationOptions.length === 1
+          ) {
+            planCourses.push(associatedArticulation);
+          }
+        }
+      }
+    }
+  }
+
+  return planCourses;
 }
