@@ -60,7 +60,8 @@
   display: flex;
   flex-direction: column;
 
-  padding: 15px 10px;
+  padding: 5px;
+  margin-top: 10px;
 }
 
 .requirement > .lettered-group {
@@ -76,6 +77,10 @@
   align-items: center;
 
   gap: 20px;
+}
+
+.group-header:has(.n-course-indicator) {
+  margin-bottom: -5px;
 }
 
 .group-letter {
