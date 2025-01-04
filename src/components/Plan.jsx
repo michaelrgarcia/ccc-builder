@@ -6,9 +6,10 @@ import {
   groupByUni,
   findArticulation,
   prePopulatePlan,
+  existingArticulationMatch,
 } from "../utils/planTools";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import "../styles/Plan.css";
 
@@ -131,7 +132,9 @@ function CourseItem({
           type="button"
           className="dropdown"
           onClick={() => setIsOpen(!isOpen)}
-        />
+        >
+          v
+        </button>
       </div>
       {isOpen ? (
         <ArticulationDropdown
@@ -161,6 +164,11 @@ function CourseItemGroup({
   onArticulationSelect,
 }) {
   const { courses, type, amount } = courseGroup;
+
+  const groupInfo = {
+    type,
+    amount,
+  };
 
   if (courses.length === 0) {
     return null;
@@ -196,21 +204,16 @@ function CourseItemGroup({
 
         const courseKey = courseId || seriesId;
 
+        const articulation = findArticulation(course, articulations);
+
         return (
           <CourseItem
             key={courseKey}
             course={course}
-            isFulfilled={planCourses.some((planCourse) => {
-              const idToFind = course.courseId || course.seriesId;
-
-              const noYearCourseId = idToFind.split("_")[0];
-
-              return (
-                Number(planCourse.courseId) === Number(noYearCourseId) ||
-                planCourse.seriesId === noYearCourseId
-              );
-            })}
-            articulation={findArticulation(course, articulations)}
+            isFulfilled={planCourses.some((planCourse) =>
+              existingArticulationMatch(articulation, planCourse, groupInfo)
+            )}
+            articulation={articulation}
             onArticulationSelect={onArticulationSelect}
           />
         );
@@ -352,22 +355,30 @@ function Plan({ reqsList, majorList, articulations }) {
     <>
       <div className="plan">
         <p className="title">Plan</p>
-        {planCourses.map((articulation, index) => {
-          const { articulationOptions, cccInfo, universityInfo } = articulation;
-
-          // user will be able to select articulationOptions of any length
-          // just render each array + its courses as a separate course in the DOM
-          const articulationInfo = articulationOptions[0][0];
-          const identifier =
-            articulationInfo.seriesTitle ||
-            `${articulationInfo.coursePrefix} ${articulationInfo.courseNumber} - ${articulationInfo.courseTitle}`;
-
-          return (
-            <div key={index} className="ccc-articulation">
-              {identifier}
-            </div>
-          );
-        })}
+        <div className="plan-courses">
+          {planCourses.map((course, index) => {
+            const {
+              courseTitle,
+              seriesTitle,
+              courseNumber,
+              coursePrefix,
+              courseId,
+              articulatesTo,
+              unisThatRequire,
+              cccInfo,
+            } = course;
+            const identifier =
+              seriesTitle || `${coursePrefix} ${courseNumber} - ${courseTitle}`;
+            return (
+              <div key={index} className="ccc-articulation">
+                <p className="course-identifier">{identifier}</p>
+                <button type="button" className="articulation-info">
+                  🛈
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
       <div className="university-requirements">
         <p className="title">Requirements</p>
