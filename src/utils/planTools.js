@@ -107,7 +107,8 @@ export function findArticulation(course, articulations) {
   const noYearCourseId = idToFind.split("_")[0];
 
   for (let i = 0; i < articulations.length; i++) {
-    const { articulatedCourses, universityInfo, cccInfo } = articulations[i];
+    const { articulatedCourses, universityInfo, cccInfo, articulationInfo } =
+      articulations[i];
 
     for (let j = 0; j < articulatedCourses.length; j++) {
       const articulationId =
@@ -116,6 +117,7 @@ export function findArticulation(course, articulations) {
       if (Number(noYearCourseId) === Number(articulationId)) {
         return {
           ...articulatedCourses[j],
+          articulationInfo,
           universityInfo,
           cccInfo,
         };
@@ -143,8 +145,27 @@ export function groupByUni(reqsList) {
   return newReqsList;
 }
 
+export function minimizeCourses(planCourses) {
+  const planCoursesCopy = [...planCourses];
+
+  for (let i = 0; i < planCoursesCopy.length; i++) {
+    if (
+      i < planCoursesCopy.length - 1 &&
+      planCoursesCopy[i].articulatesTo.length <
+        planCoursesCopy[i + 1].articulatesTo.length &&
+      planCoursesCopy[i].articulatesTo.every((course) =>
+        planCoursesCopy[i + 1].includes(course)
+      )
+    ) {
+      planCoursesCopy[i] = planCoursesCopy[i + 1];
+    }
+  }
+
+  return planCoursesCopy;
+}
+
 export function prePopulatePlan(reqsList, articulations) {
-  const planCourses = [];
+  let planCourses = [];
 
   for (let i = 0; i < reqsList.length; i++) {
     const { requirements } = reqsList[i];
@@ -166,7 +187,55 @@ export function prePopulatePlan(reqsList, articulations) {
             associatedArticulation &&
             associatedArticulation.articulationOptions.length === 1
           ) {
-            planCourses.push(associatedArticulation);
+            // make into the planCourse adding function?
+            let fyCourse;
+
+            if (associatedArticulation.articulationType === "Course") {
+              fyCourse = {
+                courseTitle: associatedArticulation.courseTitle,
+                coursePrefix: associatedArticulation.coursePrefix,
+                courseNumber: associatedArticulation.courseNumber,
+                courseId: associatedArticulation.courseId,
+              };
+            } else {
+              fyCourse = {
+                seriesTitle: associatedArticulation.seriesTitle,
+                seriesId: associatedArticulation.seriesId,
+              };
+            }
+
+            const cccCourse = associatedArticulation.articulationOptions[0][0];
+
+            const dupeIndex = planCourses.findIndex(
+              (course) =>
+                Number(course.courseId) === Number(cccCourse.courseId) ||
+                Number(course.seriesId) === Number(cccCourse.seriesId)
+            );
+
+            if (dupeIndex === -1) {
+              planCourses.push({
+                ...cccCourse,
+                articulatesTo: [
+                  {
+                    ...associatedArticulation.articulationInfo,
+                    fyCourse,
+                  },
+                ],
+                unisThatRequire: [associatedArticulation.universityInfo],
+                cccInfo: associatedArticulation.cccInfo,
+              });
+            } else {
+              planCourses[dupeIndex].articulatesTo.push({
+                ...associatedArticulation.articulationInfo,
+                fyCourse,
+              });
+
+              planCourses[dupeIndex].unisThatRequire.push(
+                associatedArticulation.universityInfo
+              );
+            }
+
+            planCourses = minimizeCourses(planCourses);
           }
         }
       }
@@ -174,4 +243,55 @@ export function prePopulatePlan(reqsList, articulations) {
   }
 
   return planCourses;
+}
+
+// rework to handle entire articulationOptions arrays at once
+
+export function existingArticulationMatch(articulation, planCourse, groupInfo) {
+  if (articulation) {
+    //  REFER TO pseudocode in drawer written on paper
+    /*
+    if (groupInfo.type === "AllCourses") {
+
+      for (let i = 0; i < articulation.articulationOptions.length; i++) {
+        const currentOptions = articulation.articulationOptions[i];
+
+        for (let j = 0; j < currentOptions.length; j++) {
+          const currentOption = currentOptions[j];
+
+          if (
+            Number(planCourse.courseId) === Number(currentOption.courseId) ||
+            planCourse.seriesId === currentOption.seriesId
+          ) {
+            return true;
+          }
+        }
+      }
+    } else if (groupInfo.type === "NCourses" && groupInfo.amount) {
+      let reqsSatisfied = 0;
+
+      for (let i = 0; i < articulation.articulationOptions.length; i++) {
+        const currentSet = articulation.articulationOptions[i];
+
+        for (let j = 0; j < currentSet.length; j++) {
+          const currentOption = currentSet[j];
+
+          if (
+            Number(planCourse.courseId) === Number(currentOption.courseId) ||
+            planCourse.seriesId === currentOption.seriesId
+          ) {
+            reqsSatisfied += 1;
+          }
+
+          if (reqsSatisfied === groupInfo.amount) {
+            return true;
+          }
+        }
+      }
+    }
+
+    */
+  }
+
+  return false;
 }
