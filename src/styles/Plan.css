@@ -40,7 +40,8 @@
   margin-bottom: -15px;
 }
 
-.requirement {
+.requirement,
+.plan-courses {
   border: 1px solid;
   border-radius: 8px;
 
@@ -107,12 +108,14 @@
   font-size: 0.8em;
 }
 
-.course-item {
+.course-item,
+.ccc-articulation {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
 
+  font-size: 0.9em;
   text-align: left;
 }
 
@@ -131,11 +134,35 @@
   width: 80px;
 }
 
-.dropdown {
-  background-color: #aaa;
-  mask-image: url(../assets/arrow-down-drop-circle.svg);
+.plan-courses {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 
-  padding: 12px 12px;
   border: 1px solid;
-  border-radius: 50%;
+  border-radius: 8px;
+}
+
+.ccc-articulation {
+  border-bottom: 1px solid;
+
+  padding: 10px 0;
+}
+
+.ccc-articulation:last-child {
+  border-bottom: none;
+}
+
+.articulation-info,
+.dropdown {
+  background-color: #ccc;
+  padding: 3px 8px;
+
+  text-align: center;
+  font-size: 1.2em;
+  line-height: 25px;
+}
+
+.dropdown {
+  padding: 3px 12px;
 }
