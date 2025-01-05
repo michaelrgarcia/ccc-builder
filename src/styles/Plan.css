@@ -163,6 +163,10 @@
   line-height: 25px;
 }
 
+.articulation-info {
+  margin-right: 5px;
+}
+
 .dropdown {
   padding: 3px 12px;
 }
