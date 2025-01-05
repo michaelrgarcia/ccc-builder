@@ -133,7 +133,7 @@ function CourseItem({
           className="dropdown"
           onClick={() => setIsOpen(!isOpen)}
         >
-          v
+          <span>⌄</span>
         </button>
       </div>
       {isOpen ? (
@@ -373,7 +373,7 @@ function Plan({ reqsList, majorList, articulations }) {
               <div key={index} className="ccc-articulation">
                 <p className="course-identifier">{identifier}</p>
                 <button type="button" className="articulation-info">
-                  🛈
+                  ⓘ
                 </button>
               </div>
             );

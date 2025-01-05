@@ -91,7 +91,7 @@
 }
 
 .n-course-indicator {
-  background-color: #aaa;
+  background-color: #dddddd30;
 
   border-radius: 40px;
   padding: 2px 20px;
@@ -100,7 +100,7 @@
 }
 
 .n-credits-indicator {
-  background-color: #aaa;
+  background-color: #dddddd30;
 
   border-radius: 20px;
   padding: 0px 20px;
@@ -155,18 +155,26 @@
 
 .articulation-info,
 .dropdown {
-  background-color: #ccc;
-  padding: 3px 8px;
+  background-color: #bbbbbb2a;
 
-  text-align: center;
+  width: 35px;
+}
+
+.articulation-info {
+  padding: 3px 8px;
   font-size: 1.2em;
   line-height: 25px;
 }
 
-.articulation-info {
-  margin-right: 5px;
+.dropdown {
+  display: flex;
+  justify-content: center;
+  padding: 0 8px;
+  font-size: 2em;
+  line-height: 30px;
+  position: relative;
 }
 
-.dropdown {
-  padding: 3px 12px;
+.dropdown span {
+  transform: translateY(-5px);
 }
