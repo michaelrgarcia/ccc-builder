@@ -342,6 +342,7 @@ function App() {
           <h1>CCCBuilder</h1>
           <p className="user-guide">
             Search for any missing articulations and make any indicated choices.
+            Depending on the courses you add, the plan may change.
           </p>
           <div className="progress-container">
             <label htmlFor="plan-progress">70% done</label>
