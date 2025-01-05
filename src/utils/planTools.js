@@ -148,13 +148,12 @@ export function groupByUni(reqsList) {
 export function minimizeCourses(planCourses) {
   const planCoursesCopy = [...planCourses];
 
-  for (let i = 0; i < planCoursesCopy.length; i++) {
+  for (let i = 0; i < planCoursesCopy.length - 1; i++) {
     if (
-      i < planCoursesCopy.length - 1 &&
       planCoursesCopy[i].articulatesTo.length <
         planCoursesCopy[i + 1].articulatesTo.length &&
       planCoursesCopy[i].articulatesTo.every((course) =>
-        planCoursesCopy[i + 1].includes(course)
+        planCoursesCopy[i + 1].articulatesTo.includes(course)
       )
     ) {
       planCoursesCopy[i] = planCoursesCopy[i + 1];
