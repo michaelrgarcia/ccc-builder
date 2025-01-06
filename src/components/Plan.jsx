@@ -98,15 +98,56 @@ const ArticulationObj = PropTypes.shape({
   nonArticulatedCourses: PropTypes.arrayOf(Course).isRequired,
 });
 
-function ArticulationDropdown({ articulation, onArticulationSelect }) {
+function ArticulationSelectDropdown({ articulation, onArticulationSelect }) {
   if (!articulation) {
     // show search menu
+    return <p>Search another CCC for an articulation?</p>;
   }
 
-  return;
+  return (
+    <div className="articulation-select-dropdown">
+      <p className="subtitle">Select 1 option</p>
+      <div className="articulation-select-options">
+        {articulation.articulationOptions.map((option, index) => {
+          return (
+            <label
+              key={`select-for-${
+                articulation.seriesId || articulation.courseId
+              }-${index}`}
+              className="articulation-select-option"
+            >
+              <input
+                type="radio"
+                name={`radio-for-${
+                  articulation.seriesId || articulation.courseId
+                }`}
+              />
+              <div key={index} className="option-group">
+                {option.map(
+                  ({
+                    courseId,
+                    seriesId,
+                    courseTitle,
+                    seriesTitle,
+                    courseNumber,
+                    coursePrefix,
+                  }) => (
+                    <p key={`articulation-${seriesId || courseId}`}>
+                      {seriesTitle ||
+                        `${coursePrefix} ${courseNumber} - ${courseTitle}`}
+                    </p>
+                  )
+                )}
+              </div>
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
-ArticulationDropdown.propTypes = {
+ArticulationSelectDropdown.propTypes = {
   articulation: Articulation,
   onArticulationSelect: PropTypes.func.isRequired,
 };
@@ -145,7 +186,14 @@ function CourseItem({
           )}
         </button>
       </div>
-      {isOpen ? <p>brenton wood</p> : ""}
+      {isOpen ? (
+        <ArticulationSelectDropdown
+          articulation={articulation}
+          onArticulationSelect={onArticulationSelect}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 }
@@ -346,14 +394,8 @@ UniversityGroup.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
 };
 
-function ArticulationItem({
-  identifier,
-  articulatesTo,
-  cccInfo,
-  removeFromPlan,
-}) {
+function ArticulationItem({ identifier, articulatesTo, cccInfo }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [willRemove, setWillRemove] = useState(false);
 
   return (
     <div className="ccc-articulation">
@@ -372,7 +414,7 @@ function ArticulationItem({
         </button>
       </div>
       {isOpen ? (
-        <div className="articulation-dropdown">
+        <div className="articulation-info-dropdown">
           <p className="subtitle">
             From: <span>{cccInfo.name}</span>
           </p>
@@ -390,35 +432,6 @@ function ArticulationItem({
               );
             })}
           </ul>
-          {willRemove ? (
-            <div className="confirm-remove-course">
-              <p className="confirm">Are you sure?</p>
-              <div className="choice-btns">
-                <button
-                  type="button"
-                  className="do-remove"
-                  onClick={removeFromPlan}
-                >
-                  Yes
-                </button>
-                <button
-                  type="button"
-                  className="dont-remove"
-                  onClick={() => setWillRemove(false)}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              className="remove-course"
-              type="button"
-              onClick={() => setWillRemove(true)}
-            >
-              Remove from plan
-            </button>
-          )}
         </div>
       ) : (
         ""
@@ -450,7 +463,6 @@ ArticulationItem.propTypes = {
     name: PropTypes.string.isRequired,
     code: PropTypes.string,
   }).isRequired,
-  removeFromPlan: PropTypes.func.isRequired,
 };
 
 function Plan({ reqsList, majorList, articulations }) {
@@ -464,36 +476,36 @@ function Plan({ reqsList, majorList, articulations }) {
     <>
       <div className="plan">
         <p className="title">Plan</p>
-        <div className="plan-courses">
-          {planCourses.map((course) => {
-            const {
-              courseTitle,
-              seriesTitle,
-              courseNumber,
-              coursePrefix,
-              courseId,
-              articulatesTo,
-              cccInfo,
-            } = course;
+        {planCourses.length > 0 ? (
+          <div className="plan-courses">
+            {planCourses.map((course) => {
+              const {
+                courseTitle,
+                seriesTitle,
+                courseNumber,
+                coursePrefix,
+                courseId,
+                articulatesTo,
+                cccInfo,
+              } = course;
 
-            const identifier =
-              seriesTitle || `${coursePrefix} ${courseNumber} - ${courseTitle}`;
+              const identifier =
+                seriesTitle ||
+                `${coursePrefix} ${courseNumber} - ${courseTitle}`;
 
-            return (
-              <ArticulationItem
-                key={courseId}
-                identifier={identifier}
-                articulatesTo={articulatesTo}
-                cccInfo={cccInfo}
-                removeFromPlan={() => {
-                  setPlanCourses(
-                    planCourses.filter((course) => course.courseId !== courseId)
-                  );
-                }}
-              />
-            );
-          })}
-        </div>
+              return (
+                <ArticulationItem
+                  key={courseId}
+                  identifier={identifier}
+                  articulatesTo={articulatesTo}
+                  cccInfo={cccInfo}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <p>Courses will appear when choices are made below.</p>
+        )}
       </div>
       <div className="university-requirements">
         <p className="title">Requirements</p>
