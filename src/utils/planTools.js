@@ -220,7 +220,6 @@ export function prePopulatePlan(reqsList, articulations) {
                     fyCourse,
                   },
                 ],
-                unisThatRequire: [associatedArticulation.universityInfo],
                 cccInfo: associatedArticulation.cccInfo,
               });
             } else {
@@ -228,10 +227,6 @@ export function prePopulatePlan(reqsList, articulations) {
                 ...associatedArticulation.articulationInfo,
                 fyCourse,
               });
-
-              planCourses[dupeIndex].unisThatRequire.push(
-                associatedArticulation.universityInfo
-              );
             }
 
             planCourses = minimizeCourses(planCourses);
