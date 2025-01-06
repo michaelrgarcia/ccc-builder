@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 
 import InfoIcon from "../assets/information-variant-circle-outline.svg";
 import FilledInfoIcon from "../assets/information-variant-circle.svg";
+import DownArrow from "../assets/chevron-down.svg";
+import UpArrow from "../assets/chevron-up.svg";
 
 import "../styles/Plan.css";
 
@@ -133,20 +135,17 @@ function CourseItem({
         </div>
         <button
           type="button"
-          className="dropdown"
+          className="articulation-select-toggle"
           onClick={() => setIsOpen(!isOpen)}
         >
-          <span>⌄</span>
+          {isOpen ? (
+            <img src={UpArrow} alt="Toggle Articulation Select" />
+          ) : (
+            <img src={DownArrow} alt="Toggle Articulation Select" />
+          )}
         </button>
       </div>
-      {isOpen ? (
-        <ArticulationDropdown
-          articulation={articulation}
-          onArticulationSelect={onArticulationSelect}
-        />
-      ) : (
-        ""
-      )}
+      {isOpen ? <p>brenton wood</p> : ""}
     </>
   );
 }
@@ -360,23 +359,17 @@ function ArticulationItem({
     <div className="ccc-articulation">
       <div className="articulation-item">
         <p className="course-identifier">{identifier}</p>
-        {isOpen ? (
-          <button
-            type="button"
-            className="articulation-info"
-            onClick={() => setIsOpen(!isOpen)}
-          >
+        <button
+          type="button"
+          className="articulation-info-toggle"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? (
             <img src={FilledInfoIcon} alt="Toggle Info" />
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="articulation-info"
-            onClick={() => setIsOpen(!isOpen)}
-          >
+          ) : (
             <img src={InfoIcon} alt="Toggle Info" />
-          </button>
-        )}
+          )}
+        </button>
       </div>
       {isOpen ? (
         <div className="articulation-dropdown">
