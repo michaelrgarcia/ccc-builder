@@ -141,6 +141,8 @@
 
   border: 1px solid;
   border-radius: 8px;
+
+  padding: 10px 40px;
 }
 
 .ccc-articulation {
@@ -164,20 +166,18 @@
   width: 100%;
 }
 
-.articulation-info,
-.dropdown {
+.articulation-info-toggle,
+.articulation-select-toggle {
+  display: inline-block;
+
   background-color: #bbbbbb2a;
 
   width: 35px;
-}
 
-.articulation-info {
   padding: 0px 8px;
-
-  display: inline-block;
 }
 
-.articulation-info > img {
+.articulation-info-toggle > img {
   filter: invert(92%) sepia(0%) saturate(132%) hue-rotate(156deg)
     brightness(79%) contrast(72%);
 
@@ -186,16 +186,13 @@
   width: 20px;
 }
 
-.dropdown {
-  display: flex;
-  justify-content: center;
-  padding: 0 8px;
-  font-size: 2em;
-  line-height: 30px;
-}
+.articulation-select-toggle > img {
+  filter: invert(92%) sepia(0%) saturate(132%) hue-rotate(156deg)
+    brightness(79%) contrast(72%);
 
-.dropdown span {
-  transform: translateY(-5px);
+  width: 25px;
+  margin-left: -4px;
+  transform: translateY(3px);
 }
 
 .articulation-dropdown {
