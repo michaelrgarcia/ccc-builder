@@ -11,6 +11,9 @@ import {
 
 import { useEffect, useState } from "react";
 
+import InfoIcon from "../assets/information-variant-circle-outline.svg";
+import FilledInfoIcon from "../assets/information-variant-circle.svg";
+
 import "../styles/Plan.css";
 
 const Major = PropTypes.shape({
@@ -344,6 +347,119 @@ UniversityGroup.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
 };
 
+function ArticulationItem({
+  identifier,
+  articulatesTo,
+  cccInfo,
+  removeFromPlan,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [willRemove, setWillRemove] = useState(false);
+
+  return (
+    <div className="ccc-articulation">
+      <div className="articulation-item">
+        <p className="course-identifier">{identifier}</p>
+        {isOpen ? (
+          <button
+            type="button"
+            className="articulation-info"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <img src={FilledInfoIcon} alt="Toggle Info" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="articulation-info"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <img src={InfoIcon} alt="Toggle Info" />
+          </button>
+        )}
+      </div>
+      {isOpen ? (
+        <div className="articulation-dropdown">
+          <p className="subtitle">
+            From: <span>{cccInfo.name}</span>
+          </p>
+          <p className="subtitle">Articulates To</p>
+          <ul>
+            {articulatesTo.map(({ fyCourse, major, majorId }, index) => {
+              const { coursePrefix, courseNumber, courseTitle } = fyCourse;
+              const splitMajorId = majorId.split("/");
+              const fyName = getUniName(splitMajorId[3]);
+
+              return (
+                <li
+                  key={index}
+                >{`${coursePrefix} ${courseNumber} - ${courseTitle} (${fyName}: ${major})`}</li>
+              );
+            })}
+          </ul>
+          {willRemove ? (
+            <div className="confirm-remove-course">
+              <p className="confirm">Are you sure?</p>
+              <div className="choice-btns">
+                <button
+                  type="button"
+                  className="do-remove"
+                  onClick={removeFromPlan}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  className="dont-remove"
+                  onClick={() => setWillRemove(false)}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              className="remove-course"
+              type="button"
+              onClick={() => setWillRemove(true)}
+            >
+              Remove from plan
+            </button>
+          )}
+        </div>
+      ) : (
+        ""
+      )}
+    </div>
+  );
+}
+
+ArticulationItem.propTypes = {
+  identifier: PropTypes.string.isRequired,
+  articulatesTo: PropTypes.arrayOf(
+    PropTypes.shape({
+      term: PropTypes.string,
+      termId: PropTypes.string,
+      major: PropTypes.string.isRequired,
+      majorId: PropTypes.string.isRequired,
+      fyCourse: PropTypes.shape({
+        courseTitle: PropTypes.string,
+        seriesTitle: PropTypes.string,
+        coursePrefix: PropTypes.string,
+        courseNumber: PropTypes.string,
+        courseId: PropTypes.string,
+        seriesId: PropTypes.string,
+      }).isRequired,
+    }).isRequired
+  ).isRequired,
+  cccInfo: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string.isRequired,
+    code: PropTypes.string,
+  }).isRequired,
+  removeFromPlan: PropTypes.func.isRequired,
+};
+
 function Plan({ reqsList, majorList, articulations }) {
   const [planCourses, setPlanCourses] = useState(
     prePopulatePlan(reqsList, articulations)
@@ -364,18 +480,23 @@ function Plan({ reqsList, majorList, articulations }) {
               coursePrefix,
               courseId,
               articulatesTo,
-              unisThatRequire,
               cccInfo,
             } = course;
             const identifier =
               seriesTitle || `${coursePrefix} ${courseNumber} - ${courseTitle}`;
+
             return (
-              <div key={index} className="ccc-articulation">
-                <p className="course-identifier">{identifier}</p>
-                <button type="button" className="articulation-info">
-                  ⓘ
-                </button>
-              </div>
+              <ArticulationItem
+                key={courseId}
+                identifier={identifier}
+                articulatesTo={articulatesTo}
+                cccInfo={cccInfo}
+                removeFromPlan={() => {
+                  setPlanCourses(
+                    planCourses.filter((course) => course.courseId !== courseId)
+                  );
+                }}
+              />
             );
           })}
         </div>
