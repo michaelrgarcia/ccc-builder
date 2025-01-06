@@ -472,7 +472,7 @@ function Plan({ reqsList, majorList, articulations }) {
       <div className="plan">
         <p className="title">Plan</p>
         <div className="plan-courses">
-          {planCourses.map((course, index) => {
+          {planCourses.map((course) => {
             const {
               courseTitle,
               seriesTitle,
@@ -482,6 +482,7 @@ function Plan({ reqsList, majorList, articulations }) {
               articulatesTo,
               cccInfo,
             } = course;
+
             const identifier =
               seriesTitle || `${coursePrefix} ${courseNumber} - ${courseTitle}`;
 
