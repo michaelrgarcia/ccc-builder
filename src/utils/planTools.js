@@ -187,6 +187,8 @@ export function prePopulatePlan(reqsList, articulations) {
             associatedArticulation.articulationOptions.length === 1
           ) {
             // make into the planCourse adding function?
+            // address the one articulationOptions array being more than 1 course long
+            // address berkeley "articulation subject to university course here" (dont add courses with that)
             let fyCourse;
 
             if (associatedArticulation.articulationType === "Course") {
@@ -203,30 +205,42 @@ export function prePopulatePlan(reqsList, articulations) {
               };
             }
 
-            const cccCourse = associatedArticulation.articulationOptions[0][0];
+            for (
+              let i = 0;
+              i < associatedArticulation.articulationOptions[0].length;
+              i++
+            ) {
+              const cccCourse =
+                associatedArticulation.articulationOptions[0][i];
 
-            const dupeIndex = planCourses.findIndex(
-              (course) =>
-                Number(course.courseId) === Number(cccCourse.courseId) ||
-                Number(course.seriesId) === Number(cccCourse.seriesId)
-            );
+              // 376897: special articulationOptions (length 1) case
+              // the courseId of honors discrete math at de anza college
 
-            if (dupeIndex === -1) {
-              planCourses.push({
-                ...cccCourse,
-                articulatesTo: [
-                  {
+              if (Number(cccCourse.courseId) !== 376897) {
+                const dupeIndex = planCourses.findIndex(
+                  (course) =>
+                    Number(course.courseId) === Number(cccCourse.courseId) ||
+                    Number(course.seriesId) === Number(cccCourse.seriesId)
+                );
+
+                if (dupeIndex === -1 && Number(cccCourse.courseId) !== 376897) {
+                  planCourses.push({
+                    ...cccCourse,
+                    articulatesTo: [
+                      {
+                        ...associatedArticulation.articulationInfo,
+                        fyCourse,
+                      },
+                    ],
+                    cccInfo: associatedArticulation.cccInfo,
+                  });
+                } else {
+                  planCourses[dupeIndex].articulatesTo.push({
                     ...associatedArticulation.articulationInfo,
                     fyCourse,
-                  },
-                ],
-                cccInfo: associatedArticulation.cccInfo,
-              });
-            } else {
-              planCourses[dupeIndex].articulatesTo.push({
-                ...associatedArticulation.articulationInfo,
-                fyCourse,
-              });
+                  });
+                }
+              }
             }
 
             planCourses = minimizeCourses(planCourses);
