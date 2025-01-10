@@ -28,11 +28,13 @@ export function getUniName(fyId) {
   }
 }
 
-export function createInstructions(requiredCourses) {
+export function createInstructions(requiredCourses, conjunction) {
+  const lowerConj = conjunction ? conjunction.toLowerCase() : "and";
+
   if (requiredCourses.length < 2) {
     return "";
   } else if (requiredCourses.length === 2) {
-    return "Complete A and B";
+    return `Complete A ${lowerConj} B`;
   } else if (requiredCourses.length > 2) {
     let instructions = "";
 
@@ -47,7 +49,7 @@ export function createInstructions(requiredCourses) {
         } else if (i !== requiredCourses.length - 1) {
           instructions += ` ${progressiveLetter}, `;
         } else {
-          instructions += ` and ${progressiveLetter}`;
+          instructions += ` ${lowerConj} ${progressiveLetter}`;
         }
       }
     }

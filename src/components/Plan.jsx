@@ -110,6 +110,8 @@ function ArticulationSelectDropdown({
     return <p>Search another CCC for an articulation?</p>;
   }
 
+  // include a checkmark icon below the subtitle if isFulfilled
+
   return (
     <div
       className="articulation-select-dropdown"
@@ -332,9 +334,9 @@ function RequirementItem({
   planCourses,
   onArticulationSelect,
 }) {
-  const { requiredCourses } = requirement;
+  const { conjunction, requiredCourses } = requirement;
 
-  const instructions = createInstructions(requiredCourses);
+  const instructions = createInstructions(requiredCourses, conjunction);
 
   if (!requiredCourses.some((group) => group.courses.length > 0)) {
     return null;
