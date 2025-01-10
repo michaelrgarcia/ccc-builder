@@ -6,7 +6,8 @@ import {
   groupByUni,
   findArticulation,
   prePopulatePlan,
-  existingArticulationMatch,
+  matchArticulation,
+  articulationInPlan,
 } from "../utils/planTools";
 
 import { useEffect, useState } from "react";
@@ -98,17 +99,48 @@ const ArticulationObj = PropTypes.shape({
   nonArticulatedCourses: PropTypes.arrayOf(Course).isRequired,
 });
 
-function ArticulationSelectDropdown({ articulation, onArticulationSelect }) {
+function ArticulationSelectDropdown({
+  articulation,
+  planCourses,
+  onArticulationSelect,
+  isFulfilled,
+}) {
   if (!articulation) {
     // show search menu
     return <p>Search another CCC for an articulation?</p>;
   }
 
   return (
-    <div className="articulation-select-dropdown">
-      <p className="subtitle">Select 1 option</p>
+    <div
+      className="articulation-select-dropdown"
+      style={{
+        opacity:
+          isFulfilled && articulation.articulationOptions.length === 1
+            ? 0.3
+            : 1,
+      }}
+    >
+      <p className="subtitle">
+        {isFulfilled && articulation.articulationOptions.length === 1
+          ? `Cannot deselect required course.`
+          : "Select 1 option"}
+      </p>
       <div className="articulation-select-options">
         {articulation.articulationOptions.map((option, index) => {
+          const inPlan = option.every((course) =>
+            planCourses.some((planCourse) =>
+              matchArticulation(course, planCourse)
+            )
+          );
+
+          const daDiscrete = option.some((course) =>
+            planCourses.some(
+              (planCourse) =>
+                Number(course.courseId) === 359214 &&
+                Number(planCourse.courseId) === 359214
+            )
+          );
+
           return (
             <label
               key={`select-for-${
@@ -121,6 +153,9 @@ function ArticulationSelectDropdown({ articulation, onArticulationSelect }) {
                 name={`radio-for-${
                   articulation.seriesId || articulation.courseId
                 }`}
+                checked={inPlan || daDiscrete}
+                readOnly={inPlan || daDiscrete}
+                onChange={onArticulationSelect}
               />
               <div key={index} className="option-group">
                 {option.map(
@@ -149,7 +184,9 @@ function ArticulationSelectDropdown({ articulation, onArticulationSelect }) {
 
 ArticulationSelectDropdown.propTypes = {
   articulation: Articulation,
+  planCourses: PropTypes.array.isRequired,
   onArticulationSelect: PropTypes.func.isRequired,
+  isFulfilled: PropTypes.bool.isRequired,
 };
 
 function CourseItem({
@@ -157,6 +194,7 @@ function CourseItem({
   isFulfilled,
   articulation,
   onArticulationSelect,
+  planCourses,
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -169,7 +207,15 @@ function CourseItem({
 
   return (
     <>
-      <div className="course-item" style={{ opacity: isFulfilled ? 0.5 : 1 }}>
+      <div
+        className="course-item"
+        style={{
+          opacity:
+            isFulfilled && articulation.articulationOptions.length === 1
+              ? 0.3
+              : 1,
+        }}
+      >
         <div className="identifiers">
           <p className="course-identifier">{courseIdentifier}</p>
           <p className="units">{credits} units</p>
@@ -190,6 +236,8 @@ function CourseItem({
         <ArticulationSelectDropdown
           articulation={articulation}
           onArticulationSelect={onArticulationSelect}
+          planCourses={planCourses}
+          isFulfilled={isFulfilled}
         />
       ) : (
         ""
@@ -203,6 +251,7 @@ CourseItem.propTypes = {
   isFulfilled: PropTypes.bool.isRequired,
   articulation: Articulation,
   onArticulationSelect: PropTypes.func.isRequired,
+  planCourses: PropTypes.array.isRequired,
 };
 
 function CourseItemGroup({
@@ -215,10 +264,7 @@ function CourseItemGroup({
 }) {
   const { courses, type, amount } = courseGroup;
 
-  const groupInfo = {
-    type,
-    amount,
-  };
+  // "Requirement fulfilled (checkmark) header"
 
   if (courses.length === 0) {
     return null;
@@ -260,10 +306,9 @@ function CourseItemGroup({
           <CourseItem
             key={courseKey}
             course={course}
-            isFulfilled={planCourses.some((planCourse) =>
-              existingArticulationMatch(articulation, planCourse, groupInfo)
-            )}
+            isFulfilled={articulationInPlan(articulation, planCourses)}
             articulation={articulation}
+            planCourses={planCourses}
             onArticulationSelect={onArticulationSelect}
           />
         );
@@ -421,14 +466,19 @@ function ArticulationItem({ identifier, articulatesTo, cccInfo }) {
           <p className="subtitle">Articulates To</p>
           <ul>
             {articulatesTo.map(({ fyCourse, major, majorId }, index) => {
-              const { coursePrefix, courseNumber, courseTitle } = fyCourse;
+              const { coursePrefix, courseNumber, courseTitle, seriesTitle } =
+                fyCourse;
               const splitMajorId = majorId.split("/");
               const fyName = getUniName(splitMajorId[3]);
 
               return (
-                <li
-                  key={index}
-                >{`${coursePrefix} ${courseNumber} - ${courseTitle} (${fyName}: ${major})`}</li>
+                <li key={index}>
+                  {`${
+                    seriesTitle ||
+                    `${coursePrefix} ${courseNumber} - ${courseTitle}`
+                  } 
+                     (${fyName}: ${major})`}
+                </li>
               );
             })}
           </ul>
@@ -517,7 +567,8 @@ function Plan({ reqsList, majorList, articulations }) {
             articulations={articulations}
             planCourses={planCourses}
             onArticulationSelect={(course) => {
-              setPlanCourses([...planCourses, course]);
+              console.log("not yet shooting star");
+              // setPlanCourses([...planCourses, course]);
             }}
           />
         ))}
