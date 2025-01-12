@@ -180,23 +180,41 @@ export function articulationInPlan(articulation, planCourses) {
 }
 
 function minimizeCourses(planCourses) {
-  const planCoursesCopy = [...planCourses];
+  const getArticulationIds = (articulations) =>
+    articulations
+      .map((art) => Number(art.fyCourse.courseId) || art.fyCourse.seriesId)
+      .sort();
 
-  // keep track of all courses with the same articulatesTo
+  const bestCourses = [];
 
-  for (let i = 0; i < planCoursesCopy.length - 1; i++) {
-    if (
-      planCoursesCopy[i].articulatesTo.length <
-        planCoursesCopy[i + 1].articulatesTo.length &&
-      planCoursesCopy[i].articulatesTo.every((course) =>
-        planCoursesCopy[i + 1].articulatesTo.includes(course)
-      )
-    ) {
-      planCoursesCopy.splice(i, 1);
+  for (const course of planCourses) {
+    const ids = getArticulationIds(course.articulatesTo);
+
+    const existingIndex = bestCourses.findIndex((bestCourse) => {
+      const existingIds = getArticulationIds(bestCourse.articulatesTo);
+
+      return (
+        existingIds.length === ids.length &&
+        existingIds.every((id, index) => id === ids[index])
+      );
+    });
+
+    if (existingIndex === -1) {
+      bestCourses.push(course);
+    } else {
+      const existingCourse = bestCourses[existingIndex];
+      const existingIds = getArticulationIds(existingCourse.articulatesTo);
+
+      if (
+        ids.length > existingIds.length &&
+        existingIds.every((id) => ids.includes(id))
+      ) {
+        bestCourses[existingIndex] = course;
+      }
     }
   }
 
-  return planCoursesCopy;
+  return bestCourses;
 }
 
 export function updatePlanCourses(planCourses, option, articulation, fyCourse) {
@@ -257,12 +275,12 @@ function selectArticulations(courseGroup, planCourses, articulations) {
     for (const option of articulation.articulationOptions) {
       if (amount && fulfilled >= amount) break;
 
-      let wasUpdated = false;
+      let selected = false;
 
       if (!amount && articulation.articulationOptions.length === 1) {
         updatePlanCourses(planCourses, option, articulation, fyCourse);
 
-        wasUpdated = true;
+        selected = true;
       } else if (amount && articulation.articulationOptions.length === 1) {
         const alreadyInPlan = option.some((cccCourse) =>
           planCourses.some((planCourse) =>
@@ -274,11 +292,11 @@ function selectArticulations(courseGroup, planCourses, articulations) {
           updatePlanCourses(planCourses, option, articulation, fyCourse);
 
           fulfilled += type === "NCourses" ? 1 : course.credits;
-          wasUpdated = true;
+          selected = true;
         }
       }
 
-      if (!wasUpdated) {
+      if (!selected) {
         const allCoursesInPlan = option.every((cccCourse) =>
           planCourses.some((planCourse) =>
             matchArticulation(planCourse, cccCourse)
