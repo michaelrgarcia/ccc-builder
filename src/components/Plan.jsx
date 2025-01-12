@@ -219,7 +219,7 @@ function CourseItem({
       >
         <div className="identifiers">
           <p className="course-identifier">{courseIdentifier}</p>
-          <p className="units">{credits} units</p>
+          <p className="units">{Number(credits)} units</p>
         </div>
         <button
           type="button"
@@ -279,7 +279,7 @@ function CourseItemGroup({
     const articulation = findArticulation(course, articulations);
 
     if (articulationInPlan(articulation, planCourses)) {
-      fulfillmentCount += type === "NCourses" ? 1 : course.credits;
+      fulfillmentCount += type === "NCourses" ? 1 : Number(course.credits);
     }
   }
 
