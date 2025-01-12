@@ -8,6 +8,7 @@ import {
   prePopulatePlan,
   matchArticulation,
   articulationInPlan,
+  requirementCompleted,
 } from "../utils/planTools";
 
 import { useEffect, useState } from "react";
@@ -106,7 +107,7 @@ function ArticulationSelectDropdown({
   isFulfilled,
   requirementFulfilled,
 }) {
-  if (!articulation) {
+  if (!articulation && !requirementFulfilled) {
     // show search menu
     return <p>Search another CCC for an articulation?</p>;
   }
@@ -352,6 +353,11 @@ function RequirementItem({
   const { conjunction, requiredCourses } = requirement;
 
   const instructions = createInstructions(requiredCourses, conjunction);
+  const completed = requirementCompleted(
+    requirement,
+    articulations,
+    planCourses
+  );
 
   if (!requiredCourses.some((group) => group.courses.length > 0)) {
     return null;
@@ -359,7 +365,13 @@ function RequirementItem({
 
   return (
     <div className="requirement">
-      {instructions ? <p className="instructions">{instructions}</p> : ""}
+      {instructions ? (
+        <p className="instructions">
+          {instructions} {completed ? " ✅" : " ⚠️"}
+        </p>
+      ) : (
+        ""
+      )}
       {requiredCourses.map((courseGroup, index) => (
         <CourseItemGroup
           key={index}
