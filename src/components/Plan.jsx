@@ -324,7 +324,7 @@ function CourseItemGroup({
             key={courseKey}
             course={course}
             isFulfilled={articulationInPlan(articulation, planCourses)}
-            requirementFulfilled={fulfillmentCount === amount}
+            requirementFulfilled={fulfillmentCount >= amount}
             articulation={articulation}
             planCourses={planCourses}
             onArticulationSelect={onArticulationSelect}
