@@ -293,7 +293,7 @@ function CourseItemGroup({
           {type === "NCourses" ? (
             <p className="n-course-indicator">
               Select {amount} from the following
-              {fulfillmentCount === amount ? " ✅" : " ⚠️"}
+              {fulfillmentCount >= amount ? " ✅" : " ⚠️"}
             </p>
           ) : type === "NCredits" ? (
             <div className="n-credits-indicator">
@@ -302,7 +302,7 @@ function CourseItemGroup({
               </p>
               <p className="credits-selected">
                 ({fulfillmentCount} units selected)
-                {fulfillmentCount === amount ? " ✅" : " ⚠️"}
+                {fulfillmentCount >= amount ? " ✅" : " ⚠️"}
               </p>
             </div>
           ) : (
