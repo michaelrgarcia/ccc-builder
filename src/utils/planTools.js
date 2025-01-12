@@ -170,7 +170,7 @@ export function articulationInPlan(articulation, planCourses) {
     if (
       currentOption.every((course) =>
         planCourses.some((planCourse) => matchArticulation(course, planCourse))
-      ) 
+      )
     ) {
       return true;
     }
@@ -257,8 +257,12 @@ function selectArticulations(courseGroup, planCourses, articulations) {
     for (const option of articulation.articulationOptions) {
       if (amount && fulfilled >= amount) break;
 
+      let wasUpdated = false;
+
       if (!amount && articulation.articulationOptions.length === 1) {
         updatePlanCourses(planCourses, option, articulation, fyCourse);
+
+        wasUpdated = true;
       } else if (amount && articulation.articulationOptions.length === 1) {
         const alreadyInPlan = option.some((cccCourse) =>
           planCourses.some((planCourse) =>
@@ -270,18 +274,21 @@ function selectArticulations(courseGroup, planCourses, articulations) {
           updatePlanCourses(planCourses, option, articulation, fyCourse);
 
           fulfilled += type === "NCourses" ? 1 : course.credits;
+          wasUpdated = true;
         }
       }
 
-      const allCoursesInPlan = option.every((cccCourse) =>
-        planCourses.some((planCourse) =>
-          matchArticulation(planCourse, cccCourse)
-        )
-      );
+      if (!wasUpdated) {
+        const allCoursesInPlan = option.every((cccCourse) =>
+          planCourses.some((planCourse) =>
+            matchArticulation(planCourse, cccCourse)
+          )
+        );
 
-      if (allCoursesInPlan) {
-        updatePlanCourses(planCourses, option, articulation, fyCourse);
-        fulfilled += type === "NCourses" ? 1 : course.credits;
+        if (allCoursesInPlan) {
+          updatePlanCourses(planCourses, option, articulation, fyCourse);
+          fulfilled += type === "NCourses" ? 1 : course.credits;
+        }
       }
     }
   }
