@@ -234,73 +234,133 @@ export function updatePlanCourses(planCourses, option, articulation, fyCourse) {
   return minimizeCourses(planCourses);
 }
 
+function selectArticulations(courseGroup, planCourses, articulations) {
+  const { courses, type, amount } = courseGroup;
+
+  let fulfilled = 0;
+
+  for (const course of courses) {
+    if (amount && fulfilled >= amount) break;
+
+    const articulation = findArticulation(course, articulations);
+
+    if (!articulation) continue;
+
+    const fyCourse =
+      articulation.articulationType === "Course"
+        ? {
+            courseTitle: articulation.courseTitle,
+            coursePrefix: articulation.coursePrefix,
+            courseNumber: articulation.courseNumber,
+            courseId: articulation.courseId,
+          }
+        : {
+            seriesTitle: articulation.seriesTitle,
+            seriesId: articulation.seriesId,
+          };
+
+    for (const option of articulation.articulationOptions) {
+      if (amount && fulfilled >= amount) break;
+
+      if (!amount && articulation.articulationOptions.length === 1) {
+        updatePlanCourses(planCourses, option, articulation, fyCourse);
+      } else if (amount && articulation.articulationOptions.length === 1) {
+        const alreadyInPlan = option.some((cccCourse) =>
+          planCourses.some((planCourse) =>
+            matchArticulation(planCourse, cccCourse)
+          )
+        );
+
+        if (alreadyInPlan) {
+          updatePlanCourses(planCourses, option, articulation, fyCourse);
+
+          fulfilled += type === "NCourses" ? 1 : course.credits;
+        }
+      }
+
+      const allCoursesInPlan = option.every((cccCourse) =>
+        planCourses.some((planCourse) =>
+          matchArticulation(planCourse, cccCourse)
+        )
+      );
+
+      if (allCoursesInPlan) {
+        updatePlanCourses(planCourses, option, articulation, fyCourse);
+        fulfilled += type === "NCourses" ? 1 : course.credits;
+      }
+    }
+  }
+}
+
 export function prePopulatePlan(reqsList, articulations) {
   let planCourses = [];
 
   for (const reqs of reqsList) {
     for (const req of reqs.requirements) {
-      for (const courseGroup of req.requiredCourses) {
-        const { courses, type, amount } = courseGroup;
+      const { conjunction, requiredCourses } = req;
 
-        let fulfilled = 0;
+      if (conjunction === "Or") {
+        let shortestGroup = requiredCourses[0];
 
-        for (const course of courses) {
-          if (amount && fulfilled >= amount) break;
+        for (let i = 0; i < requiredCourses.length; i++) {
+          const currentGroup = requiredCourses[i];
 
-          const articulation = findArticulation(course, articulations);
-
-          if (!articulation) continue;
-
-          const fyCourse =
-            articulation.articulationType === "Course"
-              ? {
-                  courseTitle: articulation.courseTitle,
-                  coursePrefix: articulation.coursePrefix,
-                  courseNumber: articulation.courseNumber,
-                  courseId: articulation.courseId,
-                }
-              : {
-                  seriesTitle: articulation.seriesTitle,
-                  seriesId: articulation.seriesId,
-                };
-
-          for (const option of articulation.articulationOptions) {
-            if (amount && fulfilled >= amount) break;
-
-            if (!amount && articulation.articulationOptions.length === 1) {
-              updatePlanCourses(planCourses, option, articulation, fyCourse);
-            } else if (
-              amount &&
-              articulation.articulationOptions.length === 1
-            ) {
-              const alreadyInPlan = option.some((cccCourse) =>
-                planCourses.some((planCourse) =>
-                  matchArticulation(planCourse, cccCourse)
-                )
-              );
-
-              if (alreadyInPlan) {
-                updatePlanCourses(planCourses, option, articulation, fyCourse);
-
-                fulfilled += type === "NCourses" ? 1 : course.credits;
-              }
-            }
-
-            const allCoursesPresent = option.every((cccCourse) =>
-              planCourses.some((planCourse) =>
-                matchArticulation(planCourse, cccCourse)
-              )
-            );
-
-            if (allCoursesPresent) {
-              updatePlanCourses(planCourses, option, articulation, fyCourse);
-              fulfilled += type === "NCourses" ? 1 : course.credits;
-            }
+          if (currentGroup.courses.length < shortestGroup.courses.length) {
+            shortestGroup = currentGroup;
           }
+        }
+
+        selectArticulations(shortestGroup, planCourses, articulations);
+      } else {
+        for (const courseGroup of requiredCourses) {
+          selectArticulations(courseGroup, planCourses, articulations);
         }
       }
     }
   }
 
   return planCourses;
+}
+
+export function requirementCompleted(requirement, articulations, planCourses) {
+  const { conjunction, requiredCourses } = requirement;
+
+  let courseGroupsFinished = 0;
+
+  for (let i = 0; i < requiredCourses.length; i++) {
+    const { courses, amount, type } = requiredCourses[i];
+
+    let fulfilled = 0;
+
+    for (let j = 0; j < courses.length; j++) {
+      const course = courses[j];
+
+      const articulation = findArticulation(course, articulations);
+
+      if (!articulation) continue;
+
+      for (const option of articulation.articulationOptions) {
+        const inPlan = option.every((cccCourse) =>
+          planCourses.some((planCourse) =>
+            matchArticulation(planCourse, cccCourse)
+          )
+        );
+
+        if (inPlan) {
+          fulfilled +=
+            type === "NCourses" || type == "AllCourses" ? 1 : course.credits;
+        }
+      }
+    }
+
+    if (fulfilled === amount || fulfilled === courses.length) {
+      courseGroupsFinished += 1;
+    }
+  }
+
+  if (conjunction === "Or") {
+    return courseGroupsFinished === 1;
+  } else {
+    return courseGroupsFinished === requiredCourses.length;
+  }
 }
