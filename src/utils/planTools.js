@@ -170,12 +170,7 @@ export function articulationInPlan(articulation, planCourses) {
     if (
       currentOption.every((course) =>
         planCourses.some((planCourse) => matchArticulation(course, planCourse))
-      ) ||
-      planCourses.some(
-        (planCourse) =>
-          Number(planCourse.courseId) === 359214 &&
-          Number(currentOption[0].courseId) === 359214
-      )
+      ) 
     ) {
       return true;
     }
