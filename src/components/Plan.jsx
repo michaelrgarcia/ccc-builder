@@ -9,6 +9,7 @@ import {
   matchArticulation,
   articulationInPlan,
   requirementCompleted,
+  updatePlanCourses,
 } from "../utils/planTools";
 
 import { useEffect, useState } from "react";
@@ -140,6 +141,19 @@ function ArticulationSelectDropdown({
             )
           );
 
+          const fyCourse =
+            articulation.articulationType === "Course"
+              ? {
+                  courseTitle: articulation.courseTitle,
+                  coursePrefix: articulation.coursePrefix,
+                  courseNumber: articulation.courseNumber,
+                  courseId: articulation.courseId,
+                }
+              : {
+                  seriesTitle: articulation.seriesTitle,
+                  seriesId: articulation.seriesId,
+                };
+
           return (
             <label
               key={`select-for-${
@@ -154,7 +168,14 @@ function ArticulationSelectDropdown({
                 }`}
                 checked={inPlan}
                 readOnly={requirementFulfilled}
-                onChange={onArticulationSelect}
+                onChange={() =>
+                  onArticulationSelect(
+                    [...planCourses],
+                    option,
+                    articulation,
+                    fyCourse
+                  )
+                }
               />
               <div key={index} className="option-group">
                 {option.map(
@@ -595,9 +616,20 @@ function Plan({ reqsList, majorList, articulations }) {
             majorList={majorList}
             articulations={articulations}
             planCourses={planCourses}
-            onArticulationSelect={(course) => {
-              console.log("not yet shooting star");
-              // setPlanCourses([...planCourses, course]);
+            onArticulationSelect={(
+              planCoursesCopy,
+              option,
+              articulation,
+              fyCourse
+            ) => {
+              updatePlanCourses(
+                planCoursesCopy,
+                option,
+                articulation,
+                fyCourse
+              );
+
+              setPlanCourses(planCoursesCopy);
             }}
           />
         ))}
