@@ -184,8 +184,10 @@ export function articulationInPlan(articulation, planCourses) {
   return false;
 }
 
-export function minimizeCourses(planCourses) {
+function minimizeCourses(planCourses) {
   const planCoursesCopy = [...planCourses];
+
+  // keep track of all courses with the same articulatesTo
 
   for (let i = 0; i < planCoursesCopy.length - 1; i++) {
     if (
@@ -202,87 +204,88 @@ export function minimizeCourses(planCourses) {
   return planCoursesCopy;
 }
 
-export function prePopulatePlan(reqsList, articulations) {
-  let planCourses = [];
+export function updatePlanCourses(planCourses, option, articulation, fyCourse) {
+  // MUTATES PLANCOURSES
 
-  // single option
-  for (const reqs of reqsList) {
-    for (const req of reqs.requirements) {
-      for (const courseGroup of req.requiredCourses) {
-        for (const course of courseGroup.courses) {
-          const associatedArticulation = findArticulation(
-            course,
-            articulations
-          );
+  for (const cccCourse of option) {
+    const dupeIndex = planCourses.findIndex((course) =>
+      matchArticulation(course, cccCourse)
+    );
 
-          if (!associatedArticulation) continue;
-
-          if (associatedArticulation.articulationOptions.length === 1) {
-            let fyCourse;
-
-            if (associatedArticulation.articulationType === "Course") {
-              fyCourse = {
-                courseTitle: associatedArticulation.courseTitle,
-                coursePrefix: associatedArticulation.coursePrefix,
-                courseNumber: associatedArticulation.courseNumber,
-                courseId: associatedArticulation.courseId,
-              };
-            } else {
-              fyCourse = {
-                seriesTitle: associatedArticulation.seriesTitle,
-                seriesId: associatedArticulation.seriesId,
-              };
-            }
-
-            for (const cccCourse of associatedArticulation
-              .articulationOptions[0]) {
-              if (Number(cccCourse.courseId) === 376897) continue;
-
-              const dupeIndex = planCourses.findIndex((course) =>
-                matchArticulation(course, cccCourse)
-              );
-
-              if (dupeIndex === -1) {
-                planCourses.push({
-                  ...cccCourse,
-                  articulatesTo: [
-                    {
-                      ...associatedArticulation.articulationInfo,
-                      fyCourse,
-                    },
-                  ],
-                  cccInfo: associatedArticulation.cccInfo,
-                });
-              } else {
-                planCourses[dupeIndex].articulatesTo.push({
-                  ...associatedArticulation.articulationInfo,
-                  fyCourse,
-                });
-              }
-            }
-          }
-        }
-      }
+    if (dupeIndex === -1) {
+      planCourses.push({
+        ...cccCourse,
+        articulatesTo: [
+          {
+            ...articulation.articulationInfo,
+            fyCourse,
+          },
+        ],
+        cccInfo: articulation.cccInfo,
+      });
+    } else {
+      planCourses[dupeIndex].articulatesTo.push({
+        ...articulation.articulationInfo,
+        fyCourse,
+      });
     }
   }
 
-  // existing courses
+  return minimizeCourses(planCourses);
+}
+
+export function prePopulatePlan(reqsList, articulations) {
+  let planCourses = [];
+
   for (const reqs of reqsList) {
     for (const req of reqs.requirements) {
       for (const courseGroup of req.requiredCourses) {
-        for (const course of courseGroup.courses) {
-          const associatedArticulation = findArticulation(
-            course,
-            articulations
-          );
+        const { courses, type, amount } = courseGroup;
 
-          if (
-            !associatedArticulation ||
-            associatedArticulation.articulationOptions.length === 1
-          )
-            continue;
+        let fulfilled = 0;
 
-          for (const option of associatedArticulation.articulationOptions) {
+        for (const course of courses) {
+          if (amount && fulfilled >= amount) break;
+
+          const articulation = findArticulation(course, articulations);
+
+          if (!articulation) continue;
+
+          const fyCourse =
+            articulation.articulationType === "Course"
+              ? {
+                  courseTitle: articulation.courseTitle,
+                  coursePrefix: articulation.coursePrefix,
+                  courseNumber: articulation.courseNumber,
+                  courseId: articulation.courseId,
+                }
+              : {
+                  seriesTitle: articulation.seriesTitle,
+                  seriesId: articulation.seriesId,
+                };
+
+          for (const option of articulation.articulationOptions) {
+            if (amount && fulfilled >= amount) break;
+
+            if (!amount && articulation.articulationOptions.length === 1) {
+              updatePlanCourses(planCourses, option, articulation, fyCourse);
+            } else if (
+              amount &&
+              articulation.articulationOptions.length === 1
+            ) {
+              const alreadyInPlan = option.some((cccCourse) =>
+                planCourses.some((planCourse) =>
+                  matchArticulation(planCourse, cccCourse)
+                )
+              );
+
+              if (alreadyInPlan) {
+                updatePlanCourses(planCourses, option, articulation, fyCourse);
+
+                fulfilled += type === "NCourses" ? 1 : course.credits;
+              }
+            }
+
             const allCoursesPresent = option.every((cccCourse) =>
               planCourses.some((planCourse) =>
                 matchArticulation(planCourse, cccCourse)
@@ -290,31 +293,8 @@ export function prePopulatePlan(reqsList, articulations) {
             );
 
             if (allCoursesPresent) {
-              const fyCourse =
-                associatedArticulation.articulationType === "Course"
-                  ? {
-                      courseTitle: associatedArticulation.courseTitle,
-                      coursePrefix: associatedArticulation.coursePrefix,
-                      courseNumber: associatedArticulation.courseNumber,
-                      courseId: associatedArticulation.courseId,
-                    }
-                  : {
-                      seriesTitle: associatedArticulation.seriesTitle,
-                      seriesId: associatedArticulation.seriesId,
-                    };
-
-              for (const cccCourse of option) {
-                const courseIndex = planCourses.findIndex((planCourse) =>
-                  matchArticulation(planCourse, cccCourse)
-                );
-
-                if (courseIndex !== -1) {
-                  planCourses[courseIndex].articulatesTo.push({
-                    ...associatedArticulation.articulationInfo,
-                    fyCourse,
-                  });
-                }
-              }
+              updatePlanCourses(planCourses, option, articulation, fyCourse);
+              fulfilled += type === "NCourses" ? 1 : course.credits;
             }
           }
         }
@@ -322,5 +302,5 @@ export function prePopulatePlan(reqsList, articulations) {
     }
   }
 
-  return minimizeCourses(planCourses);
+  return planCourses;
 }
