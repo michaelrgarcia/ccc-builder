@@ -104,6 +104,7 @@ function ArticulationSelectDropdown({
   planCourses,
   onArticulationSelect,
   isFulfilled,
+  requirementFulfilled,
 }) {
   if (!articulation) {
     // show search menu
@@ -117,7 +118,8 @@ function ArticulationSelectDropdown({
       className="articulation-select-dropdown"
       style={{
         opacity:
-          isFulfilled && articulation.articulationOptions.length === 1
+          (isFulfilled && articulation.articulationOptions.length === 1) ||
+          requirementFulfilled
             ? 0.3
             : 1,
       }}
@@ -125,6 +127,8 @@ function ArticulationSelectDropdown({
       <p className="subtitle">
         {isFulfilled && articulation.articulationOptions.length === 1
           ? `Cannot deselect required course.`
+          : requirementFulfilled
+          ? "Requirement fulfilled."
           : "Select 1 option"}
       </p>
       <div className="articulation-select-options">
@@ -132,14 +136,6 @@ function ArticulationSelectDropdown({
           const inPlan = option.every((course) =>
             planCourses.some((planCourse) =>
               matchArticulation(course, planCourse)
-            )
-          );
-
-          const daDiscrete = option.some((course) =>
-            planCourses.some(
-              (planCourse) =>
-                Number(course.courseId) === 359214 &&
-                Number(planCourse.courseId) === 359214
             )
           );
 
@@ -155,8 +151,8 @@ function ArticulationSelectDropdown({
                 name={`radio-for-${
                   articulation.seriesId || articulation.courseId
                 }`}
-                checked={inPlan || daDiscrete}
-                readOnly={inPlan || daDiscrete}
+                checked={inPlan}
+                readOnly={requirementFulfilled}
                 onChange={onArticulationSelect}
               />
               <div key={index} className="option-group">
@@ -189,11 +185,13 @@ ArticulationSelectDropdown.propTypes = {
   planCourses: PropTypes.array.isRequired,
   onArticulationSelect: PropTypes.func.isRequired,
   isFulfilled: PropTypes.bool.isRequired,
+  requirementFulfilled: PropTypes.bool.isRequired,
 };
 
 function CourseItem({
   course,
   isFulfilled,
+  requirementFulfilled,
   articulation,
   onArticulationSelect,
   planCourses,
@@ -240,6 +238,7 @@ function CourseItem({
           onArticulationSelect={onArticulationSelect}
           planCourses={planCourses}
           isFulfilled={isFulfilled}
+          requirementFulfilled={requirementFulfilled}
         />
       ) : (
         ""
@@ -251,6 +250,7 @@ function CourseItem({
 CourseItem.propTypes = {
   course: Course.isRequired,
   isFulfilled: PropTypes.bool.isRequired,
+  requirementFulfilled: PropTypes.bool.isRequired,
   articulation: Articulation,
   onArticulationSelect: PropTypes.func.isRequired,
   planCourses: PropTypes.array.isRequired,
@@ -266,10 +266,20 @@ function CourseItemGroup({
 }) {
   const { courses, type, amount } = courseGroup;
 
-  // "Requirement fulfilled (checkmark) header"
-
   if (courses.length === 0) {
     return null;
+  }
+
+  let fulfillmentCount = 0;
+
+  for (let i = 0; i < courses.length; i++) {
+    const course = courses[i];
+
+    const articulation = findArticulation(course, articulations);
+
+    if (articulationInPlan(articulation, planCourses)) {
+      fulfillmentCount += type === "NCourses" ? 1 : course.credits;
+    }
   }
 
   return (
@@ -282,13 +292,17 @@ function CourseItemGroup({
           {type === "NCourses" ? (
             <p className="n-course-indicator">
               Select {amount} from the following
+              {fulfillmentCount === amount ? " ✅" : " ⚠️"}
             </p>
           ) : type === "NCredits" ? (
             <div className="n-credits-indicator">
               <p className="n-credits">
                 Select {amount} units from the following
               </p>
-              <p className="credits-selected">(0 units selected)</p>
+              <p className="credits-selected">
+                ({fulfillmentCount} units selected)
+                {fulfillmentCount === amount ? " ✅" : " ⚠️"}
+              </p>
             </div>
           ) : (
             ""
@@ -309,6 +323,7 @@ function CourseItemGroup({
             key={courseKey}
             course={course}
             isFulfilled={articulationInPlan(articulation, planCourses)}
+            requirementFulfilled={fulfillmentCount === amount}
             articulation={articulation}
             planCourses={planCourses}
             onArticulationSelect={onArticulationSelect}
