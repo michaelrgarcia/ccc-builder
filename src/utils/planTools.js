@@ -45,7 +45,7 @@ export function createInstructions(requiredCourses, conjunction) {
         const progressiveLetter = String.fromCharCode(i + 1 + 64);
 
         if (i === 0) {
-          instructions = "Complete";
+          instructions = "Complete A,";
         } else if (i !== requiredCourses.length - 1) {
           instructions += ` ${progressiveLetter}, `;
         } else {
