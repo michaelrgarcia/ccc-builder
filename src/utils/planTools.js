@@ -237,10 +237,20 @@ export function updatePlanCourses(planCourses, option, articulation, fyCourse) {
         cccInfo: articulation.cccInfo,
       });
     } else {
-      planCourses[dupeIndex].articulatesTo.push({
-        ...articulation.articulationInfo,
-        fyCourse,
-      });
+      const existingCourse = planCourses[dupeIndex];
+
+      const alreadyArticulated = existingCourse.articulatesTo.some(
+        (entry) =>
+          Number(entry.fyCourse.courseId) === Number(fyCourse.courseId) &&
+          entry.fyCourse.seriesId === fyCourse.seriesId
+      );
+
+      if (!alreadyArticulated) {
+        existingCourse.articulatesTo.push({
+          ...articulation.articulationInfo,
+          fyCourse,
+        });
+      }
     }
   }
 
@@ -312,23 +322,15 @@ function selectArticulations(courseGroup, planCourses, articulations) {
   }
 }
 
-export function prePopulatePlan(reqsList, articulations) {
-  let planCourses = [];
-
+export function populatePlan(reqsList, articulations, planCourses) {
   for (const reqs of reqsList) {
     for (const req of reqs.requirements) {
       const { conjunction, requiredCourses } = req;
 
       if (conjunction === "Or") {
-        let shortestGroup = requiredCourses[0];
-
-        for (let i = 0; i < requiredCourses.length; i++) {
-          const currentGroup = requiredCourses[i];
-
-          if (currentGroup.courses.length < shortestGroup.courses.length) {
-            shortestGroup = currentGroup;
-          }
-        }
+        const shortestGroup = requiredCourses.reduce((shortest, group) =>
+          group.courses.length < shortest.courses.length ? group : shortest
+        );
 
         selectArticulations(shortestGroup, planCourses, articulations);
       } else {

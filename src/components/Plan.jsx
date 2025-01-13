@@ -5,11 +5,11 @@ import {
   getUniName,
   groupByUni,
   findArticulation,
-  prePopulatePlan,
   matchArticulation,
   articulationInPlan,
   requirementCompleted,
   updatePlanCourses,
+  populatePlan,
 } from "../utils/planTools";
 
 import { useEffect, useState } from "react";
@@ -108,7 +108,7 @@ function ArticulationSelectDropdown({
   isFulfilled,
   requirementFulfilled,
 }) {
-  if (!articulation && !requirementFulfilled) {
+  if (!articulation) {
     // show search menu
     return <p>Search another CCC for an articulation?</p>;
   }
@@ -170,7 +170,7 @@ function ArticulationSelectDropdown({
                 readOnly={requirementFulfilled}
                 onChange={() =>
                   onArticulationSelect(
-                    [...planCourses],
+                    JSON.parse(JSON.stringify(planCourses)),
                     option,
                     articulation,
                     fyCourse
@@ -239,7 +239,16 @@ function CourseItem({
         }}
       >
         <div className="identifiers">
-          <p className="course-identifier">{courseIdentifier}</p>
+          <p
+            className="course-identifier"
+            style={{
+              fontWeight: articulationInPlan(articulation, planCourses)
+                ? "normal"
+                : "bold",
+            }}
+          >
+            {courseIdentifier}
+          </p>
           <p className="units">{Number(credits)} units</p>
         </div>
         <button
@@ -567,7 +576,7 @@ ArticulationItem.propTypes = {
 
 function Plan({ reqsList, majorList, articulations }) {
   const [planCourses, setPlanCourses] = useState(
-    prePopulatePlan(reqsList, articulations)
+    populatePlan(reqsList, articulations, [])
   );
 
   const uniGroups = groupByUni(reqsList);
@@ -628,6 +637,8 @@ function Plan({ reqsList, majorList, articulations }) {
                 articulation,
                 fyCourse
               );
+
+              populatePlan(reqsList, articulations, planCoursesCopy);
 
               setPlanCourses(planCoursesCopy);
             }}
