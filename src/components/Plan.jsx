@@ -101,6 +101,24 @@ const ArticulationObj = PropTypes.shape({
   nonArticulatedCourses: PropTypes.arrayOf(Course).isRequired,
 });
 
+function ArticulationSearchDropdown({
+  articulation,
+  planCourses,
+  onArticulationSelect,
+  isFulfilled,
+  requirementFulfilled,
+}) {
+  return <p>almost there</p>;
+}
+
+ArticulationSelectDropdown.propTypes = {
+  articulation: Articulation,
+  planCourses: PropTypes.array.isRequired,
+  onArticulationSelect: PropTypes.func.isRequired,
+  isFulfilled: PropTypes.bool.isRequired,
+  requirementFulfilled: PropTypes.bool.isRequired,
+};
+
 function ArticulationSelectDropdown({
   articulation,
   planCourses,
@@ -108,13 +126,6 @@ function ArticulationSelectDropdown({
   isFulfilled,
   requirementFulfilled,
 }) {
-  if (!articulation) {
-    // show search menu
-    return <p>Search another CCC for an articulation?</p>;
-  }
-
-  // include a checkmark icon below the subtitle if isFulfilled
-
   return (
     <div
       className="articulation-select-dropdown"
@@ -217,8 +228,11 @@ function CourseItem({
   articulation,
   onArticulationSelect,
   planCourses,
+  onSearchDecline,
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExcluded, setIsExcluded] = useState(false);
+  const [searchActive, setSearchActive] = useState(false);
 
   const { courseTitle, coursePrefix, courseNumber, credits } = course;
 
@@ -265,8 +279,50 @@ function CourseItem({
           )}
         </button>
       </div>
-      {isOpen ? (
+      {isOpen && isExcluded ? (
+        <div
+          className="articulation-select-dropdown"
+          style={{
+            opacity: 0.3,
+          }}
+        >
+          <p className="subtitle">{"User declined articulation search."}</p>
+        </div>
+      ) : isOpen && !articulation && !searchActive ? (
+        <div className="articulation-select-dropdown">
+          <p>Search another CCC for an articulation?</p>
+          <div className="pre-search-choices">
+            <button
+              type="button"
+              className="yes-to-search"
+              onClick={() => {
+                setSearchActive(true);
+              }}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              className="no-to-search"
+              onClick={() => {
+                onSearchDecline(course);
+                setIsExcluded(true);
+              }}
+            >
+              No
+            </button>
+          </div>
+        </div>
+      ) : isOpen && articulation ? (
         <ArticulationSelectDropdown
+          articulation={articulation}
+          onArticulationSelect={onArticulationSelect}
+          planCourses={planCourses}
+          isFulfilled={isFulfilled}
+          requirementFulfilled={requirementFulfilled}
+        />
+      ) : isOpen && !articulation && searchActive ? (
+        <ArticulationSearchDropdown
           articulation={articulation}
           onArticulationSelect={onArticulationSelect}
           planCourses={planCourses}
@@ -287,6 +343,7 @@ CourseItem.propTypes = {
   articulation: Articulation,
   onArticulationSelect: PropTypes.func.isRequired,
   planCourses: PropTypes.array.isRequired,
+  onSearchDecline: PropTypes.func.isRequired,
 };
 
 function CourseItemGroup({
@@ -296,6 +353,7 @@ function CourseItemGroup({
   articulations,
   planCourses,
   onArticulationSelect,
+  onSearchDecline,
 }) {
   const { courses, type, amount } = courseGroup;
 
@@ -360,6 +418,7 @@ function CourseItemGroup({
             articulation={articulation}
             planCourses={planCourses}
             onArticulationSelect={onArticulationSelect}
+            onSearchDecline={onSearchDecline}
           />
         );
       })}
@@ -374,6 +433,7 @@ CourseItemGroup.propTypes = {
   articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
   planCourses: PropTypes.array.isRequired,
   onArticulationSelect: PropTypes.func.isRequired,
+  onSearchDecline: PropTypes.func.isRequired,
 };
 
 function RequirementItem({
@@ -381,6 +441,7 @@ function RequirementItem({
   articulations,
   planCourses,
   onArticulationSelect,
+  onSearchDecline,
 }) {
   const { conjunction, requiredCourses } = requirement;
 
@@ -414,6 +475,7 @@ function RequirementItem({
           articulations={articulations}
           planCourses={planCourses}
           onArticulationSelect={onArticulationSelect}
+          onSearchDecline={onSearchDecline}
         />
       ))}
     </div>
@@ -425,6 +487,7 @@ RequirementItem.propTypes = {
   articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
   planCourses: PropTypes.array.isRequired,
   onArticulationSelect: PropTypes.func.isRequired,
+  onSearchDecline: PropTypes.func.isRequired,
 };
 
 function RequirementItemGroup({
@@ -433,6 +496,7 @@ function RequirementItemGroup({
   articulations,
   planCourses,
   onArticulationSelect,
+  onSearchDecline,
 }) {
   return (
     <div className="requirement-group">
@@ -444,6 +508,7 @@ function RequirementItemGroup({
           articulations={articulations}
           planCourses={planCourses}
           onArticulationSelect={onArticulationSelect}
+          onSearchDecline={onSearchDecline}
         />
       ))}
     </div>
@@ -456,6 +521,7 @@ RequirementItemGroup.propTypes = {
   articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
   planCourses: PropTypes.array.isRequired,
   onArticulationSelect: PropTypes.func.isRequired,
+  onSearchDecline: PropTypes.func.isRequired,
 };
 
 function UniversityGroup({
@@ -464,6 +530,7 @@ function UniversityGroup({
   articulations,
   planCourses,
   onArticulationSelect,
+  onSearchDecline,
 }) {
   const { fyId } = uniGroup[0].inputs;
 
@@ -486,6 +553,7 @@ function UniversityGroup({
             articulations={articulations}
             planCourses={planCourses}
             onArticulationSelect={onArticulationSelect}
+            onSearchDecline={onSearchDecline}
           />
         );
       })}
@@ -499,6 +567,7 @@ UniversityGroup.propTypes = {
   articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
   planCourses: PropTypes.array.isRequired,
   onArticulationSelect: PropTypes.func.isRequired,
+  onSearchDecline: PropTypes.func.isRequired,
 };
 
 function ArticulationItem({ identifier, articulatesTo, cccInfo }) {
@@ -582,6 +651,8 @@ function Plan({ reqsList, majorList, articulations }) {
     populatePlan(reqsList, articulations, [])
   );
 
+  const [excludedCourses, setExcludedCourses] = useState([]);
+
   const uniGroups = groupByUni(reqsList);
 
   return (
@@ -644,6 +715,9 @@ function Plan({ reqsList, majorList, articulations }) {
               populatePlan(reqsList, articulations, planCoursesCopy);
 
               setPlanCourses(planCoursesCopy);
+            }}
+            onSearchDecline={(fyCourse) => {
+              setExcludedCourses([...excludedCourses, fyCourse]);
             }}
           />
         ))}
