@@ -242,9 +242,11 @@ function CourseItem({
           <p
             className="course-identifier"
             style={{
-              fontWeight: articulationInPlan(articulation, planCourses)
-                ? "normal"
-                : "bold",
+              fontWeight:
+                articulationInPlan(articulation, planCourses) ||
+                requirementFulfilled
+                  ? "normal"
+                  : "bold",
             }}
           >
             {courseIdentifier}
@@ -383,6 +385,7 @@ function RequirementItem({
   const { conjunction, requiredCourses } = requirement;
 
   const instructions = createInstructions(requiredCourses, conjunction);
+
   const completed = requirementCompleted(
     requirement,
     articulations,
