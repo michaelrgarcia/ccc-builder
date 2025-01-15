@@ -375,7 +375,7 @@ export function requirementCompleted(requirement, articulations, planCourses) {
       }
     }
 
-    if (fulfilled === amount || fulfilled === courses.length) {
+    if (fulfilled >= amount || fulfilled >= courses.length) {
       courseGroupsFinished += 1;
     }
   }
@@ -383,6 +383,6 @@ export function requirementCompleted(requirement, articulations, planCourses) {
   if (conjunction === "Or") {
     return courseGroupsFinished === 1;
   } else {
-    return courseGroupsFinished === requiredCourses.length;
+    return courseGroupsFinished >= requiredCourses.length;
   }
 }
