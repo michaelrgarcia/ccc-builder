@@ -220,6 +220,10 @@ function minimizeCourses(planCourses) {
 export function updatePlanCourses(planCourses, option, articulation, fyCourse) {
   // MUTATES PLANCOURSES
 
+  // maybe pass in articulatesTo instead of creating it here
+  // there will be NO dupes
+  // determine it with articulations array + ccccourses of an option
+
   for (const cccCourse of option) {
     const dupeIndex = planCourses.findIndex((course) =>
       matchArticulation(course, cccCourse)
@@ -285,28 +289,9 @@ function selectArticulations(courseGroup, planCourses, articulations) {
     for (const option of articulation.articulationOptions) {
       if (amount && fulfilled >= amount) break;
 
-      let selected = false;
-
       if (!amount && articulation.articulationOptions.length === 1) {
         updatePlanCourses(planCourses, option, articulation, fyCourse);
-
-        selected = true;
-      } else if (amount && articulation.articulationOptions.length === 1) {
-        const alreadyInPlan = option.some((cccCourse) =>
-          planCourses.some((planCourse) =>
-            matchArticulation(planCourse, cccCourse)
-          )
-        );
-
-        if (alreadyInPlan) {
-          updatePlanCourses(planCourses, option, articulation, fyCourse);
-
-          fulfilled += type === "NCourses" ? 1 : course.credits;
-          selected = true;
-        }
-      }
-
-      if (!selected) {
+      } else {
         const allCoursesInPlan = option.every((cccCourse) =>
           planCourses.some((planCourse) =>
             matchArticulation(planCourse, cccCourse)
