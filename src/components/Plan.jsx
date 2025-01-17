@@ -233,8 +233,7 @@ function ArticulationItem({ identifier, articulatesTo, cccInfo }) {
           <p className="subtitle">
             From: <span>{cccInfo.name}</span>
           </p>
-          {/* maybe "Needed By" instead*/}
-          <p className="subtitle">Articulates To</p>
+          <p className="subtitle">Articulates to</p>
           <ul>
             {articulatesTo.map(({ fyCourse, major, majorId }, index) => {
               const { coursePrefix, courseNumber, courseTitle, seriesTitle } =

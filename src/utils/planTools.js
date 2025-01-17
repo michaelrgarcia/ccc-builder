@@ -321,6 +321,61 @@ export function populatePlan(reqsList, articulations, planCourses) {
     }
   }
 
+  // update articulatesTo arrays
+  for (const planCourse of planCourses) {
+    planCourse.articulatesTo = [];
+
+    for (const articulation of articulations) {
+      for (const artCourse of articulation.articulatedCourses) {
+        for (const opt of artCourse.articulationOptions) {
+          if (!opt.some((course) => matchArticulation(course, planCourse))) {
+            continue;
+          }
+
+          if (
+            !opt.every((course) =>
+              planCourses.some((planCourse) =>
+                matchArticulation(course, planCourse)
+              )
+            )
+          ) {
+            continue;
+          }
+
+          const fyCourse =
+            artCourse.articulationType === "Course"
+              ? {
+                  courseTitle: artCourse.courseTitle,
+                  coursePrefix: artCourse.coursePrefix,
+                  courseNumber: artCourse.courseNumber,
+                  courseId: artCourse.courseId,
+                }
+              : {
+                  seriesTitle: artCourse.seriesTitle,
+                  seriesId: artCourse.seriesId,
+                };
+
+          const alreadyArticulated = planCourse.articulatesTo.some(
+            (articulated) =>
+              (articulated.fyCourse.courseId &&
+                Number(articulated.fyCourse.courseId) ===
+                  Number(fyCourse.courseId)) ||
+              (articulated.fyCourse.seriesId &&
+                String(articulated.fyCourse.seriesId) ===
+                  String(fyCourse.seriesId))
+          );
+
+          if (!alreadyArticulated) {
+            planCourse.articulatesTo.push({
+              ...articulation.articulationInfo,
+              fyCourse,
+            });
+          }
+        }
+      }
+    }
+  }
+
   return planCourses;
 }
 
