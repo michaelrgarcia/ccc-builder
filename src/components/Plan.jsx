@@ -1,5 +1,7 @@
 import PropTypes from "prop-types";
 
+import ArticulationSearchDropdown from "./ArticulationSearchDropdown";
+
 import {
   createInstructions,
   getUniName,
@@ -12,7 +14,7 @@ import {
   populatePlan,
 } from "../utils/planTools";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import InfoIcon from "../assets/information-variant-circle-outline.svg";
 import FilledInfoIcon from "../assets/information-variant-circle.svg";
@@ -100,20 +102,6 @@ const ArticulationObj = PropTypes.shape({
   articulatedCourses: PropTypes.arrayOf(Articulation).isRequired,
   nonArticulatedCourses: PropTypes.arrayOf(Course).isRequired,
 });
-
-function ArticulationSearchDropdown({
-  articulation,
-  planCourses,
-  onArticulationSelect,
-}) {
-  return <p>almost there</p>;
-}
-
-ArticulationSearchDropdown.propTypes = {
-  articulation: Articulation,
-  planCourses: PropTypes.array.isRequired,
-  onArticulationSelect: PropTypes.func.isRequired,
-};
 
 function ArticulationSelectDropdown({
   articulation,
