@@ -180,17 +180,17 @@ export function articulationInPlan(articulation, planCourses) {
 }
 
 function minimizeCourses(planCourses) {
+  // MUTATES PLANCOURSES
+
   const getArticulationIds = (articulations) =>
     articulations
       .map((art) => Number(art.fyCourse.courseId) || art.fyCourse.seriesId)
       .sort();
 
-  const bestCourses = [];
-
   for (const course of planCourses) {
     const ids = getArticulationIds(course.articulatesTo);
 
-    const existingIndex = bestCourses.findIndex((bestCourse) => {
+    const inferiorIndex = planCourses.findIndex((bestCourse) => {
       const existingIds = getArticulationIds(bestCourse.articulatesTo);
 
       return (
@@ -199,30 +199,22 @@ function minimizeCourses(planCourses) {
       );
     });
 
-    if (existingIndex === -1) {
-      bestCourses.push(course);
-    } else {
-      const existingCourse = bestCourses[existingIndex];
+    if (inferiorIndex !== -1) {
+      const existingCourse = planCourses[inferiorIndex];
       const existingIds = getArticulationIds(existingCourse.articulatesTo);
 
       if (
         ids.length > existingIds.length &&
         existingIds.every((id) => ids.includes(id))
       ) {
-        bestCourses[existingIndex] = course;
+        planCourses[inferiorIndex] = course;
       }
     }
   }
-
-  return bestCourses;
 }
 
 export function updatePlanCourses(planCourses, option, articulation, fyCourse) {
   // MUTATES PLANCOURSES
-
-  // maybe pass in articulatesTo instead of creating it here
-  // there will be NO dupes
-  // determine it with articulations array + ccccourses of an option
 
   for (const cccCourse of option) {
     const dupeIndex = planCourses.findIndex((course) =>
@@ -245,8 +237,8 @@ export function updatePlanCourses(planCourses, option, articulation, fyCourse) {
 
       const alreadyArticulated = existingCourse.articulatesTo.some(
         (entry) =>
-          Number(entry.fyCourse.courseId) === Number(fyCourse.courseId) &&
-          entry.fyCourse.seriesId === fyCourse.seriesId
+          Number(entry.fyCourse.courseId) === Number(fyCourse.courseId) ||
+          String(entry.fyCourse.seriesId) === String(fyCourse.seriesId)
       );
 
       if (!alreadyArticulated) {
@@ -258,7 +250,7 @@ export function updatePlanCourses(planCourses, option, articulation, fyCourse) {
     }
   }
 
-  return minimizeCourses(planCourses);
+  minimizeCourses(planCourses);
 }
 
 function selectArticulations(courseGroup, planCourses, articulations) {
@@ -300,6 +292,7 @@ function selectArticulations(courseGroup, planCourses, articulations) {
 
         if (allCoursesInPlan) {
           updatePlanCourses(planCourses, option, articulation, fyCourse);
+
           fulfilled += type === "NCourses" ? 1 : course.credits;
         }
       }
@@ -318,6 +311,8 @@ export function populatePlan(reqsList, articulations, planCourses) {
         );
 
         selectArticulations(shortestGroup, planCourses, articulations);
+
+        continue;
       } else {
         for (const courseGroup of requiredCourses) {
           selectArticulations(courseGroup, planCourses, articulations);
