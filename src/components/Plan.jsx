@@ -105,45 +105,24 @@ function ArticulationSearchDropdown({
   articulation,
   planCourses,
   onArticulationSelect,
-  isFulfilled,
-  requirementFulfilled,
 }) {
   return <p>almost there</p>;
 }
 
-ArticulationSelectDropdown.propTypes = {
+ArticulationSearchDropdown.propTypes = {
   articulation: Articulation,
   planCourses: PropTypes.array.isRequired,
   onArticulationSelect: PropTypes.func.isRequired,
-  isFulfilled: PropTypes.bool.isRequired,
-  requirementFulfilled: PropTypes.bool.isRequired,
 };
 
 function ArticulationSelectDropdown({
   articulation,
   planCourses,
   onArticulationSelect,
-  isFulfilled,
-  requirementFulfilled,
 }) {
   return (
-    <div
-      className="articulation-select-dropdown"
-      style={{
-        opacity:
-          (isFulfilled && articulation.articulationOptions.length === 1) ||
-          requirementFulfilled
-            ? 0.3
-            : 1,
-      }}
-    >
-      <p className="subtitle">
-        {isFulfilled && articulation.articulationOptions.length === 1
-          ? `Cannot deselect required course.`
-          : requirementFulfilled
-          ? "Requirement fulfilled."
-          : "Select 1 option"}
-      </p>
+    <div className="articulation-select-dropdown">
+      <p className="subtitle">Select 1 option</p>
       <div className="articulation-select-options">
         {articulation.articulationOptions.map((option, index) => {
           const inPlan = option.every((course) =>
@@ -178,15 +157,26 @@ function ArticulationSelectDropdown({
                   articulation.seriesId || articulation.courseId
                 }`}
                 checked={inPlan}
-                readOnly={requirementFulfilled}
-                onChange={() =>
-                  onArticulationSelect(
-                    JSON.parse(JSON.stringify(planCourses)),
-                    option,
-                    articulation,
-                    fyCourse
-                  )
-                }
+                onChange={() => {
+                  if (!inPlan) {
+                    const updatedPlanCourses = planCourses.filter(
+                      (planCourse) =>
+                        !articulation?.articulationOptions.some(
+                          (existingOption) =>
+                            existingOption.every((course) =>
+                              matchArticulation(course, planCourse)
+                            )
+                        )
+                    );
+
+                    onArticulationSelect(
+                      updatedPlanCourses,
+                      option,
+                      articulation,
+                      fyCourse
+                    );
+                  }
+                }}
               />
               <div key={index} className="option-group">
                 {option.map(
@@ -217,357 +207,6 @@ ArticulationSelectDropdown.propTypes = {
   articulation: Articulation,
   planCourses: PropTypes.array.isRequired,
   onArticulationSelect: PropTypes.func.isRequired,
-  isFulfilled: PropTypes.bool.isRequired,
-  requirementFulfilled: PropTypes.bool.isRequired,
-};
-
-function CourseItem({
-  course,
-  isFulfilled,
-  requirementFulfilled,
-  articulation,
-  onArticulationSelect,
-  planCourses,
-  onSearchDecline,
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isExcluded, setIsExcluded] = useState(false);
-  const [searchActive, setSearchActive] = useState(false);
-
-  const { courseTitle, coursePrefix, courseNumber, credits } = course;
-
-  const courseIdentifier =
-    course.type === "Course"
-      ? `${coursePrefix} ${courseNumber} - ${courseTitle}`
-      : course.seriesTitle;
-
-  return (
-    <>
-      <div
-        className="course-item"
-        style={{
-          opacity:
-            isFulfilled && articulation.articulationOptions.length === 1
-              ? 0.3
-              : 1,
-        }}
-      >
-        <div className="identifiers">
-          <p
-            className="course-identifier"
-            style={{
-              fontWeight:
-                articulationInPlan(articulation, planCourses) ||
-                requirementFulfilled
-                  ? "normal"
-                  : "bold",
-            }}
-          >
-            {courseIdentifier}
-          </p>
-          <p className="units">{Number(credits)} units</p>
-        </div>
-        <button
-          type="button"
-          className="articulation-select-toggle"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? (
-            <img src={UpArrow} alt="Toggle Articulation Select" />
-          ) : (
-            <img src={DownArrow} alt="Toggle Articulation Select" />
-          )}
-        </button>
-      </div>
-      {isOpen && isExcluded ? (
-        <div
-          className="articulation-select-dropdown"
-          style={{
-            opacity: 0.3,
-          }}
-        >
-          <p className="subtitle">{"User declined articulation search."}</p>
-        </div>
-      ) : isOpen && !articulation && !searchActive ? (
-        <div className="articulation-select-dropdown">
-          <p>Search another CCC for an articulation?</p>
-          <div className="pre-search-choices">
-            <button
-              type="button"
-              className="yes-to-search"
-              onClick={() => {
-                setSearchActive(true);
-              }}
-            >
-              Yes
-            </button>
-            <button
-              type="button"
-              className="no-to-search"
-              onClick={() => {
-                onSearchDecline(course);
-                setIsExcluded(true);
-              }}
-            >
-              No
-            </button>
-          </div>
-        </div>
-      ) : isOpen && articulation ? (
-        <ArticulationSelectDropdown
-          articulation={articulation}
-          onArticulationSelect={onArticulationSelect}
-          planCourses={planCourses}
-          isFulfilled={isFulfilled}
-          requirementFulfilled={requirementFulfilled}
-        />
-      ) : isOpen && !articulation && searchActive ? (
-        <ArticulationSearchDropdown
-          articulation={articulation}
-          onArticulationSelect={onArticulationSelect}
-          planCourses={planCourses}
-          isFulfilled={isFulfilled}
-          requirementFulfilled={requirementFulfilled}
-        />
-      ) : (
-        ""
-      )}
-    </>
-  );
-}
-
-CourseItem.propTypes = {
-  course: Course.isRequired,
-  isFulfilled: PropTypes.bool.isRequired,
-  requirementFulfilled: PropTypes.bool.isRequired,
-  articulation: Articulation,
-  onArticulationSelect: PropTypes.func.isRequired,
-  planCourses: PropTypes.array.isRequired,
-  onSearchDecline: PropTypes.func.isRequired,
-};
-
-function CourseItemGroup({
-  courseGroup,
-  reqLength,
-  groupIndex,
-  articulations,
-  planCourses,
-  onArticulationSelect,
-  onSearchDecline,
-}) {
-  const { courses, type, amount } = courseGroup;
-
-  if (courses.length === 0) {
-    return null;
-  }
-
-  let fulfillmentCount = 0;
-
-  for (let i = 0; i < courses.length; i++) {
-    const course = courses[i];
-
-    const articulation = findArticulation(course, articulations);
-
-    if (articulationInPlan(articulation, planCourses)) {
-      fulfillmentCount += type === "NCourses" ? 1 : Number(course.credits);
-    }
-  }
-
-  return (
-    <div className="course-group">
-      {reqLength > 1 || (courses.length > 1 && amount) ? (
-        <div className="group-header">
-          <div className="group-letter">
-            {String.fromCharCode(groupIndex + 1 + 64)}
-          </div>
-          {type === "NCourses" ? (
-            <p className="n-course-indicator">
-              Select {amount} from the following
-              {fulfillmentCount >= amount ? " ✅" : " ⚠️"}
-            </p>
-          ) : type === "NCredits" ? (
-            <div className="n-credits-indicator">
-              <p className="n-credits">
-                Select {amount} units from the following
-              </p>
-              <p className="credits-selected">
-                ({fulfillmentCount} units selected)
-                {fulfillmentCount >= amount ? " ✅" : " ⚠️"}
-              </p>
-            </div>
-          ) : (
-            ""
-          )}
-        </div>
-      ) : (
-        ""
-      )}
-      {courses.map((course) => {
-        const { courseId, seriesId } = course;
-
-        const courseKey = courseId || seriesId;
-
-        const articulation = findArticulation(course, articulations);
-
-        return (
-          <CourseItem
-            key={courseKey}
-            course={course}
-            isFulfilled={articulationInPlan(articulation, planCourses)}
-            requirementFulfilled={fulfillmentCount >= amount}
-            articulation={articulation}
-            planCourses={planCourses}
-            onArticulationSelect={onArticulationSelect}
-            onSearchDecline={onSearchDecline}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-CourseItemGroup.propTypes = {
-  courseGroup: CourseGroup.isRequired,
-  reqLength: PropTypes.number.isRequired,
-  groupIndex: PropTypes.number.isRequired,
-  articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
-  planCourses: PropTypes.array.isRequired,
-  onArticulationSelect: PropTypes.func.isRequired,
-  onSearchDecline: PropTypes.func.isRequired,
-};
-
-function RequirementItem({
-  requirement,
-  articulations,
-  planCourses,
-  onArticulationSelect,
-  onSearchDecline,
-}) {
-  const { conjunction, requiredCourses } = requirement;
-
-  const instructions = createInstructions(requiredCourses, conjunction);
-
-  const completed = requirementCompleted(
-    requirement,
-    articulations,
-    planCourses
-  );
-
-  if (!requiredCourses.some((group) => group.courses.length > 0)) {
-    return null;
-  }
-
-  return (
-    <div className="requirement">
-      {instructions ? (
-        <p className="instructions">
-          {instructions} {completed ? " ✅" : " ⚠️"}
-        </p>
-      ) : (
-        ""
-      )}
-      {requiredCourses.map((courseGroup, index) => (
-        <CourseItemGroup
-          key={index}
-          courseGroup={courseGroup}
-          reqLength={requiredCourses.length}
-          groupIndex={index}
-          articulations={articulations}
-          planCourses={planCourses}
-          onArticulationSelect={onArticulationSelect}
-          onSearchDecline={onSearchDecline}
-        />
-      ))}
-    </div>
-  );
-}
-
-RequirementItem.propTypes = {
-  requirement: Requirement.isRequired,
-  articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
-  planCourses: PropTypes.array.isRequired,
-  onArticulationSelect: PropTypes.func.isRequired,
-  onSearchDecline: PropTypes.func.isRequired,
-};
-
-function RequirementItemGroup({
-  majorName,
-  requirements,
-  articulations,
-  planCourses,
-  onArticulationSelect,
-  onSearchDecline,
-}) {
-  return (
-    <div className="requirement-group">
-      <div className="major-name">{majorName}</div>
-      {requirements.map((requirement, index) => (
-        <RequirementItem
-          key={index}
-          requirement={requirement}
-          articulations={articulations}
-          planCourses={planCourses}
-          onArticulationSelect={onArticulationSelect}
-          onSearchDecline={onSearchDecline}
-        />
-      ))}
-    </div>
-  );
-}
-
-RequirementItemGroup.propTypes = {
-  majorName: PropTypes.string.isRequired,
-  requirements: PropTypes.arrayOf(Requirement).isRequired,
-  articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
-  planCourses: PropTypes.array.isRequired,
-  onArticulationSelect: PropTypes.func.isRequired,
-  onSearchDecline: PropTypes.func.isRequired,
-};
-
-function UniversityGroup({
-  uniGroup,
-  majorList,
-  articulations,
-  planCourses,
-  onArticulationSelect,
-  onSearchDecline,
-}) {
-  const { fyId } = uniGroup[0].inputs;
-
-  return (
-    <div className="uni-group">
-      <p className="uni-title">{getUniName(fyId)}</p>
-      {uniGroup.map(({ inputs, requirements }) => {
-        const separated = inputs.majorId.split("/");
-        const extractedKey = separated[separated.length - 1];
-
-        const majorName = majorList.find(
-          (major) => major.key === extractedKey
-        ).major;
-
-        return (
-          <RequirementItemGroup
-            key={`${fyId}-${extractedKey}`}
-            majorName={majorName}
-            requirements={requirements}
-            articulations={articulations}
-            planCourses={planCourses}
-            onArticulationSelect={onArticulationSelect}
-            onSearchDecline={onSearchDecline}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-UniversityGroup.propTypes = {
-  uniGroup: PropTypes.arrayOf(RequirementGroup),
-  majorList: PropTypes.arrayOf(Major).isRequired,
-  articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
-  planCourses: PropTypes.array.isRequired,
-  onArticulationSelect: PropTypes.func.isRequired,
-  onSearchDecline: PropTypes.func.isRequired,
 };
 
 function ArticulationItem({ identifier, articulatesTo, cccInfo }) {
@@ -594,6 +233,7 @@ function ArticulationItem({ identifier, articulatesTo, cccInfo }) {
           <p className="subtitle">
             From: <span>{cccInfo.name}</span>
           </p>
+          {/* maybe "Needed By" instead*/}
           <p className="subtitle">Articulates To</p>
           <ul>
             {articulatesTo.map(({ fyCourse, major, majorId }, index) => {
@@ -644,6 +284,366 @@ ArticulationItem.propTypes = {
     name: PropTypes.string.isRequired,
     code: PropTypes.string,
   }).isRequired,
+};
+
+function CourseItem({
+  course,
+  requirementFulfilled,
+  articulation,
+  onArticulationSelect,
+  planCourses,
+  onSearchDecline,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isExcluded, setIsExcluded] = useState(false);
+  const [searchActive, setSearchActive] = useState(false);
+
+  const { courseTitle, coursePrefix, courseNumber, credits } = course;
+
+  const courseIdentifier =
+    course.type === "Course"
+      ? `${coursePrefix} ${courseNumber} - ${courseTitle}`
+      : course.seriesTitle;
+
+  return (
+    <>
+      <div
+        className="course-item"
+        style={{
+          opacity: isExcluded ? 0.3 : 1,
+        }}
+      >
+        <div className="identifiers">
+          <p
+            className="course-identifier"
+            style={{
+              fontWeight:
+                articulationInPlan(articulation, planCourses) ||
+                requirementFulfilled ||
+                isExcluded
+                  ? "normal"
+                  : "bold",
+            }}
+          >
+            {courseIdentifier}
+          </p>
+          <p className="units">{Number(credits)} units</p>
+        </div>
+        <button
+          type="button"
+          className="articulation-select-toggle"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? (
+            <img src={UpArrow} alt="Toggle Articulation Select" />
+          ) : (
+            <img src={DownArrow} alt="Toggle Articulation Select" />
+          )}
+        </button>
+      </div>
+      {isOpen && isExcluded ? (
+        <div
+          className="articulation-select-dropdown"
+          style={{
+            opacity: 0.3,
+          }}
+        >
+          <p className="subtitle">Requirement skipped.</p>
+        </div>
+      ) : isOpen && !articulation && !searchActive ? (
+        <div className="articulation-select-dropdown">
+          <p>Search another CCC for an articulation?</p>
+          <div className="pre-search-choices">
+            <button
+              type="button"
+              className="yes-to-search"
+              onClick={() => {
+                setSearchActive(true);
+              }}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              className="no-to-search"
+              onClick={() => {
+                onSearchDecline(course);
+                setIsExcluded(true);
+              }}
+            >
+              No
+            </button>
+          </div>
+        </div>
+      ) : isOpen && articulation ? (
+        <ArticulationSelectDropdown
+          articulation={articulation}
+          onArticulationSelect={onArticulationSelect}
+          planCourses={planCourses}
+        />
+      ) : isOpen && !articulation && searchActive ? (
+        <ArticulationSearchDropdown
+          articulation={articulation}
+          onArticulationSelect={onArticulationSelect}
+          planCourses={planCourses}
+        />
+      ) : (
+        ""
+      )}
+    </>
+  );
+}
+
+CourseItem.propTypes = {
+  course: Course.isRequired,
+  requirementFulfilled: PropTypes.bool.isRequired,
+  articulation: Articulation,
+  onArticulationSelect: PropTypes.func.isRequired,
+  planCourses: PropTypes.array.isRequired,
+  onSearchDecline: PropTypes.func.isRequired,
+};
+
+function CourseItemGroup({
+  courseGroup,
+  reqLength,
+  groupIndex,
+  articulations,
+  planCourses,
+  onArticulationSelect,
+  onSearchDecline,
+  excludedCourses,
+}) {
+  const { courses, type, amount } = courseGroup;
+
+  if (courses.length === 0) {
+    return null;
+  }
+
+  let fulfillmentCount = 0;
+
+  for (let i = 0; i < courses.length; i++) {
+    const course = courses[i];
+
+    const articulation = findArticulation(course, articulations);
+
+    if (articulationInPlan(articulation, planCourses)) {
+      fulfillmentCount += type === "NCourses" ? 1 : Number(course.credits);
+    }
+  }
+
+  const groupFulfilled =
+    fulfillmentCount >= amount ||
+    courses.every((course) =>
+      excludedCourses.some(
+        (excluded) => JSON.stringify(excluded) === JSON.stringify(course)
+      )
+    );
+
+  return (
+    <div className="course-group">
+      {reqLength > 1 || (courses.length > 1 && amount) ? (
+        <div className="group-header">
+          <div className="group-letter">
+            {String.fromCharCode(groupIndex + 1 + 64)}
+          </div>
+          {type === "NCourses" ? (
+            <p className="n-course-indicator">
+              Select {amount} from the following
+              {groupFulfilled ? " ✅" : " ⚠️"}
+            </p>
+          ) : type === "NCredits" ? (
+            <div className="n-credits-indicator">
+              <p className="n-credits">
+                Select {amount} units from the following
+              </p>
+              <p className="credits-selected">
+                ({fulfillmentCount} units selected)
+                {groupFulfilled ? " ✅" : " ⚠️"}
+              </p>
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
+      ) : (
+        ""
+      )}
+      {courses.map((course) => {
+        const { courseId, seriesId } = course;
+
+        const courseKey = courseId || seriesId;
+
+        const articulation = findArticulation(course, articulations);
+
+        return (
+          <CourseItem
+            key={courseKey}
+            course={course}
+            requirementFulfilled={fulfillmentCount >= amount}
+            articulation={articulation}
+            planCourses={planCourses}
+            onArticulationSelect={onArticulationSelect}
+            onSearchDecline={onSearchDecline}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+CourseItemGroup.propTypes = {
+  courseGroup: CourseGroup.isRequired,
+  reqLength: PropTypes.number.isRequired,
+  groupIndex: PropTypes.number.isRequired,
+  articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
+  planCourses: PropTypes.array.isRequired,
+  onArticulationSelect: PropTypes.func.isRequired,
+  onSearchDecline: PropTypes.func.isRequired,
+  excludedCourses: PropTypes.arrayOf(Course).isRequired,
+};
+
+function RequirementItem({
+  requirement,
+  articulations,
+  planCourses,
+  onArticulationSelect,
+  onSearchDecline,
+  excludedCourses,
+}) {
+  const { conjunction, requiredCourses } = requirement;
+
+  const instructions = createInstructions(requiredCourses, conjunction);
+
+  const completed = requirementCompleted(
+    requirement,
+    articulations,
+    planCourses,
+    excludedCourses
+  );
+
+  if (!requiredCourses.some((group) => group.courses.length > 0)) {
+    return null;
+  }
+
+  return (
+    <div className="requirement">
+      {instructions ? (
+        <p className="instructions">
+          {instructions} {completed ? " ✅" : " ⚠️"}
+        </p>
+      ) : (
+        ""
+      )}
+      {requiredCourses.map((courseGroup, index) => (
+        <CourseItemGroup
+          key={index}
+          courseGroup={courseGroup}
+          reqLength={requiredCourses.length}
+          groupIndex={index}
+          articulations={articulations}
+          planCourses={planCourses}
+          onArticulationSelect={onArticulationSelect}
+          onSearchDecline={onSearchDecline}
+          excludedCourses={excludedCourses}
+        />
+      ))}
+    </div>
+  );
+}
+
+RequirementItem.propTypes = {
+  requirement: Requirement.isRequired,
+  articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
+  planCourses: PropTypes.array.isRequired,
+  onArticulationSelect: PropTypes.func.isRequired,
+  onSearchDecline: PropTypes.func.isRequired,
+  excludedCourses: PropTypes.arrayOf(Course).isRequired,
+};
+
+function RequirementItemGroup({
+  majorName,
+  requirements,
+  articulations,
+  planCourses,
+  onArticulationSelect,
+  onSearchDecline,
+  excludedCourses,
+}) {
+  return (
+    <div className="requirement-group">
+      <div className="major-name">{majorName}</div>
+      {requirements.map((requirement, index) => (
+        <RequirementItem
+          key={index}
+          requirement={requirement}
+          articulations={articulations}
+          planCourses={planCourses}
+          onArticulationSelect={onArticulationSelect}
+          onSearchDecline={onSearchDecline}
+          excludedCourses={excludedCourses}
+        />
+      ))}
+    </div>
+  );
+}
+
+RequirementItemGroup.propTypes = {
+  majorName: PropTypes.string.isRequired,
+  requirements: PropTypes.arrayOf(Requirement).isRequired,
+  articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
+  planCourses: PropTypes.array.isRequired,
+  onArticulationSelect: PropTypes.func.isRequired,
+  onSearchDecline: PropTypes.func.isRequired,
+  excludedCourses: PropTypes.arrayOf(Course).isRequired,
+};
+
+function UniversityGroup({
+  uniGroup,
+  majorList,
+  articulations,
+  planCourses,
+  onArticulationSelect,
+  onSearchDecline,
+  excludedCourses,
+}) {
+  const { fyId } = uniGroup[0].inputs;
+
+  return (
+    <div className="uni-group">
+      <p className="uni-title">{getUniName(fyId)}</p>
+      {uniGroup.map(({ inputs, requirements }) => {
+        const separated = inputs.majorId.split("/");
+        const extractedKey = separated[separated.length - 1];
+
+        const majorName = majorList.find(
+          (major) => major.key === extractedKey
+        ).major;
+
+        return (
+          <RequirementItemGroup
+            key={`${fyId}-${extractedKey}`}
+            majorName={majorName}
+            requirements={requirements}
+            articulations={articulations}
+            planCourses={planCourses}
+            onArticulationSelect={onArticulationSelect}
+            onSearchDecline={onSearchDecline}
+            excludedCourses={excludedCourses}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+UniversityGroup.propTypes = {
+  uniGroup: PropTypes.arrayOf(RequirementGroup),
+  majorList: PropTypes.arrayOf(Major).isRequired,
+  articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
+  planCourses: PropTypes.array.isRequired,
+  onArticulationSelect: PropTypes.func.isRequired,
+  onSearchDecline: PropTypes.func.isRequired,
+  excludedCourses: PropTypes.arrayOf(Course).isRequired,
 };
 
 function Plan({ reqsList, majorList, articulations }) {
@@ -719,6 +719,7 @@ function Plan({ reqsList, majorList, articulations }) {
             onSearchDecline={(fyCourse) => {
               setExcludedCourses([...excludedCourses, fyCourse]);
             }}
+            excludedCourses={excludedCourses}
           />
         ))}
       </div>
