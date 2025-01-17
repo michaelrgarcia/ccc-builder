@@ -329,7 +329,12 @@ export function populatePlan(reqsList, articulations, planCourses) {
   return planCourses;
 }
 
-export function requirementCompleted(requirement, articulations, planCourses) {
+export function requirementCompleted(
+  requirement,
+  articulations,
+  planCourses,
+  excludedCourses
+) {
   const { conjunction, requiredCourses } = requirement;
 
   let courseGroupsFinished = 0;
@@ -339,34 +344,47 @@ export function requirementCompleted(requirement, articulations, planCourses) {
 
     let fulfilled = 0;
 
+    const excludedGroup = courses.every((course) =>
+      excludedCourses.some(
+        (excluded) => JSON.stringify(excluded) === JSON.stringify(course)
+      )
+    );
+
     for (let j = 0; j < courses.length; j++) {
       const course = courses[j];
 
       const articulation = findArticulation(course, articulations);
 
-      if (!articulation) continue;
+      const excluded = excludedCourses.some(
+        (excluded) => JSON.stringify(excluded) === JSON.stringify(course)
+      );
 
-      for (const option of articulation.articulationOptions) {
-        const inPlan = option.every((cccCourse) =>
-          planCourses.some((planCourse) =>
-            matchArticulation(planCourse, cccCourse)
-          )
-        );
+      if (!articulation && excluded) {
+        fulfilled +=
+          type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
+      } else if (articulation) {
+        for (const option of articulation.articulationOptions) {
+          const inPlan = option.every((cccCourse) =>
+            planCourses.some((planCourse) =>
+              matchArticulation(planCourse, cccCourse)
+            )
+          );
 
-        if (inPlan) {
-          fulfilled +=
-            type === "NCourses" || type == "AllCourses" ? 1 : course.credits;
+          if (inPlan) {
+            fulfilled +=
+              type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
+          }
         }
       }
     }
 
-    if (fulfilled >= amount || fulfilled >= courses.length) {
+    if (fulfilled >= amount || fulfilled >= courses.length || excludedGroup) {
       courseGroupsFinished += 1;
     }
   }
 
   if (conjunction === "Or") {
-    return courseGroupsFinished === 1;
+    return courseGroupsFinished >= 1;
   } else {
     return courseGroupsFinished >= requiredCourses.length;
   }
