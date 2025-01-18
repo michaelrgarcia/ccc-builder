@@ -167,6 +167,8 @@ function ArticulationSearchDropdown({
 
           await finalizeSearch(fyCourseId, articulations);
         }
+
+        setFoundArticulations(articulations);
       } catch (err) {
         console.error("error processing requests", err);
       } finally {
