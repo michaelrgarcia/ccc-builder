@@ -280,14 +280,20 @@ function CourseItem({
   onArticulationSelect,
   planCourses,
   onSearchDecline,
-  searchActive,
-  toggleSearch,
+  majorId,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExcluded, setIsExcluded] = useState(false);
   const [oneSearch, setOneSearch] = useState(false);
 
-  const { courseTitle, coursePrefix, courseNumber, credits } = course;
+  const {
+    courseTitle,
+    coursePrefix,
+    courseNumber,
+    credits,
+    courseId,
+    seriesId,
+  } = course;
 
   const courseIdentifier =
     course.type === "Course"
@@ -339,11 +345,7 @@ function CourseItem({
         >
           <p className="subtitle">Requirement skipped.</p>
         </div>
-      ) : isOpen && !articulation && !oneSearch && searchActive ? (
-        <div className="articulation-select-dropdown">
-          <p>Please wait for the existing search to finish.</p>
-        </div>
-      ) : isOpen && !articulation && !oneSearch && !searchActive ? (
+      ) : isOpen && !articulation && !oneSearch ? (
         <div className="articulation-select-dropdown">
           <p>Search another CCC for an articulation?</p>
           <div className="pre-search-choices">
@@ -379,8 +381,8 @@ function CourseItem({
           articulation={articulation}
           onArticulationSelect={onArticulationSelect}
           planCourses={planCourses}
-          searchActive={searchActive}
-          toggleSearch={toggleSearch}
+          fyCourseId={seriesId || courseId}
+          majorId={majorId}
         />
       ) : (
         ""
@@ -396,8 +398,7 @@ CourseItem.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
   planCourses: PropTypes.array.isRequired,
   onSearchDecline: PropTypes.func.isRequired,
-  searchActive: PropTypes.bool.isRequired,
-  toggleSearch: PropTypes.func.isRequired,
+  majorId: PropTypes.string.isRequired,
 };
 
 function CourseItemGroup({
@@ -409,8 +410,6 @@ function CourseItemGroup({
   onArticulationSelect,
   onSearchDecline,
   excludedCourses,
-  searchActive,
-  toggleSearch,
 }) {
   const { courses, type, amount } = courseGroup;
 
@@ -419,11 +418,16 @@ function CourseItemGroup({
   }
 
   let fulfillmentCount = 0;
+  let nearestMajorId = "";
 
   for (let i = 0; i < courses.length; i++) {
     const course = courses[i];
 
     const articulation = findArticulation(course, articulations);
+
+    if (articulation) {
+      nearestMajorId = articulation.articulationInfo.majorId;
+    }
 
     if (articulationInPlan(articulation, planCourses)) {
       fulfillmentCount += type === "NCourses" ? 1 : Number(course.credits);
@@ -483,8 +487,7 @@ function CourseItemGroup({
             planCourses={planCourses}
             onArticulationSelect={onArticulationSelect}
             onSearchDecline={onSearchDecline}
-            searchActive={searchActive}
-            toggleSearch={toggleSearch}
+            majorId={nearestMajorId}
           />
         );
       })}
@@ -501,8 +504,6 @@ CourseItemGroup.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
-  searchActive: PropTypes.bool.isRequired,
-  toggleSearch: PropTypes.func.isRequired,
 };
 
 function RequirementItem({
@@ -512,8 +513,6 @@ function RequirementItem({
   onArticulationSelect,
   onSearchDecline,
   excludedCourses,
-  searchActive,
-  toggleSearch,
 }) {
   const { conjunction, requiredCourses } = requirement;
 
@@ -550,8 +549,6 @@ function RequirementItem({
           onArticulationSelect={onArticulationSelect}
           onSearchDecline={onSearchDecline}
           excludedCourses={excludedCourses}
-          searchActive={searchActive}
-          toggleSearch={toggleSearch}
         />
       ))}
     </div>
@@ -565,8 +562,6 @@ RequirementItem.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
-  searchActive: PropTypes.bool.isRequired,
-  toggleSearch: PropTypes.func.isRequired,
 };
 
 function RequirementItemGroup({
@@ -577,8 +572,6 @@ function RequirementItemGroup({
   onArticulationSelect,
   onSearchDecline,
   excludedCourses,
-  searchActive,
-  toggleSearch,
 }) {
   return (
     <div className="requirement-group">
@@ -592,8 +585,6 @@ function RequirementItemGroup({
           onArticulationSelect={onArticulationSelect}
           onSearchDecline={onSearchDecline}
           excludedCourses={excludedCourses}
-          searchActive={searchActive}
-          toggleSearch={toggleSearch}
         />
       ))}
     </div>
@@ -608,8 +599,6 @@ RequirementItemGroup.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
-  searchActive: PropTypes.bool.isRequired,
-  toggleSearch: PropTypes.func.isRequired,
 };
 
 function UniversityGroup({
@@ -620,8 +609,6 @@ function UniversityGroup({
   onArticulationSelect,
   onSearchDecline,
   excludedCourses,
-  searchActive,
-  toggleSearch,
 }) {
   const { fyId } = uniGroup[0].inputs;
 
@@ -646,8 +633,6 @@ function UniversityGroup({
             onArticulationSelect={onArticulationSelect}
             onSearchDecline={onSearchDecline}
             excludedCourses={excludedCourses}
-            searchActive={searchActive}
-            toggleSearch={toggleSearch}
           />
         );
       })}
@@ -663,8 +648,6 @@ UniversityGroup.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
-  searchActive: PropTypes.bool.isRequired,
-  toggleSearch: PropTypes.func.isRequired,
 };
 
 function Plan({ reqsList, majorList, articulations }) {
@@ -672,7 +655,7 @@ function Plan({ reqsList, majorList, articulations }) {
     populatePlan(reqsList, articulations, [])
   );
   const [excludedCourses, setExcludedCourses] = useState([]);
-  const [searchActive, setSearchActive] = useState(false);
+  const [searchesActive, setSearchesActive] = useState(0); // determine upper limit
 
   const uniGroups = groupByUni(reqsList);
 
@@ -741,8 +724,6 @@ function Plan({ reqsList, majorList, articulations }) {
               setExcludedCourses([...excludedCourses, fyCourse]);
             }}
             excludedCourses={excludedCourses}
-            searchActive={searchActive}
-            toggleSearch={() => setSearchActive(!searchActive)}
           />
         ))}
       </div>
