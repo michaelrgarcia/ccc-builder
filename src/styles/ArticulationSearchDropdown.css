@@ -7,7 +7,7 @@
   font-size: 0.9em;
 }
 
-.articulation-search-dropdown > .subtitle {
+.articulation-search-dropdown > .loading-container + .subtitle {
   text-decoration: underline;
   font-size: 1.4em;
 
