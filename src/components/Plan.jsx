@@ -286,6 +286,8 @@ function CourseItem({
   const [isExcluded, setIsExcluded] = useState(false);
   const [oneSearch, setOneSearch] = useState(false);
 
+  const [artState, setArtState] = useState(articulation);
+
   const {
     courseTitle,
     coursePrefix,
@@ -313,7 +315,7 @@ function CourseItem({
             className="course-identifier"
             style={{
               fontWeight:
-                articulationInPlan(articulation, planCourses) ||
+                articulationInPlan(artState, planCourses) ||
                 requirementFulfilled ||
                 isExcluded
                   ? "normal"
@@ -345,7 +347,7 @@ function CourseItem({
         >
           <p className="subtitle">Requirement skipped.</p>
         </div>
-      ) : isOpen && !articulation && !oneSearch ? (
+      ) : isOpen && !artState && !oneSearch ? (
         <div className="articulation-select-dropdown">
           <p>Search another CCC for an articulation?</p>
           <div className="pre-search-choices">
@@ -370,19 +372,17 @@ function CourseItem({
             </button>
           </div>
         </div>
-      ) : isOpen && articulation ? (
+      ) : isOpen && artState ? (
         <ArticulationSelectDropdown
-          articulation={articulation}
+          articulation={artState}
           onArticulationSelect={onArticulationSelect}
           planCourses={planCourses}
         />
       ) : isOpen && !articulation && oneSearch ? (
         <ArticulationSearchDropdown
-          articulation={articulation}
-          onArticulationSelect={onArticulationSelect}
-          planCourses={planCourses}
           fyCourseId={seriesId || courseId}
           majorId={majorId}
+          updateArticulation={(newArt) => setArtState(newArt)}
         />
       ) : (
         ""
