@@ -33,7 +33,11 @@ function renderCourseItem(item, parentKey = "") {
   }
 
   if (typeof item !== "string") {
-    return <p>{`${item.prefix} ${item.courseNumber} - ${item.courseTitle}`}</p>;
+    return (
+      <p
+        key={parentKey}
+      >{`${item.prefix} ${item.courseNumber} - ${item.courseTitle}`}</p>
+    );
   }
 }
 
@@ -76,13 +80,17 @@ function ArticulationList({
   cccName,
   streamArticulations,
   updateArticulation,
+  stopSearch,
 }) {
   return (
     <div className="articulation-list">
       <button
         type="button"
         className="ccc-name"
-        onClick={updateArticulation(streamArticulations)}
+        onClick={() => {
+          updateArticulation(streamArticulations);
+          stopSearch();
+        }}
       >
         {cccName}
       </button>
@@ -97,6 +105,7 @@ ArticulationList.propTypes = {
   cccName: PropTypes.string.isRequired,
   streamArticulations: PropTypes.arrayOf(StreamArticulation),
   updateArticulation: PropTypes.func.isRequired,
+  stopSearch: PropTypes.func.isRequired,
 };
 
 function ArticulationSearchDropdown({
@@ -110,6 +119,7 @@ function ArticulationSearchDropdown({
   const [foundArticulations, setFoundArticulations] = useState([]);
 
   const cccCount = 116;
+
   const renderedArticulations = foundArticulations.map((art, artIndex) => {
     if (!art || !art.result) return null;
 
@@ -136,6 +146,7 @@ function ArticulationSearchDropdown({
             cccName={collegeName}
             streamArticulations={courseCache}
             updateArticulation={updateArticulation}
+            stopSearch={() => setSearchActive(false)}
           />
         );
       }
