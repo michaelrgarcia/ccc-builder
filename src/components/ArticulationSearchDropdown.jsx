@@ -76,22 +76,21 @@ function renderStreamArticulations(items, groupName) {
   return renderedElements;
 }
 
-function ArticulationList({
-  cccName,
-  streamArticulations,
-  updateArticulation,
-  stopSearch,
-}) {
+function ArticulationList({ cccName, streamArticulations, stopSearch }) {
   return (
     <div className="articulation-list">
       <button
         type="button"
         className="ccc-name"
         onClick={() => {
-          // make courseItems able to render my articulation structure
+          console.log("xo");
           /*
-          updateArticulation(streamArticulations);
+
+          * some function that allows user to select articulation for the plan
+          * and calls prajwals articulation endpt(s) to check articulatesTo
+          
           stopSearch();
+
           */
         }}
       >
@@ -107,14 +106,14 @@ function ArticulationList({
 ArticulationList.propTypes = {
   cccName: PropTypes.string.isRequired,
   streamArticulations: PropTypes.arrayOf(StreamArticulation),
-  updateArticulation: PropTypes.func.isRequired,
   stopSearch: PropTypes.func.isRequired,
 };
 
 function ArticulationSearchDropdown({
   fyCourseId,
   majorId,
-  updateArticulation,
+  cachedSearch,
+  updateArticulations,
 }) {
   const [searchActive, setSearchActive] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
@@ -122,8 +121,9 @@ function ArticulationSearchDropdown({
   const [foundArticulations, setFoundArticulations] = useState([]);
 
   const cccCount = 116;
+  const availableArticulations = cachedSearch || foundArticulations;
 
-  const renderedArticulations = foundArticulations.map((art, artIndex) => {
+  const renderedArticulations = availableArticulations.map((art, artIndex) => {
     if (!art || !art.result) return null;
 
     const { result } = art;
@@ -148,7 +148,7 @@ function ArticulationSearchDropdown({
             key={`${collegeName}-${artIndex}-for-${fyCourseId}`}
             cccName={collegeName}
             streamArticulations={courseCache}
-            updateArticulation={updateArticulation}
+            updateArticulations={updateArticulations}
             stopSearch={() => setSearchActive(false)}
           />
         );
@@ -158,6 +158,8 @@ function ArticulationSearchDropdown({
 
   useEffect(() => {
     if (!searchActive) return;
+
+    // still need to implement messages for the response codes in tvUtils
 
     const splitMajorId = majorId.split("/");
 
@@ -268,8 +270,6 @@ function ArticulationSearchDropdown({
       const links = getArticulationParams(receivingId, majorKey, year);
       const linksCopy = [...links];
 
-      setFoundArticulations([]);
-
       let articulations;
 
       try {
@@ -281,7 +281,7 @@ function ArticulationSearchDropdown({
           await finalizeSearch(fyCourseId, articulations);
         }
 
-        setFoundArticulations(articulations);
+        updateArticulations(articulations);
       } catch (err) {
         console.error("error processing requests", err);
       } finally {
@@ -290,7 +290,7 @@ function ArticulationSearchDropdown({
     }
 
     searchForArticulations();
-  }, [fyCourseId, majorId, searchActive, updateArticulation]);
+  }, [fyCourseId, majorId, searchActive, updateArticulations]);
 
   if (searchActive) {
     return (
@@ -317,7 +317,7 @@ function ArticulationSearchDropdown({
         <div className="search-articulations">{renderedArticulations}</div>
       </div>
     );
-  } else if (!searchActive && foundArticulations.length === 0) {
+  } else if (!searchActive && availableArticulations.length === 0) {
     return (
       <div className="articulation-search-dropdown">
         <p className="subtitle">Click Search to proceed.</p>
@@ -333,7 +333,7 @@ function ArticulationSearchDropdown({
         </button>
       </div>
     );
-  } else if (!searchActive && foundArticulations.length > 0) {
+  } else if (!searchActive && availableArticulations.length > 0) {
     return (
       <div className="articulation-search-dropdown">
         <p className="subtitle">Select a college</p>
@@ -346,7 +346,8 @@ function ArticulationSearchDropdown({
 ArticulationSearchDropdown.propTypes = {
   fyCourseId: PropTypes.string.isRequired,
   majorId: PropTypes.string.isRequired,
-  updateArticulation: PropTypes.func.isRequired,
+  cachedSearch: PropTypes.arrayOf(StreamArticulation),
+  updateArticulations: PropTypes.func.isRequired,
 };
 
 export default ArticulationSearchDropdown;

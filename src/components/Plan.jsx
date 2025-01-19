@@ -385,7 +385,7 @@ function CourseItem({
           fyCourseId={seriesId || courseId}
           majorId={majorId}
           cachedSearch={searchArticulation}
-          updateArticulation={(newArt) => setSearchArticulation(newArt)}
+          updateArticulations={(newArt) => setSearchArticulation(newArt)}
         />
       ) : (
         ""
