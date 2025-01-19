@@ -7,9 +7,9 @@
   font-size: 0.9em;
 }
 
-.articulation-search-dropdown > .loading-container + .subtitle {
-  text-decoration: underline;
+.articulation-search-dropdown:has(.search-articulations) > .subtitle {
   font-size: 1.4em;
+  text-align: center;
 
   user-select: none;
 }
@@ -89,6 +89,37 @@
     #9864cb 55%,
     #7a3dbc 100%
   );
+}
+
+.search-articulations {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+
+  margin-top: 10px;
+}
+
+.ccc-name {
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 8px 20px;
+  margin-bottom: 0;
+}
+
+.stream-articulations {
+  margin-top: 5px;
+
+  user-select: none;
+
+  opacity: 0.6;
+}
+
+.search-articulation-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 0.9em;
 }
 
 @keyframes waver {
