@@ -94,7 +94,7 @@
 .search-articulations {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
 
   margin-top: 10px;
 }
@@ -104,6 +104,8 @@
   border-radius: 8px;
   padding: 5px 20px;
   margin-bottom: 0;
+
+  width: fit-content;
 }
 
 .stream-articulations {
