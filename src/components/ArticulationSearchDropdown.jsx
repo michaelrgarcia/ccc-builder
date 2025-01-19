@@ -88,8 +88,11 @@ function ArticulationList({
         type="button"
         className="ccc-name"
         onClick={() => {
+          // make courseItems able to render my articulation structure
+          /*
           updateArticulation(streamArticulations);
           stopSearch();
+          */
         }}
       >
         {cccName}
