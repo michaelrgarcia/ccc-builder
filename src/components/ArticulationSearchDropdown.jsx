@@ -54,7 +54,22 @@ function renderStreamArticulations(items, groupName) {
       renderedElements.push(
         <div key={i} className="search-art-optgroup">
           <label className="search-articulation-option">
-            <input type="radio" name={groupName} disabled />
+            <input
+              type="radio"
+              name={groupName}
+              onClick={() => {
+                console.log("xo");
+                /*
+
+          * some function that allows user to select articulation for the plan
+          * and calls prajwals articulation endpt(s) to check articulatesTo
+          
+          stopSearch();
+
+          */
+              }}
+              disabled
+            />
             <div className="search-art-courses">
               {renderCourseItem(subitem, sharedInputName)}
             </div>
@@ -66,7 +81,22 @@ function renderStreamArticulations(items, groupName) {
 
       renderedElements.push(
         <label key={i} className="search-articulation-option">
-          <input type="radio" name={courseName} disabled />
+          <input
+            type="radio"
+            name={courseName}
+            onClick={() => {
+              console.log("xo");
+              /*
+
+          * some function that allows user to select articulation for the plan
+          * and calls prajwals articulation endpt(s) to check articulatesTo
+          
+          stopSearch();
+
+          */
+            }}
+            disabled
+          />
           <p>{courseName}</p>
         </label>
       );
@@ -79,23 +109,7 @@ function renderStreamArticulations(items, groupName) {
 function ArticulationList({ cccName, streamArticulations, stopSearch }) {
   return (
     <div className="articulation-list">
-      <button
-        type="button"
-        className="ccc-name"
-        onClick={() => {
-          console.log("xo");
-          /*
-
-          * some function that allows user to select articulation for the plan
-          * and calls prajwals articulation endpt(s) to check articulatesTo
-          
-          stopSearch();
-
-          */
-        }}
-      >
-        {cccName}
-      </button>
+      <p className="ccc-name">{cccName}</p>
       <div className="stream-articulations">
         {renderStreamArticulations(streamArticulations, "root")}
       </div>
@@ -313,7 +327,7 @@ function ArticulationSearchDropdown({
             max={cccCount}
           ></progress>
         </div>
-        <p className="subtitle">Select a college </p>
+        <p className="subtitle">Select 1 option </p>
         <div className="search-articulations">{renderedArticulations}</div>
       </div>
     );
@@ -336,7 +350,7 @@ function ArticulationSearchDropdown({
   } else if (!searchActive && availableArticulations.length > 0) {
     return (
       <div className="articulation-search-dropdown">
-        <p className="subtitle">Select a college</p>
+        <p className="subtitle">Select 1 option</p>
         <div className="search-articulations">{renderedArticulations}</div>
       </div>
     );
