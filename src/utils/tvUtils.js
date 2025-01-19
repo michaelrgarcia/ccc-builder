@@ -105,3 +105,33 @@ export async function getClassFromDb(fullCourseId) {
 
   return false;
 }
+
+export function sortClassData(classData) {
+  classData.sort((a, b) => {
+    if (typeof a === "string") {
+      return 0;
+    }
+
+    if (typeof b === "string") {
+      return 0;
+    }
+
+    if ("prefix" in a && "prefix" in b) {
+      const prefixComparison = a.prefix.localeCompare(b.prefix);
+
+      if (prefixComparison !== 0) return prefixComparison;
+    }
+
+    if ("courseNumber" in a && "courseNumber" in b) {
+      const courseNumberComparison = a.courseNumber.localeCompare(
+        b.courseNumber
+      );
+
+      if (courseNumberComparison !== 0) return courseNumberComparison;
+    }
+
+    return 0;
+  });
+
+  return classData;
+}
