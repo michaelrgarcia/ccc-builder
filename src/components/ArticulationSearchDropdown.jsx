@@ -1,47 +1,146 @@
 import PropTypes from "prop-types";
 
 import "../styles/ArticulationSearchDropdown.css";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   finalizeSearch,
   getArticulationParams,
   getClassFromDb,
+  sortClassData,
 } from "../utils/tvUtils";
 
-const PrajArticulation = PropTypes.shape({
-  articulationType: PropTypes.oneOf(["Course", "Series"]).isRequired,
-  courseTitle: PropTypes.string,
-  seriesTitle: PropTypes.string,
-  coursePrefix: PropTypes.string,
+const MyLowerDiv = PropTypes.shape({
+  prefix: PropTypes.string,
   courseNumber: PropTypes.string,
+  courseTitle: PropTypes.string,
   courseId: PropTypes.string,
-  seriesId: PropTypes.string,
-  credits: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  articulationOptions: PropTypes.arrayOf(
-    PropTypes.arrayOf(
-      PropTypes.shape({
-        courseTitle: PropTypes.string.isRequired,
-        courseNumber: PropTypes.string.isRequired,
-        coursePrefix: PropTypes.string.isRequired,
-        courseId: PropTypes.string.isRequired,
-        note: PropTypes.string,
-      })
-    )
-  ).isRequired,
+  cid: PropTypes.string,
 });
+const MySeriesItem = PropTypes.oneOfType([PropTypes.string, MyLowerDiv]);
+const MySeries = PropTypes.arrayOf(MySeriesItem);
+const MyArticulation = PropTypes.oneOfType([MyLowerDiv, MySeries]);
+
+const StreamArticulation = PropTypes.oneOfType([
+  MyArticulation,
+  PropTypes.string,
+]);
+
+function renderCourseItem(item, parentKey = "") {
+  if (Array.isArray(item)) {
+    return item.map((subitem, index) =>
+      renderCourseItem(subitem, `${parentKey}-${index}`)
+    );
+  }
+
+  if (typeof item !== "string") {
+    return <p>{`${item.prefix} ${item.courseNumber} - ${item.courseTitle}`}</p>;
+  }
+}
+
+function renderStreamArticulations(items, groupName) {
+  const sortedItems = sortClassData(items);
+  const renderedElements = [];
+
+  for (let i = 0; i < sortedItems.length; i++) {
+    const subitem = sortedItems[i];
+
+    if (Array.isArray(subitem)) {
+      const sharedInputName = `${groupName}-group-${i}`;
+
+      renderedElements.push(
+        <div key={i} className="search-art-optgroup">
+          <label className="search-articulation-option">
+            <input type="radio" name={groupName} disabled />
+            <div className="search-art-courses">
+              {renderCourseItem(subitem, sharedInputName)}
+            </div>
+          </label>
+        </div>
+      );
+    } else if (subitem.courseNumber && subitem.courseTitle && subitem.prefix) {
+      const courseName = `${subitem.prefix} ${subitem.courseNumber} - ${subitem.courseTitle}`;
+
+      renderedElements.push(
+        <label key={i} className="search-articulation-option">
+          <input type="radio" name={courseName} disabled />
+          <p>{courseName}</p>
+        </label>
+      );
+    }
+  }
+
+  return renderedElements;
+}
+
+function ArticulationList({
+  cccName,
+  streamArticulations,
+  updateArticulation,
+}) {
+  return (
+    <div className="articulation-list">
+      <button
+        type="button"
+        className="ccc-name"
+        onClick={updateArticulation(streamArticulations)}
+      >
+        {cccName}
+      </button>
+      <div className="stream-articulations">
+        {renderStreamArticulations(streamArticulations, "root")}
+      </div>
+    </div>
+  );
+}
+
+ArticulationList.propTypes = {
+  cccName: PropTypes.string.isRequired,
+  streamArticulations: PropTypes.arrayOf(StreamArticulation),
+  updateArticulation: PropTypes.func.isRequired,
+};
 
 function ArticulationSearchDropdown({
-  articulation,
-  planCourses,
-  onArticulationSelect,
   fyCourseId,
   majorId,
+  updateArticulation,
 }) {
   const [searchActive, setSearchActive] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
+
   const [foundArticulations, setFoundArticulations] = useState([]);
 
   const cccCount = 116;
+  const renderedArticulations = foundArticulations.map((art, artIndex) => {
+    if (!art || !art.result) return null;
+
+    const { result } = art;
+
+    const courseCache = [];
+    let collegeName = "";
+
+    for (let i = 0; i < result.length; i++) {
+      const item = result[i];
+
+      if (!item) return null;
+
+      if (item.ccName) {
+        collegeName = item.ccName;
+      } else {
+        courseCache.push(item);
+      }
+
+      if (collegeName) {
+        return (
+          <ArticulationList
+            key={`${collegeName}-${artIndex}-for-${fyCourseId}`}
+            cccName={collegeName}
+            streamArticulations={courseCache}
+            updateArticulation={updateArticulation}
+          />
+        );
+      }
+    }
+  });
 
   useEffect(() => {
     if (!searchActive) return;
@@ -177,7 +276,7 @@ function ArticulationSearchDropdown({
     }
 
     searchForArticulations();
-  }, [fyCourseId, majorId, searchActive]);
+  }, [fyCourseId, majorId, searchActive, updateArticulation]);
 
   if (searchActive) {
     return (
@@ -200,8 +299,8 @@ function ArticulationSearchDropdown({
             max={cccCount}
           ></progress>
         </div>
-        <p className="subtitle">Articulations found: </p>
-        <div className="search-articulations"></div>
+        <p className="subtitle">Select a college </p>
+        <div className="search-articulations">{renderedArticulations}</div>
       </div>
     );
   } else if (!searchActive && foundArticulations.length === 0) {
@@ -221,16 +320,19 @@ function ArticulationSearchDropdown({
       </div>
     );
   } else if (!searchActive && foundArticulations.length > 0) {
-    return <p>articulations found! soon to be rendered here</p>;
+    return (
+      <div className="articulation-search-dropdown">
+        <p className="subtitle">Select a college</p>
+        <div className="search-articulations">{renderedArticulations}</div>
+      </div>
+    );
   }
 }
 
 ArticulationSearchDropdown.propTypes = {
-  articulation: PrajArticulation,
-  planCourses: PropTypes.array.isRequired,
-  onArticulationSelect: PropTypes.func.isRequired,
   fyCourseId: PropTypes.string.isRequired,
   majorId: PropTypes.string.isRequired,
+  updateArticulation: PropTypes.func.isRequired,
 };
 
 export default ArticulationSearchDropdown;
