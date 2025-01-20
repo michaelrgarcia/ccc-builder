@@ -41,7 +41,9 @@ export function createInstructions(requiredCourses, conjunction) {
     for (let i = 0; i < requiredCourses.length; i++) {
       const currentReq = requiredCourses[i];
 
-      if (currentReq.courses.length >= 1) {
+      if (currentReq.courses.length === 1) {
+        break;
+      } else if (currentReq.courses.length > 1) {
         const progressiveLetter = String.fromCharCode(i + 1 + 64);
 
         if (i === 0) {
