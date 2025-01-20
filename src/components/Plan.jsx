@@ -281,6 +281,7 @@ function CourseItem({
   planCourses,
   onSearchDecline,
   majorId,
+  createArticulationParams,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExcluded, setIsExcluded] = useState(false);
@@ -392,6 +393,7 @@ function CourseItem({
           majorId={majorId}
           cachedSearch={searchArticulation}
           updateArticulations={(newArt) => setSearchArticulation(newArt)}
+          createArticulationParams={createArticulationParams}
         />
       ) : (
         ""
@@ -408,6 +410,7 @@ CourseItem.propTypes = {
   planCourses: PropTypes.array.isRequired,
   onSearchDecline: PropTypes.func.isRequired,
   majorId: PropTypes.string.isRequired,
+  createArticulationParams: PropTypes.func.isRequired,
 };
 
 function CourseItemGroup({
@@ -419,6 +422,7 @@ function CourseItemGroup({
   onArticulationSelect,
   onSearchDecline,
   excludedCourses,
+  createArticulationParams,
 }) {
   const { courses, type, amount } = courseGroup;
 
@@ -497,6 +501,7 @@ function CourseItemGroup({
             onArticulationSelect={onArticulationSelect}
             onSearchDecline={onSearchDecline}
             majorId={nearestMajorId}
+            createArticulationParams={createArticulationParams}
           />
         );
       })}
@@ -513,6 +518,7 @@ CourseItemGroup.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
+  createArticulationParams: PropTypes.func.isRequired,
 };
 
 function RequirementItem({
@@ -522,6 +528,7 @@ function RequirementItem({
   onArticulationSelect,
   onSearchDecline,
   excludedCourses,
+  createArticulationParams,
 }) {
   const { conjunction, requiredCourses } = requirement;
 
@@ -558,6 +565,7 @@ function RequirementItem({
           onArticulationSelect={onArticulationSelect}
           onSearchDecline={onSearchDecline}
           excludedCourses={excludedCourses}
+          createArticulationParams={createArticulationParams}
         />
       ))}
     </div>
@@ -571,6 +579,7 @@ RequirementItem.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
+  createArticulationParams: PropTypes.func.isRequired,
 };
 
 function RequirementItemGroup({
@@ -581,6 +590,7 @@ function RequirementItemGroup({
   onArticulationSelect,
   onSearchDecline,
   excludedCourses,
+  createArticulationParams,
 }) {
   return (
     <div className="requirement-group">
@@ -594,6 +604,7 @@ function RequirementItemGroup({
           onArticulationSelect={onArticulationSelect}
           onSearchDecline={onSearchDecline}
           excludedCourses={excludedCourses}
+          createArticulationParams={createArticulationParams}
         />
       ))}
     </div>
@@ -608,6 +619,7 @@ RequirementItemGroup.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
+  createArticulationParams: PropTypes.func.isRequired,
 };
 
 function UniversityGroup({
@@ -618,6 +630,7 @@ function UniversityGroup({
   onArticulationSelect,
   onSearchDecline,
   excludedCourses,
+  createArticulationParams,
 }) {
   const { fyId } = uniGroup[0].inputs;
 
@@ -642,6 +655,7 @@ function UniversityGroup({
             onArticulationSelect={onArticulationSelect}
             onSearchDecline={onSearchDecline}
             excludedCourses={excludedCourses}
+            createArticulationParams={createArticulationParams}
           />
         );
       })}
@@ -657,9 +671,15 @@ UniversityGroup.propTypes = {
   onArticulationSelect: PropTypes.func.isRequired,
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
+  createArticulationParams: PropTypes.func.isRequired,
 };
 
-function Plan({ reqsList, majorList, articulations }) {
+function Plan({
+  reqsList,
+  majorList,
+  articulations,
+  createArticulationParams,
+}) {
   const [planCourses, setPlanCourses] = useState(
     populatePlan(reqsList, articulations, [])
   );
@@ -733,6 +753,7 @@ function Plan({ reqsList, majorList, articulations }) {
               setExcludedCourses([...excludedCourses, fyCourse]);
             }}
             excludedCourses={excludedCourses}
+            createArticulationParams={createArticulationParams}
           />
         ))}
       </div>
@@ -749,6 +770,7 @@ Plan.propTypes = {
     }).isRequired
   ).isRequired,
   articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
+  createArticulationParams: PropTypes.func.isRequired,
 };
 
 export default Plan;
