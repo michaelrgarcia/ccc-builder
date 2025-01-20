@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { caliCCs, universities } from "../utils/staticAssistData";
 
@@ -26,13 +26,29 @@ function App() {
 
   const [majors, setMajors] = useState({});
 
-  // combine these at some point
   const [selectedSchools, setSelectedSchools] = useState([]);
   const [selectedMajors, setSelectedMajors] = useState({});
   const [selectedCCC, setSelectedCCC] = useState({});
 
   const [reqsList, setReqsList] = useState([]);
   const [articulations, setArticulations] = useState({});
+
+  const createArticulationParams = useCallback(
+    (cccId) => {
+      return selectedSchools.flatMap((school) => {
+        const fyId = school.id;
+        const associatedMajors = selectedMajors[fyId];
+
+        return associatedMajors.map(({ key }) => ({
+          cccId,
+          fyId,
+          yr: academicYear,
+          majorId: `${academicYear}/${cccId}/to/${fyId}/Major/${key}`,
+        }));
+      });
+    },
+    [selectedSchools, selectedMajors]
+  );
 
   useEffect(() => {
     async function getMajors() {
@@ -74,17 +90,7 @@ function App() {
       try {
         const endpoint = import.meta.env.VITE_BASE_SEARCHER;
 
-        const paramsList = selectedSchools.flatMap((school) => {
-          const fyId = school.id;
-          const associatedMajors = selectedMajors[fyId];
-
-          return associatedMajors.map(({ key }) => ({
-            cccId: selectedCCC.id,
-            fyId,
-            yr: academicYear,
-            majorId: `${academicYear}/${selectedCCC.id}/to/${fyId}/Major/${key}`,
-          }));
-        });
+        const paramsList = createArticulationParams(selectedCCC.id);
 
         const response = await fetch(endpoint, {
           body: JSON.stringify(paramsList),
@@ -113,7 +119,7 @@ function App() {
       setReqsList([]);
       getReqsList();
     }
-  }, [selectedSchools, selectedMajors, selectedCCC.id]);
+  }, [selectedCCC.id, createArticulationParams]);
 
   useEffect(() => {
     async function getArticulations() {
@@ -285,7 +291,6 @@ function App() {
     );
   } else if (currentStage === "primary-cc-select") {
     const amtOfMajors = Object.values(selectedMajors).flat();
-    const articsForEachMajor = Object.values(articulations);
 
     return (
       <>
@@ -312,8 +317,7 @@ function App() {
             inputId="community-colleges"
           />
           {selectedCCC.name ? (
-            reqsList.flat().length === amtOfMajors.length /* &&
-            articsForEachMajor.length === selectedSchools.length */ ? (
+            reqsList.flat().length === amtOfMajors.length ? (
               <button
                 type="button"
                 className="next"
@@ -358,6 +362,9 @@ function App() {
             reqsList={reqsList}
             majorList={flatMajors}
             articulations={articulations}
+            createArticulationParams={(cccId) =>
+              createArticulationParams(cccId)
+            }
           />
         </main>
       </>
