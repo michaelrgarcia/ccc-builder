@@ -284,11 +284,11 @@ function CourseItem({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExcluded, setIsExcluded] = useState(false);
-  const [oneSearch, setOneSearch] = useState(false);
+  const [searchPlanned, setSearchPlanned] = useState(false);
 
   const [searchArticulation, setSearchArticulation] = useState(null);
 
-  const availableArticulation = /* searchArticulation ||  */ articulation;
+  const availableArticulation = searchArticulation || articulation;
 
   const {
     courseTitle,
@@ -317,7 +317,10 @@ function CourseItem({
             className="course-identifier"
             style={{
               fontWeight:
-                articulationInPlan(availableArticulation, planCourses) ||
+                articulationInPlan(
+                  articulation /* will be availableArticulation soon*/,
+                  planCourses
+                ) ||
                 requirementFulfilled ||
                 isExcluded
                   ? "normal"
@@ -331,7 +334,10 @@ function CourseItem({
         <button
           type="button"
           className="articulation-select-toggle"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            setIsOpen(!isOpen);
+            setSearchPlanned(false);
+          }}
         >
           {isOpen ? (
             <img src={UpArrow} alt="Toggle Articulation Select" />
@@ -349,7 +355,7 @@ function CourseItem({
         >
           <p className="subtitle">Requirement skipped.</p>
         </div>
-      ) : isOpen && !availableArticulation && !oneSearch ? (
+      ) : isOpen && !availableArticulation && !searchPlanned ? (
         <div className="articulation-select-dropdown">
           <p>Search another CCC for an articulation?</p>
           <div className="pre-search-choices">
@@ -357,7 +363,7 @@ function CourseItem({
               type="button"
               className="yes-to-search"
               onClick={() => {
-                setOneSearch(true);
+                setSearchPlanned(true);
               }}
             >
               Yes
@@ -374,13 +380,13 @@ function CourseItem({
             </button>
           </div>
         </div>
-      ) : isOpen && availableArticulation ? (
+      ) : isOpen && articulation ? (
         <ArticulationSelectDropdown
-          articulation={availableArticulation}
+          articulation={articulation}
           onArticulationSelect={onArticulationSelect}
           planCourses={planCourses}
         />
-      ) : isOpen && !availableArticulation && oneSearch ? (
+      ) : isOpen && !articulation && (searchPlanned || searchArticulation) ? (
         <ArticulationSearchDropdown
           fyCourseId={seriesId || courseId}
           majorId={majorId}
