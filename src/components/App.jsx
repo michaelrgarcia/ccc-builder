@@ -181,6 +181,7 @@ function App() {
       <>
         <header>
           <h1>CCCBuilder</h1>
+          <p className="beta">Beta</p>
           <p className="user-guide">
             Welcome! First, create a list of universities to transfer to.
           </p>
@@ -241,6 +242,7 @@ function App() {
       <>
         <header>
           <h1>CCCBuilder</h1>
+          <p className="beta">Beta</p>
           <p className="user-guide">
             Select at least one major for each school.
           </p>
@@ -296,6 +298,7 @@ function App() {
       <>
         <header>
           <h1>CCCBuilder</h1>
+          <p className="beta">Beta</p>
           <p className="user-guide">Select your primary community college.</p>
           <div className="progress-container">
             <label htmlFor="plan-progress">20% done</label>
@@ -344,6 +347,7 @@ function App() {
       <>
         <header>
           <h1>CCCBuilder</h1>
+          <p className="beta">Beta</p>
           <p className="user-guide">
             Search for any missing articulations and make any indicated choices.
             Depending on the courses you add, the plan may change.
