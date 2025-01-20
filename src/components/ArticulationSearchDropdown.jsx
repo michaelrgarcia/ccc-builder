@@ -335,8 +335,11 @@ function ArticulationSearchDropdown({
     return (
       <div className="articulation-search-dropdown">
         <p className="subtitle">Click Search to proceed.</p>
-        <p className="subtitle" style={{ fontWeight: "normal" }}>
-          This may take some time.
+        <p
+          className="subtitle"
+          style={{ fontWeight: "normal", textAlign: "center" }}
+        >
+          This may take some time. Final result will be preserved.
         </p>
         <button
           type="button"
