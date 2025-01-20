@@ -41,7 +41,7 @@ function renderCourseItem(item, parentKey = "") {
   }
 }
 
-function renderStreamArticulations(items, groupName) {
+function renderStreamArticulations(items, groupName, paramsList) {
   const sortedItems = sortClassData(items);
   const renderedElements = [];
 
@@ -57,16 +57,24 @@ function renderStreamArticulations(items, groupName) {
             <input
               type="radio"
               name={groupName}
-              onClick={() => {
+              onChange={() => {
                 console.log("xo");
+                console.log(paramsList);
                 /*
 
-          * some function that allows user to select articulation for the plan
-          * and calls prajwals articulation endpt(s) to check articulatesTo
-          
-          stopSearch();
+              call a function that requests  PRAJ_ARTICULATION_FETCHER with the corresponding cccId (can be found with ccName in my dataset)
 
-          */
+              find the equivalent option in prajwal's dataset
+
+              add it to the  plan as usual with onArticulationSelect
+
+              ... will need to deal with lesser ArticulationSelectDropdowns by replacing the articulation in their parent CourseItems (somehow)
+          
+              ^ maybe this logic can go into onArticulationSelect
+              
+              stopSearch();
+
+              */
               }}
               disabled
             />
@@ -84,16 +92,24 @@ function renderStreamArticulations(items, groupName) {
           <input
             type="radio"
             name={courseName}
-            onClick={() => {
+            onChange={() => {
               console.log("xo");
+              console.log(paramsList);
               /*
 
-          * some function that allows user to select articulation for the plan
-          * and calls prajwals articulation endpt(s) to check articulatesTo
-          
-          stopSearch();
+              call a function that requests  PRAJ_ARTICULATION_FETCHER with the corresponding cccId (can be found with ccName in my dataset)
 
-          */
+              find the equivalent option in prajwal's dataset
+
+              add it to the  plan as usual with onArticulationSelect
+
+              ... will need to deal with lesser ArticulationSelectDropdowns by replacing the articulation in their parent CourseItems (somehow)
+          
+              ^ maybe this logic can go into onArticulationSelect
+              
+              stopSearch();
+
+            */
             }}
             disabled
           />
@@ -106,20 +122,31 @@ function renderStreamArticulations(items, groupName) {
   return renderedElements;
 }
 
-function ArticulationList({ cccName, streamArticulations, stopSearch }) {
+function ArticulationList({
+  cccInfo,
+  streamArticulations,
+  createArticulationParams,
+  stopSearch,
+}) {
+  const paramsList = createArticulationParams(cccInfo.cccId);
+
   return (
     <div className="articulation-list">
-      <p className="ccc-name">{cccName}</p>
+      <p className="ccc-name">{cccInfo.cccName}</p>
       <div className="stream-articulations">
-        {renderStreamArticulations(streamArticulations, "root")}
+        {renderStreamArticulations(streamArticulations, "root", paramsList)}
       </div>
     </div>
   );
 }
 
 ArticulationList.propTypes = {
-  cccName: PropTypes.string.isRequired,
+  cccInfo: PropTypes.shape({
+    cccName: PropTypes.string.isRequired,
+    cccId: PropTypes.number.isRequired,
+  }).isRequired,
   streamArticulations: PropTypes.arrayOf(StreamArticulation),
+  createArticulationParams: PropTypes.func.isRequired,
   stopSearch: PropTypes.func.isRequired,
 };
 
@@ -128,6 +155,7 @@ function ArticulationSearchDropdown({
   majorId,
   cachedSearch,
   updateArticulations,
+  createArticulationParams,
 }) {
   const [searchActive, setSearchActive] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
@@ -143,7 +171,8 @@ function ArticulationSearchDropdown({
     const { result } = art;
 
     const courseCache = [];
-    let collegeName = "";
+    let cccName = "";
+    let agreementLink = "";
 
     for (let i = 0; i < result.length; i++) {
       const item = result[i];
@@ -151,18 +180,27 @@ function ArticulationSearchDropdown({
       if (!item) return null;
 
       if (item.ccName) {
-        collegeName = item.ccName;
+        cccName = item.ccName;
+      } else if (item.agreementLink) {
+        agreementLink = item.agreementLink;
       } else {
         courseCache.push(item);
       }
 
-      if (collegeName) {
+      if (cccName && agreementLink) {
+        const agreementUrl = new URL(agreementLink);
+        const cccId = Number(agreementUrl.searchParams.get("institution"));
+
         return (
           <ArticulationList
-            key={`${collegeName}-${artIndex}-for-${fyCourseId}`}
-            cccName={collegeName}
+            key={`${cccName}-${artIndex}-for-${fyCourseId}`}
+            cccInfo={{
+              cccName,
+              cccId,
+            }}
             streamArticulations={courseCache}
             updateArticulations={updateArticulations}
+            createArticulationParams={createArticulationParams}
             stopSearch={() => setSearchActive(false)}
           />
         );
@@ -365,6 +403,7 @@ ArticulationSearchDropdown.propTypes = {
   majorId: PropTypes.string.isRequired,
   cachedSearch: PropTypes.arrayOf(StreamArticulation),
   updateArticulations: PropTypes.func.isRequired,
+  createArticulationParams: PropTypes.func.isRequired,
 };
 
 export default ArticulationSearchDropdown;
