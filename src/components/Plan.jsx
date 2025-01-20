@@ -423,6 +423,7 @@ function CourseItemGroup({
   onSearchDecline,
   excludedCourses,
   createArticulationParams,
+  majorId,
 }) {
   const { courses, type, amount } = courseGroup;
 
@@ -431,21 +432,6 @@ function CourseItemGroup({
   }
 
   let fulfillmentCount = 0;
-  let nearestMajorId = "";
-
-  for (let i = 0; i < courses.length; i++) {
-    const course = courses[i];
-
-    const articulation = findArticulation(course, articulations);
-
-    if (articulation) {
-      nearestMajorId = articulation.articulationInfo.majorId;
-    }
-
-    if (articulationInPlan(articulation, planCourses)) {
-      fulfillmentCount += type === "NCourses" ? 1 : Number(course.credits);
-    }
-  }
 
   const groupFulfilled =
     fulfillmentCount >= amount ||
@@ -500,7 +486,7 @@ function CourseItemGroup({
             planCourses={planCourses}
             onArticulationSelect={onArticulationSelect}
             onSearchDecline={onSearchDecline}
-            majorId={nearestMajorId}
+            majorId={majorId}
             createArticulationParams={createArticulationParams}
           />
         );
@@ -519,6 +505,7 @@ CourseItemGroup.propTypes = {
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
   createArticulationParams: PropTypes.func.isRequired,
+  majorId: PropTypes.string.isRequired,
 };
 
 function RequirementItem({
@@ -529,6 +516,7 @@ function RequirementItem({
   onSearchDecline,
   excludedCourses,
   createArticulationParams,
+  majorId,
 }) {
   const { conjunction, requiredCourses } = requirement;
 
@@ -566,6 +554,7 @@ function RequirementItem({
           onSearchDecline={onSearchDecline}
           excludedCourses={excludedCourses}
           createArticulationParams={createArticulationParams}
+          majorId={majorId}
         />
       ))}
     </div>
@@ -580,6 +569,7 @@ RequirementItem.propTypes = {
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
   createArticulationParams: PropTypes.func.isRequired,
+  majorId: PropTypes.string.isRequired,
 };
 
 function RequirementItemGroup({
@@ -591,6 +581,7 @@ function RequirementItemGroup({
   onSearchDecline,
   excludedCourses,
   createArticulationParams,
+  majorId,
 }) {
   return (
     <div className="requirement-group">
@@ -605,6 +596,7 @@ function RequirementItemGroup({
           onSearchDecline={onSearchDecline}
           excludedCourses={excludedCourses}
           createArticulationParams={createArticulationParams}
+          majorId={majorId}
         />
       ))}
     </div>
@@ -620,6 +612,7 @@ RequirementItemGroup.propTypes = {
   onSearchDecline: PropTypes.func.isRequired,
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
   createArticulationParams: PropTypes.func.isRequired,
+  majorId: PropTypes.string.isRequired,
 };
 
 function UniversityGroup({
@@ -656,6 +649,7 @@ function UniversityGroup({
             onSearchDecline={onSearchDecline}
             excludedCourses={excludedCourses}
             createArticulationParams={createArticulationParams}
+            majorId={inputs.majorId}
           />
         );
       })}
