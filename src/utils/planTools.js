@@ -439,3 +439,30 @@ export function requirementCompleted(
     return courseGroupsFinished >= requiredCourses.length;
   }
 }
+
+/*
+
+async function getEquivalentPrajArticulation(paramsList) {
+  if (!paramsList) return null;
+  
+   try {
+    const endpoint = import.meta.env.VITE_PRAJWAL_ARTICULATIONS;
+
+    const response = await fetch(endpoint, {
+      body: JSON.stringify(paramsList),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Connection: "keep-alive",
+      },
+    });
+
+    if (response.ok) {
+      const newArticulations = await response.json();
+    }
+  } catch (err) {
+    console.error("Failed articulations search: ", err);
+  }
+}
+
+*/
