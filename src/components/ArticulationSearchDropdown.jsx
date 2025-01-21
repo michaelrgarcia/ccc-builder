@@ -8,6 +8,7 @@ import {
   getClassFromDb,
   sortClassData,
 } from "../utils/tvUtils";
+import { getEquivalentArtInfo, myArtInPlan } from "../utils/planTools";
 
 const MyLowerDiv = PropTypes.shape({
   prefix: PropTypes.string,
@@ -25,96 +26,198 @@ const StreamArticulation = PropTypes.oneOfType([
   PropTypes.string,
 ]);
 
-function renderCourseItem(item, parentKey = "") {
+function renderCourseItem(item, baseKey) {
   if (Array.isArray(item)) {
-    return item.map((subitem, index) =>
-      renderCourseItem(subitem, `${parentKey}-${index}`)
-    );
+    return item.map((subitem) => renderCourseItem(subitem));
   }
 
   if (typeof item !== "string") {
-    return (
-      <p
-        key={parentKey}
-      >{`${item.prefix} ${item.courseNumber} - ${item.courseTitle}`}</p>
-    );
+    const courseName = `${item.prefix} ${item.courseNumber} - ${item.courseTitle}`;
+
+    return <p key={`${baseKey}-${courseName}`}>{courseName}</p>;
   }
 }
 
-function renderStreamArticulations(items, groupName, paramsList) {
-  const sortedItems = sortClassData(items);
+function SearchArtOption({
+  paramsList,
+  inputName,
+  inPlan,
+  searchArt,
+  children,
+  toggleAudit,
+  onArticulationSelect,
+  planCourses,
+  cachedSearch,
+}) {
+  const [optForPlan, setOptForPlan] = useState({});
+
+  useEffect(() => {
+    async function selectEquivalentPrajArticulation() {
+      toggleAudit((prev) => !prev);
+
+      try {
+        const endpoint = import.meta.env.VITE_PRAJWAL_ARTICULATIONS;
+
+        const response = await fetch(endpoint, {
+          body: JSON.stringify(paramsList),
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Connection: "keep-alive",
+          },
+        });
+
+        if (response.ok) {
+          const prajArt = await response.json();
+
+          const equivalent = getEquivalentArtInfo(optForPlan, prajArt);
+
+          const fyCourse =
+            equivalent.articulationType === "Course"
+              ? {
+                  courseTitle: equivalent.courseTitle,
+                  coursePrefix: equivalent.coursePrefix,
+                  courseNumber: equivalent.courseNumber,
+                  courseId: equivalent.courseId,
+                }
+              : {
+                  seriesTitle: equivalent.seriesTitle,
+                  seriesId: equivalent.seriesId,
+                };
+
+          onArticulationSelect(
+            [...planCourses],
+            equivalent.option,
+            equivalent,
+            fyCourse,
+            prajArt,
+            cachedSearch,
+            optForPlan
+          );
+        }
+      } catch (err) {
+        console.error("Failed articulations search: ", err);
+      } finally {
+        toggleAudit((prev) => !prev);
+      }
+    }
+
+    if (optForPlan.prefix || optForPlan.length > 0) {
+      selectEquivalentPrajArticulation();
+    }
+  }, [
+    optForPlan,
+    paramsList,
+    toggleAudit,
+    onArticulationSelect,
+    cachedSearch,
+    planCourses,
+  ]);
+
+  return (
+    <label className="search-articulation-option">
+      <input
+        type="radio"
+        name={inputName}
+        checked={inPlan}
+        onChange={() => {
+          if (!inPlan) {
+            setOptForPlan(searchArt);
+          }
+
+          /*
+
+        ... will need to deal with lesser ArticulationSelectDropdowns by replacing the articulation in their parent CourseItems (somehow)
+    
+        ^ maybe this logic can go into onArticulationSelect
+
+
+        */
+        }}
+      />
+      <>{children}</>
+    </label>
+  );
+}
+
+SearchArtOption.propTypes = {
+  paramsList: PropTypes.arrayOf(
+    PropTypes.shape({
+      cccId: PropTypes.number.isRequired,
+      fyId: PropTypes.number.isRequired,
+      yr: PropTypes.number.isRequired,
+      majorId: PropTypes.string.isRequired,
+    }).isRequired
+  ).isRequired,
+  inputName: PropTypes.string.isRequired,
+  searchArt: PropTypes.any.isRequired,
+  inPlan: PropTypes.bool.isRequired,
+  existingEquivalent: PropTypes.any,
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
+  toggleAudit: PropTypes.func.isRequired,
+  onArticulationSelect: PropTypes.func.isRequired,
+  planCourses: PropTypes.array.isRequired,
+  cachedSearch: PropTypes.arrayOf(StreamArticulation),
+};
+
+function renderStreamArticulations(
+  streamArticulations,
+  inputName,
+  paramsList,
+  toggleAudit,
+  planCourses,
+  onArticulationSelect,
+  cachedSearch
+) {
+  const sortedItems = sortClassData(streamArticulations);
   const renderedElements = [];
 
   for (let i = 0; i < sortedItems.length; i++) {
     const subitem = sortedItems[i];
+    const optKey = `${inputName}-search-option-${i}`;
+
+    const inPlan = myArtInPlan(subitem, planCourses);
 
     if (Array.isArray(subitem)) {
-      const sharedInputName = `${groupName}-group-${i}`;
-
       renderedElements.push(
-        <div key={i} className="search-art-optgroup">
-          <label className="search-articulation-option">
-            <input
-              type="radio"
-              name={groupName}
-              onChange={() => {
-                console.log("xo");
-                console.log(paramsList);
-                /*
-
-              call a function that requests  PRAJ_ARTICULATION_FETCHER with the corresponding cccId (can be found with ccName in my dataset)
-
-              find the equivalent option in prajwal's dataset
-
-              add it to the  plan as usual with onArticulationSelect
-
-              ... will need to deal with lesser ArticulationSelectDropdowns by replacing the articulation in their parent CourseItems (somehow)
-          
-              ^ maybe this logic can go into onArticulationSelect
-              
-              stopSearch();
-
-              */
-              }}
-              disabled
-            />
+        <div key={`${optKey}-group`} className="search-art-optgroup">
+          <SearchArtOption
+            key={optKey}
+            paramsList={paramsList}
+            inputName={inputName}
+            searchArt={subitem}
+            inPlan={inPlan}
+            toggleAudit={toggleAudit}
+            planCourses={planCourses}
+            onArticulationSelect={onArticulationSelect}
+            cachedSearch={cachedSearch}
+          >
             <div className="search-art-courses">
-              {renderCourseItem(subitem, sharedInputName)}
+              {renderCourseItem(subitem, optKey)}
             </div>
-          </label>
+          </SearchArtOption>
         </div>
       );
     } else if (subitem.courseNumber && subitem.courseTitle && subitem.prefix) {
       const courseName = `${subitem.prefix} ${subitem.courseNumber} - ${subitem.courseTitle}`;
 
       renderedElements.push(
-        <label key={i} className="search-articulation-option">
-          <input
-            type="radio"
-            name={courseName}
-            onChange={() => {
-              console.log("xo");
-              console.log(paramsList);
-              /*
-
-              call a function that requests  PRAJ_ARTICULATION_FETCHER with the corresponding cccId (can be found with ccName in my dataset)
-
-              find the equivalent option in prajwal's dataset
-
-              add it to the  plan as usual with onArticulationSelect
-
-              ... will need to deal with lesser ArticulationSelectDropdowns by replacing the articulation in their parent CourseItems (somehow)
-          
-              ^ maybe this logic can go into onArticulationSelect
-              
-              stopSearch();
-
-            */
-            }}
-            disabled
-          />
-          <p>{courseName}</p>
-        </label>
+        <SearchArtOption
+          key={optKey}
+          paramsList={paramsList}
+          inputName={inputName}
+          searchArt={subitem}
+          inPlan={inPlan}
+          toggleAudit={toggleAudit}
+          planCourses={planCourses}
+          onArticulationSelect={onArticulationSelect}
+          cachedSearch={cachedSearch}
+        >
+          <p key={`${optKey}-text`}>{courseName}</p>
+        </SearchArtOption>
       );
     }
   }
@@ -124,17 +227,33 @@ function renderStreamArticulations(items, groupName, paramsList) {
 
 function ArticulationList({
   cccInfo,
+  inputName,
   streamArticulations,
   createArticulationParams,
-  stopSearch,
+  toggleAudit,
+  planCourses,
+  onArticulationSelect,
+  cachedSearch,
 }) {
   const paramsList = createArticulationParams(cccInfo.cccId);
 
+  const listBaseKey = `${cccInfo.cccId}-${inputName}`;
+
   return (
-    <div className="articulation-list">
-      <p className="ccc-name">{cccInfo.cccName}</p>
-      <div className="stream-articulations">
-        {renderStreamArticulations(streamArticulations, "root", paramsList)}
+    <div key={`list-${listBaseKey}`} className="articulation-list">
+      <p key={`ccc-${listBaseKey}`} className="ccc-name">
+        {cccInfo.cccName}
+      </p>
+      <div key={`stream-${listBaseKey}`} className="stream-articulations">
+        {renderStreamArticulations(
+          streamArticulations,
+          inputName,
+          paramsList,
+          toggleAudit,
+          planCourses,
+          onArticulationSelect,
+          cachedSearch
+        )}
       </div>
     </div>
   );
@@ -145,9 +264,13 @@ ArticulationList.propTypes = {
     cccName: PropTypes.string.isRequired,
     cccId: PropTypes.number.isRequired,
   }).isRequired,
+  inputName: PropTypes.string.isRequired,
   streamArticulations: PropTypes.arrayOf(StreamArticulation),
   createArticulationParams: PropTypes.func.isRequired,
-  stopSearch: PropTypes.func.isRequired,
+  toggleAudit: PropTypes.func.isRequired,
+  planCourses: PropTypes.array.isRequired,
+  onArticulationSelect: PropTypes.func.isRequired,
+  cachedSearch: PropTypes.arrayOf(StreamArticulation),
 };
 
 function ArticulationSearchDropdown({
@@ -156,11 +279,15 @@ function ArticulationSearchDropdown({
   cachedSearch,
   updateArticulations,
   createArticulationParams,
+  onArticulationSelect,
+  planCourses,
 }) {
   const [searchActive, setSearchActive] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
 
   const [foundArticulations, setFoundArticulations] = useState([]);
+
+  const [auditInProgress, setAuditInProgress] = useState(false);
 
   const cccCount = 116;
   const availableArticulations = cachedSearch || foundArticulations;
@@ -198,10 +325,14 @@ function ArticulationSearchDropdown({
               cccName,
               cccId,
             }}
+            inputName={`radio-for-${fyCourseId}`}
             streamArticulations={courseCache}
             updateArticulations={updateArticulations}
             createArticulationParams={createArticulationParams}
-            stopSearch={() => setSearchActive(false)}
+            toggleAudit={(newVal) => setAuditInProgress(newVal)}
+            onArticulationSelect={onArticulationSelect}
+            planCourses={planCourses}
+            cachedSearch={cachedSearch}
           />
         );
       }
@@ -388,6 +519,22 @@ function ArticulationSearchDropdown({
         </button>
       </div>
     );
+  } else if (auditInProgress) {
+    return (
+      <div className="articulation-search-dropdown">
+        <p
+          className="subtitle"
+          style={{
+            animationName: "waver",
+            animationDuration: "2s",
+            animationIterationCount: "infinite",
+            fontSize: "1.3em",
+          }}
+        >
+          Optimizing plan...
+        </p>
+      </div>
+    );
   } else if (!searchActive && availableArticulations.length > 0) {
     return (
       <div className="articulation-search-dropdown">
@@ -404,6 +551,8 @@ ArticulationSearchDropdown.propTypes = {
   cachedSearch: PropTypes.arrayOf(StreamArticulation),
   updateArticulations: PropTypes.func.isRequired,
   createArticulationParams: PropTypes.func.isRequired,
+  planCourses: PropTypes.array.isRequired,
+  onArticulationSelect: PropTypes.func.isRequired,
 };
 
 export default ArticulationSearchDropdown;

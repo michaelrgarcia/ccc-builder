@@ -12,6 +12,8 @@ import {
   requirementCompleted,
   updatePlanCourses,
   populatePlan,
+  createArticulatesTo,
+  filterSearchArtInPlan,
 } from "../utils/planTools";
 
 import { useState } from "react";
@@ -394,6 +396,8 @@ function CourseItem({
           cachedSearch={searchArticulation}
           updateArticulations={(newArt) => setSearchArticulation(newArt)}
           createArticulationParams={createArticulationParams}
+          onArticulationSelect={onArticulationSelect}
+          planCourses={planCourses}
         />
       ) : (
         ""
@@ -528,6 +532,9 @@ function RequirementItem({
     planCourses,
     excludedCourses
   );
+
+  // need to determine search articulation completion for this and
+  // course item groups
 
   if (!requiredCourses.some((group) => group.courses.length > 0)) {
     return null;
@@ -730,7 +737,10 @@ function Plan({
               planCoursesCopy,
               option,
               articulation,
-              fyCourse
+              fyCourse,
+              searchArticulations,
+              cachedSearch,
+              searchOpt
             ) => {
               updatePlanCourses(
                 planCoursesCopy,
@@ -740,6 +750,12 @@ function Plan({
               );
 
               populatePlan(reqsList, articulations, planCoursesCopy);
+
+              if (searchArticulations && cachedSearch) {
+                createArticulatesTo(searchArticulations, planCoursesCopy);
+
+                filterSearchArtInPlan(cachedSearch, planCoursesCopy, searchOpt);
+              }
 
               setPlanCourses(planCoursesCopy);
             }}
