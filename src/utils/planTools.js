@@ -39,24 +39,16 @@ export function createInstructions(requiredCourses, conjunction) {
     let instructions = "";
 
     for (let i = 0; i < requiredCourses.length; i++) {
-      const currentReq = requiredCourses[i];
+      const progressiveLetter = String.fromCharCode(65 + i);
 
-      if (currentReq.courses.length === 1) {
-        break;
-      } else if (currentReq.courses.length > 1) {
-        const progressiveLetter = String.fromCharCode(i + 1 + 64);
-
-        if (i === 0) {
-          instructions = "Complete A,";
-        } else if (i !== requiredCourses.length - 1) {
-          instructions += ` ${progressiveLetter}, `;
-        } else {
-          instructions += ` ${lowerConj} ${progressiveLetter}`;
-        }
+      if (i !== requiredCourses.length - 1) {
+        instructions += `${progressiveLetter}, `;
+      } else {
+        instructions += `${lowerConj} ${progressiveLetter}`;
       }
     }
 
-    return instructions;
+    return `Complete ${instructions}`;
   }
 }
 
@@ -302,31 +294,10 @@ function selectArticulations(courseGroup, planCourses, articulations) {
   }
 }
 
-export function populatePlan(reqsList, articulations, planCourses) {
-  for (const reqs of reqsList) {
-    for (const req of reqs.requirements) {
-      const { conjunction, requiredCourses } = req;
+export function createArticulatesTo(articulations, planCourses) {
+  // mutates planCourses
 
-      if (conjunction === "Or") {
-        const shortestGroup = requiredCourses.reduce((shortest, group) =>
-          group.courses.length < shortest.courses.length ? group : shortest
-        );
-
-        selectArticulations(shortestGroup, planCourses, articulations);
-
-        continue;
-      } else {
-        for (const courseGroup of requiredCourses) {
-          selectArticulations(courseGroup, planCourses, articulations);
-        }
-      }
-    }
-  }
-
-  // update articulatesTo arrays
   for (const planCourse of planCourses) {
-    planCourse.articulatesTo = [];
-
     for (const articulation of articulations) {
       for (const artCourse of articulation.articulatedCourses) {
         for (const opt of artCourse.articulationOptions) {
@@ -377,6 +348,31 @@ export function populatePlan(reqsList, articulations, planCourses) {
       }
     }
   }
+}
+
+export function populatePlan(reqsList, articulations, planCourses) {
+  for (const reqs of reqsList) {
+    for (const req of reqs.requirements) {
+      const { conjunction, requiredCourses } = req;
+
+      if (conjunction === "Or") {
+        const shortestGroup = requiredCourses.reduce((shortest, group) =>
+          group.courses.length < shortest.courses.length ? group : shortest
+        );
+
+        selectArticulations(shortestGroup, planCourses, articulations);
+
+        continue;
+      } else {
+        for (const courseGroup of requiredCourses) {
+          selectArticulations(courseGroup, planCourses, articulations);
+        }
+      }
+    }
+  }
+
+  // update articulatesTo arrays
+  createArticulatesTo(articulations, planCourses);
 
   return planCourses;
 }
@@ -442,29 +438,140 @@ export function requirementCompleted(
   }
 }
 
-/*
+export function getEquivalentArtInfo(searchArt, prajArt) {
+  for (const articulationObj of prajArt) {
+    const { articulationInfo, universityInfo, cccInfo } = articulationObj;
 
-async function getEquivalentPrajArticulation(paramsList) {
-  if (!paramsList) return null;
-  
-   try {
-    const endpoint = import.meta.env.VITE_PRAJWAL_ARTICULATIONS;
+    for (const articulation of articulationObj.articulatedCourses) {
+      for (const option of articulation.articulationOptions) {
+        if (Array.isArray(searchArt)) {
+          const noStr = searchArt.filter((item) => typeof item !== "string");
 
-    const response = await fetch(endpoint, {
-      body: JSON.stringify(paramsList),
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Connection: "keep-alive",
-      },
-    });
+          const equivalentSeries = option.every(
+            (optCourse, index) =>
+              noStr[index].prefix === optCourse.coursePrefix &&
+              Number(noStr[index].courseNumber) ===
+                Number(optCourse.courseNumber) &&
+              noStr[index].courseTitle === optCourse.courseTitle
+          );
 
-    if (response.ok) {
-      const newArticulations = await response.json();
+          if (equivalentSeries) {
+            return {
+              articulationInfo,
+              universityInfo,
+              cccInfo,
+              ...articulation,
+              option,
+            };
+          }
+        }
+
+        if (
+          searchArt.courseNumber &&
+          searchArt.courseTitle &&
+          searchArt.prefix &&
+          option.length === 1
+        ) {
+          if (
+            Number(option[0].courseNumber) === Number(searchArt.courseNumber) &&
+            option[0].courseTitle === searchArt.courseTitle &&
+            option[0].coursePrefix === searchArt.prefix
+          ) {
+            return {
+              articulationInfo,
+              universityInfo,
+              cccInfo,
+              ...articulation,
+              option,
+            };
+          }
+        }
+      }
     }
-  } catch (err) {
-    console.error("Failed articulations search: ", err);
+  }
+
+  return null;
+}
+
+export function myArtInPlan(subitem, planCourses) {
+  if (Array.isArray(subitem)) {
+    const noStr = subitem.filter((item) => typeof item !== "string");
+
+    const equivalentSeries = noStr.every((course) =>
+      planCourses.some(
+        (planCourse) =>
+          course.prefix === planCourse.coursePrefix &&
+          Number(course.courseNumber) === Number(planCourse.courseNumber) &&
+          course.courseTitle === planCourse.courseTitle
+      )
+    );
+
+    return equivalentSeries;
+  } else if (subitem.courseNumber && subitem.courseTitle && subitem.prefix) {
+    const equivalentCccCourse = planCourses.some(
+      (planCourse) =>
+        subitem.prefix === planCourse.coursePrefix &&
+        Number(subitem.courseNumber) === Number(planCourse.courseNumber) &&
+        subitem.courseTitle === planCourse.courseTitle
+    );
+
+    return equivalentCccCourse;
   }
 }
 
-*/
+export function filterSearchArtInPlan(
+  cachedSearch,
+  planCoursesCopy,
+  preserveItem
+) {
+  for (let i = 0; i < cachedSearch.length; i++) {
+    const currentSearchArt = cachedSearch[i];
+
+    if (preserveItem && currentSearchArt.result[0] === preserveItem) {
+      continue;
+    }
+
+    if (Array.isArray(currentSearchArt.result[0])) {
+      const noStr = currentSearchArt.result[0].filter(
+        (item) => typeof item !== "string"
+      );
+
+      for (let j = 0; j < noStr.length; j++) {
+        const currentArt = noStr[j];
+
+        const indexInPlan = planCoursesCopy.findIndex(
+          (planCourse) =>
+            currentArt.prefix === planCourse.coursePrefix &&
+            Number(currentArt.courseNumber) ===
+              Number(planCourse.courseNumber) &&
+            currentArt.courseTitle === planCourse.courseTitle
+        );
+
+        if (indexInPlan !== -1) {
+          planCoursesCopy.splice(indexInPlan, 1);
+        }
+      }
+    } else if (
+      currentSearchArt.result[0].courseNumber &&
+      currentSearchArt.result[0].courseTitle &&
+      currentSearchArt.result[0].prefix
+    ) {
+      const currentArt = currentSearchArt.result[0];
+
+      if (preserveItem && currentArt === preserveItem) {
+        continue;
+      }
+
+      const indexInPlan = planCoursesCopy.findIndex(
+        (planCourse) =>
+          currentArt.prefix === planCourse.coursePrefix &&
+          Number(currentArt.courseNumber) === Number(planCourse.courseNumber) &&
+          currentArt.courseTitle === planCourse.courseTitle
+      );
+
+      if (indexInPlan !== -1) {
+        planCoursesCopy.splice(indexInPlan, 1);
+      }
+    }
+  }
+}
