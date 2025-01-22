@@ -1,13 +1,16 @@
 import PropTypes from "prop-types";
 
 import "../styles/ArticulationSearchDropdown.css";
+
 import { useEffect, useState } from "react";
+
 import {
   finalizeSearch,
   getArticulationParams,
   getClassFromDb,
   sortClassData,
 } from "../utils/tvUtils";
+
 import { getEquivalentArtInfo, myArtInPlan } from "../utils/planTools";
 
 const MyLowerDiv = PropTypes.shape({
