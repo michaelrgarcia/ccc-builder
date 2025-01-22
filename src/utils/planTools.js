@@ -355,15 +355,7 @@ export function populatePlan(reqsList, articulations, planCourses) {
     for (const req of reqs.requirements) {
       const { conjunction, requiredCourses } = req;
 
-      if (conjunction === "Or") {
-        const shortestGroup = requiredCourses.reduce((shortest, group) =>
-          group.courses.length < shortest.courses.length ? group : shortest
-        );
-
-        selectArticulations(shortestGroup, planCourses, articulations);
-
-        continue;
-      } else {
+      if (!conjunction) {
         for (const courseGroup of requiredCourses) {
           selectArticulations(courseGroup, planCourses, articulations);
         }
@@ -398,6 +390,11 @@ export function requirementCompleted(
       )
     );
 
+    if (excludedGroup) {
+      courseGroupsFinished += 1;
+      continue;
+    }
+
     for (let j = 0; j < courses.length; j++) {
       const course = courses[j];
       const possibleSeriesIds =
@@ -428,30 +425,40 @@ export function requirementCompleted(
         (excluded) => JSON.stringify(excluded) === JSON.stringify(course)
       );
 
-      if (!articulation && !searchArticulationPresent && excluded) {
-        fulfilled +=
-          type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
-      } else if (articulation) {
-        for (const option of articulation.articulationOptions) {
-          const inPlan = option.every((cccCourse) =>
-            planCourses.some((planCourse) =>
-              matchArticulation(planCourse, cccCourse)
-            )
+      if (!excluded) {
+        if (!articulation && !searchArticulationPresent) {
+          continue;
+        }
+
+        if (articulation) {
+          const articulationFulfilled = articulation.articulationOptions.some(
+            (option) =>
+              option.every((cccCourse) =>
+                planCourses.some((planCourse) =>
+                  matchArticulation(planCourse, cccCourse)
+                )
+              )
           );
 
-          if (inPlan) {
+          if (articulationFulfilled) {
             fulfilled +=
               type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
           }
+        } else if (searchArticulationPresent) {
+          fulfilled +=
+            type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
         }
-      } else if (searchArticulationPresent) {
-        fulfilled +=
-          type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
       }
     }
 
-    if (fulfilled >= amount || fulfilled >= courses.length || excludedGroup) {
-      courseGroupsFinished += 1;
+    if (type === "AllCourses") {
+      if (fulfilled === courses.length) {
+        courseGroupsFinished += 1;
+      }
+    } else if (type === "NCourses" || type === "NCredits") {
+      if (fulfilled >= amount) {
+        courseGroupsFinished += 1;
+      }
     }
   }
 
