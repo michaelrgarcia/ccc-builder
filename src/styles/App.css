@@ -139,12 +139,6 @@ main {
     brightness(104%) contrast(98%);
 }
 
-.beta {
-  margin-top: -30px;
-
-  font-weight: bold;
-}
-
 @keyframes btnFadeIn {
   0% {
     opacity: 0;
