@@ -346,11 +346,32 @@ function App() {
       <>
         <header>
           <h1>CCCBuilder</h1>
-
-          <p className="user-guide">
-            Search for any missing articulations and make any indicated choices.
-            Depending on the courses you add, the plan may change.
-          </p>
+          <>
+            {planProgress !== 100 ? (
+              <>
+                <p className="user-guide">
+                  Search for any missing articulations and make any indicated
+                  choices. Depending on the courses you add, the plan may
+                  change.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="user-guide">All requirements satisfied! 🎉</p>
+                <p className="user-guide">
+                  Any changes made from here will not affect completion.{" "}
+                  <span className="check-assist">
+                    Please verify as much of this plan as possible with
+                    ASSIST.org and/or a counselor.
+                  </span>
+                </p>
+                <p className="user-guide">
+                  General education patterns such as IGETC are not considered
+                  for this plan.
+                </p>
+              </>
+            )}
+          </>
           <div className="progress-container">
             <label htmlFor="plan-progress">{planProgress}% done</label>
             <progress

@@ -739,11 +739,6 @@ function Plan({
     <>
       <div className="plan">
         <p className="title">Plan</p>
-        <p>
-          {allCompleted
-            ? "All requirements satisfied! 🎉 Any changes made from here will not affect completion."
-            : ""}
-        </p>
         {planCourses.length > 0 ? (
           <div className="plan-courses">
             {planCourses.map((course) => {
