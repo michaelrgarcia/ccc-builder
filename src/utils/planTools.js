@@ -400,14 +400,35 @@ export function requirementCompleted(
 
     for (let j = 0; j < courses.length; j++) {
       const course = courses[j];
+      const possibleSeriesIds =
+        course.type === "Series"
+          ? course.seriesId.split("_")[0].split("-")
+          : "";
 
       const articulation = findArticulation(course, articulations);
+
+      const searchArticulationPresent =
+        course.type === "Course"
+          ? planCourses.some(({ articulatesTo }) =>
+              articulatesTo.some(
+                ({ fyCourse }) =>
+                  Number(fyCourse.courseId) ===
+                  Number(course.courseId.split("_")[0])
+              )
+            )
+          : possibleSeriesIds.every((id) =>
+              planCourses.some(({ articulatesTo }) =>
+                articulatesTo.some(
+                  ({ fyCourse }) => Number(fyCourse.courseId) === Number(id)
+                )
+              )
+            );
 
       const excluded = excludedCourses.some(
         (excluded) => JSON.stringify(excluded) === JSON.stringify(course)
       );
 
-      if (!articulation && excluded) {
+      if (!articulation && !searchArticulationPresent && excluded) {
         fulfilled +=
           type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
       } else if (articulation) {
@@ -423,6 +444,9 @@ export function requirementCompleted(
               type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
           }
         }
+      } else if (searchArticulationPresent) {
+        fulfilled +=
+          type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
       }
     }
 
