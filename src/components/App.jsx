@@ -352,7 +352,7 @@ function App() {
             Depending on the courses you add, the plan may change.
           </p>
           <div className="progress-container">
-            <label htmlFor="plan-progress">70% done</label>
+            <label htmlFor="plan-progress">{planProgress}% done</label>
             <progress
               id="plan-progress"
               value={planProgress}
@@ -368,6 +368,7 @@ function App() {
             createArticulationParams={(cccId) =>
               createArticulationParams(cccId)
             }
+            onFinish={() => setPlanProgress(100)}
           />
         </main>
       </>
