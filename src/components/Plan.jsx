@@ -14,6 +14,7 @@ import {
   populatePlan,
   createArticulatesTo,
   filterSearchArtInPlan,
+  myArtInPlan,
 } from "../utils/planTools";
 
 import { useState } from "react";
@@ -291,8 +292,6 @@ function CourseItem({
 
   const [searchArticulation, setSearchArticulation] = useState(null);
 
-  const availableArticulation = searchArticulation || articulation;
-
   const {
     courseTitle,
     coursePrefix,
@@ -320,10 +319,11 @@ function CourseItem({
             className="course-identifier"
             style={{
               fontWeight:
-                articulationInPlan(
-                  articulation /* will be availableArticulation soon*/,
-                  planCourses
-                ) ||
+                articulationInPlan(articulation, planCourses) ||
+                (searchArticulation &&
+                  searchArticulation.some(({ result }) =>
+                    myArtInPlan(result[0], planCourses)
+                  )) ||
                 requirementFulfilled ||
                 isExcluded
                   ? "normal"
@@ -358,7 +358,7 @@ function CourseItem({
         >
           <p className="subtitle">Requirement skipped.</p>
         </div>
-      ) : isOpen && !availableArticulation && !searchPlanned ? (
+      ) : isOpen && !(searchArticulation || articulation) && !searchPlanned ? (
         <div className="articulation-select-dropdown">
           <p>Search another CCC for an articulation?</p>
           <div className="pre-search-choices">
@@ -436,6 +436,38 @@ function CourseItemGroup({
   }
 
   let fulfillmentCount = 0;
+
+  for (let i = 0; i < courses.length; i++) {
+    const course = courses[i];
+    const possibleSeriesIds =
+      course.type === "Series" ? course.seriesId.split("_")[0].split("-") : "";
+
+    const existingArticulation = findArticulation(course, articulations);
+
+    const searchArticulationPresent =
+      course.type === "Course"
+        ? planCourses.some(({ articulatesTo }) =>
+            articulatesTo.some(
+              ({ fyCourse }) =>
+                Number(fyCourse.courseId) ===
+                Number(course.courseId.split("_")[0])
+            )
+          )
+        : possibleSeriesIds.every((id) =>
+            planCourses.some(({ articulatesTo }) =>
+              articulatesTo.some(
+                ({ fyCourse }) => Number(fyCourse.courseId) === Number(id)
+              )
+            )
+          );
+
+    if (
+      articulationInPlan(existingArticulation, planCourses) ||
+      searchArticulationPresent
+    ) {
+      fulfillmentCount += type === "NCourses" ? 1 : Number(course.credits);
+    }
+  }
 
   const groupFulfilled =
     fulfillmentCount >= amount ||
@@ -532,9 +564,6 @@ function RequirementItem({
     planCourses,
     excludedCourses
   );
-
-  // need to determine search articulation completion for this and
-  // course item groups
 
   if (!requiredCourses.some((group) => group.courses.length > 0)) {
     return null;
