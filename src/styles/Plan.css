@@ -2,8 +2,6 @@
   font-weight: bold;
   font-size: 1.4em;
   text-decoration: underline;
-
-  margin-bottom: -5px;
 }
 
 .university-requirements > .title {
@@ -336,6 +334,10 @@
     #cb6464 55%,
     #bc3d3d 100%
   );
+}
+
+.check-assist {
+  font-weight: bold;
 }
 
 @keyframes dropdownPopup {
