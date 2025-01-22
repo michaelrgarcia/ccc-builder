@@ -17,7 +17,7 @@ import {
   myArtInPlan,
 } from "../utils/planTools";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import InfoIcon from "../assets/information-variant-circle-outline.svg";
 import FilledInfoIcon from "../assets/information-variant-circle.svg";
@@ -709,19 +709,41 @@ function Plan({
   majorList,
   articulations,
   createArticulationParams,
+  onFinish,
 }) {
   const [planCourses, setPlanCourses] = useState(
     populatePlan(reqsList, articulations, [])
   );
   const [excludedCourses, setExcludedCourses] = useState([]);
-  const [searchesActive, setSearchesActive] = useState(0); // determine upper limit
 
   const uniGroups = groupByUni(reqsList);
+
+  const allCompleted = reqsList.every(({ requirements }) =>
+    requirements.every((req) =>
+      requirementCompleted(req, articulations, planCourses, excludedCourses)
+    )
+  );
+
+  useEffect(() => {
+    if (allCompleted) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
+      onFinish();
+    }
+  }, [allCompleted, onFinish]);
 
   return (
     <>
       <div className="plan">
         <p className="title">Plan</p>
+        <p>
+          {allCompleted
+            ? "All requirements satisfied! 🎉 Any changes made from here will not affect completion."
+            : ""}
+        </p>
         {planCourses.length > 0 ? (
           <div className="plan-courses">
             {planCourses.map((course) => {
@@ -810,6 +832,7 @@ Plan.propTypes = {
   ).isRequired,
   articulations: PropTypes.arrayOf(ArticulationObj).isRequired,
   createArticulationParams: PropTypes.func.isRequired,
+  onFinish: PropTypes.func.isRequired,
 };
 
 export default Plan;
