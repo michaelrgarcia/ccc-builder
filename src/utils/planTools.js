@@ -429,7 +429,9 @@ export function requirementCompleted(
             fulfilled +=
               type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
           }
-        } else if (searchInPlan.length > 0) {
+        }
+
+        if (searchInPlan.length > 0) {
           fulfilled +=
             type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
         }

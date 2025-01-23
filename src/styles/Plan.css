@@ -350,3 +350,10 @@
     visibility: visible;
   }
 }
+
+@media only screen and (min-width: 950px) {
+  .plan,
+  .university-requirements {
+    min-width: 500px;
+  }
+}
