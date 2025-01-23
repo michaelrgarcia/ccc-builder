@@ -403,7 +403,7 @@ function CourseItem({
                 setIsExcluded(true);
               }}
             >
-              No
+              Skip
             </button>
           </div>
         </div>
