@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { caliCCs, universities } from "../utils/staticAssistData";
 
@@ -7,6 +7,9 @@ import Autocomplete from "./Autocomplete";
 import SingleAutocomplete from "./SingleAutocomplete";
 import { ccAndMajorSearch, uniSearch } from "../utils/search";
 import Plan from "./Plan";
+
+import party from "party-js";
+
 import { removeDupes } from "../utils/planTools";
 
 import WarningIcon from "../assets/alert.svg";
@@ -49,6 +52,8 @@ function App() {
     },
     [selectedSchools, selectedMajors]
   );
+
+  const userGuideRef = useRef(null);
 
   useEffect(() => {
     async function getMajors() {
@@ -174,6 +179,16 @@ function App() {
         {error}
       </div>
     );
+  }
+
+  if (planProgress === 100 && userGuideRef.current) {
+    setTimeout(() => {
+      party.confetti(userGuideRef.current, {
+        count: 30,
+        spread: 40,
+        size: 1.5,
+      });
+    }, 700);
   }
 
   if (currentStage === "school-select") {
@@ -357,7 +372,9 @@ function App() {
               </>
             ) : (
               <>
-                <p className="user-guide">All requirements satisfied! 🎉</p>
+                <p className="user-guide" ref={userGuideRef}>
+                  All requirements satisfied! 🎉
+                </p>
                 <p className="user-guide">
                   Any changes made from here will not affect completion.{" "}
                   <span className="check-assist">
@@ -389,7 +406,9 @@ function App() {
             createArticulationParams={(cccId) =>
               createArticulationParams(cccId)
             }
-            onFinish={() => setPlanProgress(100)}
+            onFinish={() => {
+              setPlanProgress(100);
+            }}
           />
         </main>
       </>
