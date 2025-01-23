@@ -410,36 +410,36 @@ export function requirementCompleted(
         (excluded) => JSON.stringify(excluded) === JSON.stringify(course)
       );
 
-      if (!excluded) {
-        if (!articulation && searchInPlan.length === 0) {
-          continue;
-        }
-
-        if (articulation) {
-          const articulationFulfilled = articulation.articulationOptions.some(
-            (option) =>
-              option.every((cccCourse) =>
-                planCourses.some((planCourse) =>
-                  matchArticulation(planCourse, cccCourse)
-                )
+      if (articulation) {
+        const articulationFulfilled = articulation.articulationOptions.some(
+          (option) =>
+            option.every((cccCourse) =>
+              planCourses.some((planCourse) =>
+                matchArticulation(planCourse, cccCourse)
               )
-          );
+            )
+        );
 
-          if (articulationFulfilled) {
-            fulfilled +=
-              type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
-          }
-        }
-
-        if (searchInPlan.length > 0) {
+        if (articulationFulfilled) {
           fulfilled +=
             type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
+          continue;
         }
+      }
+
+      if (searchInPlan.length > 0) {
+        fulfilled +=
+          type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
+      }
+
+      if (!articulation && excluded) {
+        fulfilled +=
+          type === "NCourses" || type === "AllCourses" ? 1 : course.credits;
       }
     }
 
     if (type === "AllCourses") {
-      if (fulfilled === courses.length) {
+      if (fulfilled >= courses.length) {
         courseGroupsFinished += 1;
       }
     } else if (type === "NCourses" || type === "NCredits") {
