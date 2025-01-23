@@ -404,16 +404,7 @@ export function requirementCompleted(
 
       const articulation = findArticulation(course, articulations);
 
-      const searchInPlan = planCourses.filter(({ articulatesTo }) =>
-        articulatesTo.some(
-          ({ fyCourse }) =>
-            Number(fyCourse.courseId) ===
-            Number(
-              course.courseId.split("_")[0] ||
-                fyCourse.seriesId === course.seriesId.split("_")[0]
-            )
-        )
-      );
+      const searchInPlan = getSearchArt(planCourses, course);
 
       const excluded = excludedCourses.some(
         (excluded) => JSON.stringify(excluded) === JSON.stringify(course)
@@ -599,4 +590,19 @@ export function filterSearchArtInPlan(
       }
     }
   }
+}
+
+export function getSearchArt(planCourses, course) {
+  return course.type === "Course"
+    ? planCourses.filter(({ articulatesTo }) =>
+        articulatesTo.some(
+          ({ fyCourse }) =>
+            Number(fyCourse.courseId) === Number(course.courseId.split("_")[0])
+        )
+      )
+    : planCourses.filter(({ articulatesTo }) =>
+        articulatesTo.some(
+          ({ fyCourse }) => fyCourse.seriesId === course.seriesId.split("_")[0]
+        )
+      );
 }

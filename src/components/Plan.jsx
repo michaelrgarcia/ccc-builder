@@ -16,6 +16,7 @@ import {
   filterSearchArtInPlan,
   myArtInPlan,
   minimizeCourses,
+  getSearchArt,
 } from "../utils/planTools";
 
 import { useEffect, useState } from "react";
@@ -308,15 +309,9 @@ function CourseItem({
       ? `${coursePrefix} ${courseNumber} - ${courseTitle}`
       : course.seriesTitle;
 
-  const searchInPlan = planCourses.filter(({ articulatesTo }) =>
-    articulatesTo.some(
-      ({ fyCourse }) =>
-        Number(fyCourse.courseId) ===
-        Number(
-          courseId.split("_")[0] || fyCourse.seriesId === seriesId.split("_")[0]
-        )
-    )
-  );
+  const searchInPlan = getSearchArt(planCourses, course);
+
+  console.log(searchInPlan);
 
   const searchIdentifier = searchInPlan
     ? searchInPlan
@@ -475,16 +470,7 @@ function CourseItemGroup({
 
     const existingArticulation = findArticulation(course, articulations);
 
-    const searchArticulation = planCourses.filter(({ articulatesTo }) =>
-      articulatesTo.some(
-        ({ fyCourse }) =>
-          Number(fyCourse.courseId) ===
-          Number(
-            course.courseId.split("_")[0] ||
-              fyCourse.seriesId === course.seriesId.split("_")[0]
-          )
-      )
-    );
+    const searchArticulation = getSearchArt(planCourses, course);
 
     if (
       articulationInPlan(existingArticulation, planCourses) ||
