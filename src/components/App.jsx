@@ -185,10 +185,10 @@ function App() {
     setTimeout(() => {
       party.confetti(userGuideRef.current, {
         count: 30,
-        spread: 40,
+        spread: 50,
         size: 1.5,
       });
-    }, 700);
+    }, 500);
   }
 
   if (currentStage === "school-select") {
