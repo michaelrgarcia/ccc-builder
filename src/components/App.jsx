@@ -13,6 +13,7 @@ import party from "party-js";
 import { removeDupes } from "../utils/planTools";
 
 import WarningIcon from "../assets/alert.svg";
+import { Analytics } from "@vercel/analytics/react";
 
 // not for reuse. move this outside of the components dir?
 
@@ -209,6 +210,7 @@ function App() {
           </div>
         </header>
         <main>
+          <Analytics />
           <Autocomplete
             optionNameLabel="name"
             optionIdLabel="id"
@@ -270,6 +272,7 @@ function App() {
           </div>
         </header>
         <main>
+          <Analytics />
           <div className="major-selects">
             {selectedSchools.map(({ name, id }) => {
               return (
@@ -324,6 +327,7 @@ function App() {
           </div>
         </header>
         <main>
+          <Analytics />
           <SingleAutocomplete
             optionNameLabel="name"
             optionIdLabel="id"
@@ -399,6 +403,7 @@ function App() {
           </div>
         </header>
         <main>
+          <Analytics />
           <Plan
             reqsList={reqsList}
             majorList={flatMajors}
