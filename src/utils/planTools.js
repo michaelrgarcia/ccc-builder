@@ -173,35 +173,42 @@ export function articulationInPlan(articulation, planCourses) {
   return false;
 }
 
-function minimizeCourses(planCourses) {
+export function minimizeCourses(planCourses) {
   // MUTATES PLANCOURSES
 
-  const getArticulationIds = (articulations) =>
-    articulations
-      .map((art) => Number(art.fyCourse.courseId) || art.fyCourse.seriesId)
-      .sort();
+  const articulationIds = planCourses.map(({ articulatesTo }) =>
+    articulatesTo.map(({ fyCourse }) => fyCourse.courseId || fyCourse.seriesId)
+  );
 
-  for (const course of planCourses) {
-    const ids = getArticulationIds(course.articulatesTo);
-
-    const inferiorIndex = planCourses.findIndex((bestCourse) => {
-      const existingIds = getArticulationIds(bestCourse.articulatesTo);
-
-      return (
-        existingIds.length === ids.length &&
-        existingIds.every((id, index) => id === ids[index])
-      );
-    });
-
-    if (inferiorIndex !== -1) {
-      const existingCourse = planCourses[inferiorIndex];
-      const existingIds = getArticulationIds(existingCourse.articulatesTo);
+  for (let i = 0; i < articulationIds.length; i++) {
+    for (let j = i + 1; j < articulationIds.length; j++) {
+      let subset;
 
       if (
-        ids.length > existingIds.length &&
-        existingIds.every((id) => ids.includes(id))
+        articulationIds[i].length !== articulationIds[j].length &&
+        articulationIds[i].every((id) => articulationIds[j].includes(id))
       ) {
-        planCourses[inferiorIndex] = course;
+        if (articulationIds[i].length < articulationIds[j].length) {
+          subset = articulationIds[i];
+        } else {
+          subset = articulationIds[j];
+        }
+      }
+
+      for (let k = 0; k < planCourses.length; k++) {
+        if (!subset) continue;
+
+        const planCourse = planCourses[k];
+
+        const subsetMapping = planCourse.articulatesTo.every(
+          (infoObj) =>
+            subset.includes(infoObj.fyCourse.courseId) ||
+            subset.includes(infoObj.fyCourse.seriesId)
+        );
+
+        if (subsetMapping) {
+          planCourses.splice(k, 1);
+        }
       }
     }
   }
@@ -243,8 +250,6 @@ export function updatePlanCourses(planCourses, option, articulation, fyCourse) {
       }
     }
   }
-
-  minimizeCourses(planCourses);
 }
 
 function selectArticulations(courseGroup, planCourses, articulations) {
@@ -354,11 +359,10 @@ export function populatePlan(reqsList, articulations, planCourses) {
   for (const reqs of reqsList) {
     for (const req of reqs.requirements) {
       const { conjunction, requiredCourses } = req;
+      if (conjunction === "Or") continue;
 
-      if (!conjunction) {
-        for (const courseGroup of requiredCourses) {
-          selectArticulations(courseGroup, planCourses, articulations);
-        }
+      for (const courseGroup of requiredCourses) {
+        selectArticulations(courseGroup, planCourses, articulations);
       }
     }
   }
