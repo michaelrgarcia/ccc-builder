@@ -311,8 +311,6 @@ function CourseItem({
 
   const searchInPlan = getSearchArt(planCourses, course);
 
-  console.log(searchInPlan);
-
   const searchIdentifier = searchInPlan
     ? searchInPlan
         .map(
