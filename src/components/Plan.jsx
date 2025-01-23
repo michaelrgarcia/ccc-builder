@@ -15,6 +15,7 @@ import {
   createArticulatesTo,
   filterSearchArtInPlan,
   myArtInPlan,
+  minimizeCourses,
 } from "../utils/planTools";
 
 import { useEffect, useState } from "react";
@@ -285,11 +286,11 @@ function CourseItem({
   onSearchDecline,
   majorId,
   createArticulationParams,
+  wholeReqFinished,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExcluded, setIsExcluded] = useState(false);
   const [searchPlanned, setSearchPlanned] = useState(false);
-
   const [searchArticulation, setSearchArticulation] = useState(null);
 
   const {
@@ -299,12 +300,39 @@ function CourseItem({
     credits,
     courseId,
     seriesId,
+    type,
   } = course;
 
   const courseIdentifier =
-    course.type === "Course"
+    type === "Course"
       ? `${coursePrefix} ${courseNumber} - ${courseTitle}`
       : course.seriesTitle;
+
+  const searchInPlan = planCourses.filter(({ articulatesTo }) =>
+    articulatesTo.some(
+      ({ fyCourse }) =>
+        Number(fyCourse.courseId) ===
+        Number(
+          courseId.split("_")[0] || fyCourse.seriesId === seriesId.split("_")[0]
+        )
+    )
+  );
+
+  const searchIdentifier = searchInPlan
+    ? searchInPlan
+        .map(
+          ({ coursePrefix, courseNumber }) => `${coursePrefix} ${courseNumber}`
+        )
+        .join(", ")
+    : "";
+
+  const isArticulationInPlan = articulationInPlan(articulation, planCourses);
+
+  const shouldShowSearchDropdown =
+    isOpen &&
+    !(searchArticulation || articulation) &&
+    !searchPlanned &&
+    searchInPlan.length === 0;
 
   return (
     <>
@@ -319,13 +347,15 @@ function CourseItem({
             className="course-identifier"
             style={{
               fontWeight:
-                articulationInPlan(articulation, planCourses) ||
+                isArticulationInPlan ||
                 (searchArticulation &&
                   searchArticulation.some(({ result }) =>
                     myArtInPlan(result[0], planCourses)
                   )) ||
+                (searchInPlan.length > 0 && !isArticulationInPlan) ||
                 requirementFulfilled ||
-                isExcluded
+                isExcluded ||
+                wholeReqFinished
                   ? "normal"
                   : "bold",
             }}
@@ -338,9 +368,10 @@ function CourseItem({
           type="button"
           className="articulation-select-toggle"
           onClick={() => {
-            setIsOpen(!isOpen);
+            setIsOpen((prev) => !prev);
             setSearchPlanned(false);
           }}
+          aria-expanded={isOpen}
         >
           {isOpen ? (
             <img src={UpArrow} alt="Toggle Articulation Select" />
@@ -350,24 +381,24 @@ function CourseItem({
         </button>
       </div>
       {isOpen && isExcluded ? (
-        <div
-          className="articulation-select-dropdown"
-          style={{
-            opacity: 0.3,
-          }}
-        >
+        <div className="articulation-select-dropdown" style={{ opacity: 0.3 }}>
           <p className="subtitle">Requirement skipped.</p>
         </div>
-      ) : isOpen && !(searchArticulation || articulation) && !searchPlanned ? (
+      ) : isOpen &&
+        searchInPlan.length > 0 &&
+        !isArticulationInPlan &&
+        !searchArticulation ? (
+        <div className="articulation-select-dropdown">
+          <p className="subtitle">Satisfied by {searchIdentifier}</p>
+        </div>
+      ) : shouldShowSearchDropdown ? (
         <div className="articulation-select-dropdown">
           <p>Search another CCC for an articulation?</p>
           <div className="pre-search-choices">
             <button
               type="button"
               className="yes-to-search"
-              onClick={() => {
-                setSearchPlanned(true);
-              }}
+              onClick={() => setSearchPlanned(true)}
             >
               Yes
             </button>
@@ -415,6 +446,7 @@ CourseItem.propTypes = {
   onSearchDecline: PropTypes.func.isRequired,
   majorId: PropTypes.string.isRequired,
   createArticulationParams: PropTypes.func.isRequired,
+  wholeReqFinished: PropTypes.bool.isRequired,
 };
 
 function CourseItemGroup({
@@ -428,6 +460,7 @@ function CourseItemGroup({
   excludedCourses,
   createArticulationParams,
   majorId,
+  wholeReqFinished,
 }) {
   const { courses, type, amount } = courseGroup;
 
@@ -439,31 +472,23 @@ function CourseItemGroup({
 
   for (let i = 0; i < courses.length; i++) {
     const course = courses[i];
-    const possibleSeriesIds =
-      course.type === "Series" ? course.seriesId.split("_")[0].split("-") : "";
 
     const existingArticulation = findArticulation(course, articulations);
 
-    const searchArticulationPresent =
-      course.type === "Course"
-        ? planCourses.some(({ articulatesTo }) =>
-            articulatesTo.some(
-              ({ fyCourse }) =>
-                Number(fyCourse.courseId) ===
-                Number(course.courseId.split("_")[0])
-            )
+    const searchArticulation = planCourses.filter(({ articulatesTo }) =>
+      articulatesTo.some(
+        ({ fyCourse }) =>
+          Number(fyCourse.courseId) ===
+          Number(
+            course.courseId.split("_")[0] ||
+              fyCourse.seriesId === course.seriesId.split("_")[0]
           )
-        : possibleSeriesIds.every((id) =>
-            planCourses.some(({ articulatesTo }) =>
-              articulatesTo.some(
-                ({ fyCourse }) => Number(fyCourse.courseId) === Number(id)
-              )
-            )
-          );
+      )
+    );
 
     if (
       articulationInPlan(existingArticulation, planCourses) ||
-      searchArticulationPresent
+      searchArticulation.length > 0
     ) {
       fulfillmentCount += type === "NCourses" ? 1 : Number(course.credits);
     }
@@ -517,13 +542,14 @@ function CourseItemGroup({
           <CourseItem
             key={courseKey}
             course={course}
-            requirementFulfilled={fulfillmentCount >= amount}
+            requirementFulfilled={groupFulfilled}
             articulation={articulation}
             planCourses={planCourses}
             onArticulationSelect={onArticulationSelect}
             onSearchDecline={onSearchDecline}
             majorId={majorId}
             createArticulationParams={createArticulationParams}
+            wholeReqFinished={wholeReqFinished}
           />
         );
       })}
@@ -542,6 +568,7 @@ CourseItemGroup.propTypes = {
   excludedCourses: PropTypes.arrayOf(Course).isRequired,
   createArticulationParams: PropTypes.func.isRequired,
   majorId: PropTypes.string.isRequired,
+  wholeReqFinished: PropTypes.bool.isRequired,
 };
 
 function RequirementItem({
@@ -591,6 +618,7 @@ function RequirementItem({
           excludedCourses={excludedCourses}
           createArticulationParams={createArticulationParams}
           majorId={majorId}
+          wholeReqFinished={completed}
         />
       ))}
     </div>
@@ -802,6 +830,8 @@ function Plan({
 
                 filterSearchArtInPlan(cachedSearch, planCoursesCopy, searchOpt);
               }
+
+              minimizeCourses(planCoursesCopy);
 
               setPlanCourses(planCoursesCopy);
             }}
