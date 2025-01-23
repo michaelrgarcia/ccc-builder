@@ -127,15 +127,6 @@ function SearchArtOption({
           if (!inPlan) {
             setOptForPlan(searchArt);
           }
-
-          /*
-
-        ... will need to deal with lesser ArticulationSelectDropdowns by replacing the articulation in their parent CourseItems (somehow)
-    
-        ^ maybe this logic can go into onArticulationSelect
-
-
-        */
         }}
       />
       <>{children}</>
