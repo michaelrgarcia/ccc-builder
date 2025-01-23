@@ -284,6 +284,7 @@ function ArticulationSearchDropdown({
   createArticulationParams,
   onArticulationSelect,
   planCourses,
+  onFailedSearchSkip,
 }) {
   const [searchActive, setSearchActive] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
@@ -503,6 +504,39 @@ function ArticulationSearchDropdown({
         <div className="search-articulations">{renderedArticulations}</div>
       </div>
     );
+  } else if (cachedSearch && cachedSearch.length === 0) {
+    return (
+      <div className="articulation-search-dropdown">
+        <p className="subtitle">Search yielded no articulations.</p>
+        <p
+          className="subtitle"
+          style={{ fontWeight: "normal", textAlign: "center" }}
+        >
+          Try again or skip?
+        </p>
+        <div className="pre-search-choices">
+          <button
+            type="button"
+            className="try-again"
+            onClick={() => {
+              setSearchActive(true);
+              setSearchProgress(0);
+            }}
+          >
+            Try Again
+          </button>
+          <button
+            type="button"
+            className="no-to-search"
+            onClick={() => {
+              onFailedSearchSkip();
+            }}
+          >
+            Skip
+          </button>
+        </div>
+      </div>
+    );
   } else if (!searchActive && availableArticulations.length === 0) {
     return (
       <div className="articulation-search-dropdown">
@@ -556,6 +590,7 @@ ArticulationSearchDropdown.propTypes = {
   createArticulationParams: PropTypes.func.isRequired,
   planCourses: PropTypes.array.isRequired,
   onArticulationSelect: PropTypes.func.isRequired,
+  onFailedSearchSkip: PropTypes.func.isRequired,
 };
 
 export default ArticulationSearchDropdown;

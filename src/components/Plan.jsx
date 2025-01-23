@@ -422,6 +422,10 @@ function CourseItem({
           createArticulationParams={createArticulationParams}
           onArticulationSelect={onArticulationSelect}
           planCourses={planCourses}
+          onFailedSearchSkip={() => {
+            onSearchDecline(course);
+            setIsExcluded(true);
+          }}
         />
       ) : (
         ""
