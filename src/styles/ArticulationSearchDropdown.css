@@ -125,6 +125,40 @@
   font-size: 0.9em;
 }
 
+.try-again {
+  border: 1px solid #248624;
+
+  font-size: 1em;
+
+  background: linear-gradient(
+    to bottom,
+    #81db81 0%,
+    #75d375 45%,
+    #53c053 55%,
+    #2db32d 100%
+  );
+}
+
+.try-again:active {
+  background: linear-gradient(
+    to bottom,
+    #64cb64 0%,
+    #75d375 45%,
+    #81db81 55%,
+    #92e492 100%
+  );
+}
+
+.try-again:hover {
+  background: linear-gradient(
+    to bottom,
+    #92e492 0%,
+    #86db86 45%,
+    #64cb64 55%,
+    #3dbc3d 100%
+  );
+}
+
 @keyframes waver {
   0%,
   100% {
